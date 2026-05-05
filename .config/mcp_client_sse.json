@@ -1,0 +1,11 @@
+{
+  "prd_id": "codecortex-x-api-key-resolution",
+  "mcpServers": {
+    "CodeCortex": {
+      "url": "http://localhost:8001/codecortex-api/v1/sync",
+      "headers": {
+        "X-API-KEY": "REPLACE_WITH_CODECORTEX_DASHBOARD_API_KEY"
+      }
+    }
+  }
+}

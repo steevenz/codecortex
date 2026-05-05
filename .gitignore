@@ -1,0 +1,60 @@
+.aider*
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.aider*/
+.env
+.python-version
+
+# Development environments
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.sublime-*
+.settings/
+.project
+.pydevproject
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.hypothesis/
+.nox/
+
+# Distribution
+*.egg
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs and databases
+*.log
+*.db-shm
+*.db-wal
+database/
+
+# Cache directories
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# MCP Memory Pro Cache
+.cache/memory-pro/
+
+# Vendored upstream mirrors (managed by harvest_upstreams.py)
+vendor/

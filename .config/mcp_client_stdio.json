@@ -1,0 +1,15 @@
+{
+  "prd_id": "20260504-codecortex-mcp-config",
+  "mcpServers": {
+    "codecortex_mcp": {
+      "command": "node",
+      "args": [
+        "c:/Users/steevenz/.aicoders/scripts/pythons/codecortex/scripts/server/js/index.js"
+      ],
+      "env": {
+        "CODECORTEX_TRANSPORT": "stdio",
+        "CODECORTEX_DASHBOARD_API_KEY": "replace-with-your-key"
+      }
+    }
+  }
+}

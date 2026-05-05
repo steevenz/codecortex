@@ -1,0 +1,26 @@
+{
+  "name": "codecortex",
+  "version": "1.0.0",
+  "description": "Production-hardened CodeCortex MCP Server with SSE and Shared-Proxy support",
+  "main": "scripts/server/js/index.js",
+  "bin": {
+    "codecortex": "scripts/server/js/index.js"
+  },
+  "scripts": {
+    "start": "node scripts/server/js/index.js",
+    "dev": "node scripts/server/js/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "codecortex",
+    "agentic",
+    "architecture",
+    "ai"
+  ],
+  "author": "Aegis Codework / Steeven Andrian",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
