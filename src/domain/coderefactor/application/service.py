@@ -11,9 +11,9 @@
 """
 
 import os
-import uuid
 import json
 import re
+import asyncio
 from pathlib import Path
 from typing import List, Dict, Optional, Any, Tuple
 from src.core.database import DatabaseManager
@@ -24,6 +24,7 @@ from src.domain.codegraph.application.service import CodeGraphService
 from src.core.tree_sitter_manager import get_tree_sitter_manager, execute_query
 from src.domain.coderefactor.core.dtos import RefactorChange, RefactorResult, ImpactAnalysisResult
 from src.domain.coderefactor.application.search_service import SearchService
+from src.core.utils.diff import generate_unified_diff
 
 logger = get_logger("CodeCortex.Domain.Refactor")
 
@@ -40,152 +41,248 @@ class CodeRefactorService:
         self.ts = get_tree_sitter_manager()
         self.search = SearchService(db)
 
+    async def rename_symbol(self, path: str, old_name: str, new_name: str, dry_run: bool = True, request_id: str = "internal") -> RefactorResult:
+        """
+        Multi-file coordinated rename using the Knowledge Graph.
+        Finds all references across files and applies coordinated changes.
+        """
+        repo_id = ""
+        try:
+            self._log_event("INFO", "RENAME_STARTED", {"old": old_name, "new": new_name, "path": path}, request_id)
+            root_path, repo_id = self._resolve_repo(path)
+            if not repo_id:
+                return RefactorResult(status="error", message="Repository not found", repository_id="")
+
+            source_rel = self._get_rel_path(root_path, path)
+            changes = []
+
+            # 1. Find all references via DB
+            def _find_refs():
+                refs = self.db.conn.execute("""
+                    SELECT DISTINCT f.root_path || '/' || d.relative_path || '/' || f2.name AS ref_file
+                    FROM symbols s
+                    JOIN files f2 ON s.file_id = f2.id
+                    JOIN directories d ON f2.directory_id = d.id
+                    JOIN repositories f ON f2.repository_id = f.id
+                    WHERE s.name = ? AND s.repository_id = ?
+                """, (old_name, repo_id)).fetchall()
+                return [r[0] for r in refs]
+
+            ref_files = await asyncio.to_thread(_find_refs)
+            if source_rel not in ref_files:
+                ref_files.append(str(root_path / source_rel))
+
+            # 2. For each file, rename using TreeSitter
+            for ref_path in ref_files:
+                if not Path(ref_path).exists():
+                    continue
+                content = Path(ref_path).read_text(encoding="utf-8", errors="ignore")
+                lang = self._detect_lang(ref_path)
+                new_content = self._rename_in_file(content, old_name, new_name, lang)
+                if new_content != content:
+                    rel = self._get_rel_path(root_path, ref_path)
+                    diff = self._generate_diff(content, new_content, rel)
+                    changes.append(RefactorChange(
+                        path=rel, action="modify",
+                        description=f"Rename '{old_name}' → '{new_name}'",
+                        diff=diff
+                    ))
+
+            if dry_run:
+                return RefactorResult(status="dry_run", message=f"Rename plan: {len(changes)} file(s) affected",
+                                      repository_id=repo_id, changes=changes)
+
+            # 3. Execute
+            for change in changes:
+                ref_abs = root_path / change.path
+                if ref_abs.exists():
+                    content = ref_abs.read_text(encoding="utf-8", errors="ignore")
+                    new_content = self._rename_in_file(content, old_name, new_name, self._detect_lang(str(ref_abs)))
+                    ref_abs.write_text(new_content, encoding="utf-8")
+
+            paths = [c.path for c in changes]
+            commit = await self.git.stage_and_commit(root_path, paths,
+                                                      f"refactor: rename {old_name} → {new_name}")
+            return RefactorResult(status="success", message=f"Renamed in {len(changes)} files",
+                                  repository_id=repo_id, changes=changes, commit_hash=commit.get("commit_hash"))
+
+        except Exception as e:
+            logger.error(f"Rename failed: {e}")
+            return RefactorResult(status="error", message=str(e), repository_id=repo_id)
+
     async def analyze_refactor_impact(self, path: str, symbol_name: str, request_id: str = "internal") -> ImpactAnalysisResult:
-        self._log_event("INFO", "REFACTOR_IMPACT_ANALYSIS_STARTED", {"symbol": symbol_name, "path": path}, request_id)
         """Predict breaking changes and affected files for a symbol modification."""
-        root_path, repo_id = self._resolve_repo(path)
-        if not repo_id:
-            return ImpactAnalysisResult(repository_id="", symbol_name=symbol_name, source_file=path, summary="Repository not found")
+        try:
+            self._log_event("INFO", "REFACTOR_IMPACT_ANALYSIS_STARTED", {"symbol": symbol_name, "path": path}, request_id)
+            root_path, repo_id = self._resolve_repo(path)
+            if not repo_id:
+                return ImpactAnalysisResult(repository_id="", symbol_name=symbol_name, source_file=path, summary="Repository not found")
+                
+            source_rel = self._get_rel_path(root_path, path)
+            callers = self._find_callers_by_name(repo_id, symbol_name, source_rel)
             
-        source_rel = self._get_rel_path(root_path, path)
-        callers = self._find_callers_by_name(repo_id, symbol_name, source_rel)
-        
-        affected_files = list(set([c[1] for c in callers]))
-        risk_level = "low"
-        if len(affected_files) > 10:
-            risk_level = "high"
-        elif len(affected_files) > 3:
-            risk_level = "medium"
-            
-        summary = f"Symbol '{symbol_name}' is used in {len(affected_files)} other files. "
-        if risk_level == "high":
-            summary += "CAUTION: This is a widely used symbol. Refactoring may have significant impact."
-            
-        return ImpactAnalysisResult(
-            repository_id=repo_id,
-            symbol_name=symbol_name,
-            source_file=source_rel,
-            affected_files=affected_files,
-            risk_level=risk_level,
-            summary=summary
-        )
+            affected_files = list(set([c[1] for c in callers]))
+            risk_level = "low"
+            if len(affected_files) > 10:
+                risk_level = "high"
+            elif len(affected_files) > 3:
+                risk_level = "medium"
+                
+            summary = f"Symbol '{symbol_name}' is used in {len(affected_files)} other files. "
+            if risk_level == "high":
+                summary += "CAUTION: This is a widely used symbol. Refactoring may have significant impact."
+                
+            return ImpactAnalysisResult(
+                repository_id=repo_id,
+                symbol_name=symbol_name,
+                source_file=source_rel,
+                affected_files=affected_files,
+                risk_level=risk_level,
+                summary=summary
+            )
+        except Exception as e:
+            logger.error(f"Impact analysis failed: {str(e)}")
+            return ImpactAnalysisResult(repository_id="", symbol_name=symbol_name, source_file=path, summary=f"Error: {str(e)}")
 
     async def apply_refactor_recipe(self, path: str, recipe: str, dry_run: bool = True, request_id: str = "internal") -> RefactorResult:
         """Apply a predefined refactor pattern (e.g. 'standardize_docstrings', 'add_type_hints')."""
-        self._log_event("INFO", "APPLY_RECIPE_STARTED", {"recipe": recipe, "path": path}, request_id)
-        
-        root_path, repo_id = self._resolve_repo(path)
-        if not repo_id:
-            return RefactorResult(status="error", message="Repository not found", repository_id="")
+        repo_id = ""
+        try:
+            self._log_event("INFO", "APPLY_RECIPE_STARTED", {"recipe": recipe, "path": path}, request_id)
             
-        rel_path = self._get_rel_path(root_path, path)
-        data = self.fs.read_file(rel_path, repo_id)
-        if "error" in data:
-            return RefactorResult(status="error", message=data["error"], repository_id=repo_id)
+            root_path, repo_id = self._resolve_repo(path)
+            if not repo_id:
+                return RefactorResult(status="error", message="Repository not found", repository_id="")
+                
+            rel_path = self._get_rel_path(root_path, path)
+            data = self.fs.read_file(rel_path, repo_id)
+            if "error" in data:
+                return RefactorResult(status="error", message=data["error"], repository_id=repo_id)
+                
+            content = data["content"]
+            new_content = content
             
-        content = data["content"]
-        new_content = content
-        
-        if recipe == "standardize_docstrings" and path.endswith(".py"):
-            new_content = self._recipe_standardize_docstrings_python(content)
-        elif recipe == "add_type_hints" and path.endswith(".py"):
-             new_content = self._recipe_add_type_hints_python(content)
-        else:
-            return RefactorResult(status="error", message=f"Recipe '{recipe}' not supported for this file type", repository_id=repo_id)
+            if recipe == "standardize_docstrings" and path.endswith(".py"):
+                new_content = self._recipe_standardize_docstrings_python(content)
+            elif recipe == "add_type_hints" and path.endswith(".py"):
+                 new_content = self._recipe_add_type_hints_python(content)
+            else:
+                return RefactorResult(status="error", message=f"Recipe '{recipe}' not supported for this file type", repository_id=repo_id)
 
-        if new_content == content:
-            return RefactorResult(status="success", message="No changes needed", repository_id=repo_id)
+            if new_content == content:
+                return RefactorResult(status="success", message="No changes needed", repository_id=repo_id)
 
-        change = RefactorChange(path=path, action="modify", description=f"Applied recipe: {recipe}")
-        
-        if dry_run:
-            return RefactorResult(status="dry_run", message="Recipe plan generated", repository_id=repo_id, changes=[change])
+            change = RefactorChange(
+                path=path, 
+                action="modify", 
+                description=f"Applied recipe: {recipe}",
+                diff=self._generate_diff(content, new_content, rel_path)
+            )
+            
+            if dry_run:
+                return RefactorResult(status="dry_run", message="Recipe plan generated", repository_id=repo_id, changes=[change])
 
-        # Execute
-        self.fs.write_file(rel_path, new_content, repo_id, dry_run=False)
-        commit_hash_data = await self.git.stage_and_commit(root_path, [path], f"refactor: apply recipe {recipe} to {rel_path}")
-        commit_hash = commit_hash_data.get("commit_hash")
-        
-        return RefactorResult(status="success", message=f"Applied recipe {recipe}", repository_id=repo_id, changes=[change], commit_hash=commit_hash)
+            # Execute
+            self.fs.write_file(rel_path, new_content, repo_id, dry_run=False)
+            commit_hash_data = await self.git.stage_and_commit(root_path, [path], f"refactor: apply recipe {recipe} to {rel_path}")
+            commit_hash = commit_hash_data.get("commit_hash")
+            
+            return RefactorResult(status="success", message=f"Applied recipe {recipe}", repository_id=repo_id, changes=[change], commit_hash=commit_hash)
+        except Exception as e:
+            logger.error(f"Apply recipe failed: {str(e)}")
+            return RefactorResult(status="error", message=str(e), repository_id=repo_id)
 
     async def move_code_element(self, path: str, element_name: str, target_file: str, dry_run: bool = True) -> RefactorResult:
         """
         Move a class or function from source file to target file.
         Automatically updates imports in all calling files based on the call graph.
         """
-        self._log_event("INFO", "MOVE_ELEMENT_STARTED", {"element": element_name, "from": path, "to": target_file})
-        
-        # 1. Resolve repository context
-        root_path, repo_id = self._resolve_repo(path)
-        if not repo_id:
-            return RefactorResult(status="error", message="Repository root not found or not indexed", repository_id="", error_code="REF_001")
-            
-        source_rel = self._get_rel_path(root_path, path)
-        target_rel = self._get_rel_path(root_path, target_file)
-        
-        # 2. Extract element code block using Tree-Sitter
-        src_data = self.fs.read_file(source_rel, repo_id)
-        if "error" in src_data:
-            return RefactorResult(status="error", message=src_data["error"], repository_id=repo_id, error_code="REF_002")
-        
-        content = src_data["content"]
-        element_code, start_line, end_line = self._extract_element(content, element_name, path)
-        if not element_code:
-             return RefactorResult(status="error", message=f"Element '{element_name}' not found in {source_rel}", repository_id=repo_id, error_code="REF_003")
-
-        # 3. Identify Impact (Callers)
-        changes = []
-        
-        # Change: Remove from source
-        changes.append(RefactorChange(
-            path=path, 
-            action="modify", 
-            description=f"Delete {element_name} (lines {start_line}-{end_line})"
-        ))
-
-        # Change: Append to target
-        changes.append(RefactorChange(
-            path=target_file, 
-            action="modify", 
-            description=f"Append {element_name} to end of file"
-        ))
-
-        # Change: Update Callers
-        callers = self._find_callers_by_name(repo_id, element_name, source_rel)
-        for caller_path, caller_rel in callers:
-            if caller_path == path: continue
-            changes.append(RefactorChange(
-                path=caller_path, 
-                action="update_import", 
-                description=f"Redirect import of {element_name} from {source_rel} to {target_rel}"
-            ))
-
-        if dry_run:
-            return RefactorResult(status="dry_run", message="Refactor plan generated", repository_id=repo_id, changes=changes)
-
-        # 4. Execute Operations
+        repo_id = ""
         try:
+            self._log_event("INFO", "MOVE_ELEMENT_STARTED", {"element": element_name, "from": path, "to": target_file})
+            
+            # 1. Resolve repository context
+            root_path, repo_id = self._resolve_repo(path)
+            if not repo_id:
+                return RefactorResult(status="error", message="Repository root not found or not indexed", repository_id="", error_code="REF_001")
+                
+            source_rel = self._get_rel_path(root_path, path)
+            target_rel = self._get_rel_path(root_path, target_file)
+            
+            # 2. Extract element code block using Tree-Sitter
+            src_data = self.fs.read_file(source_rel, repo_id)
+            if "error" in src_data:
+                return RefactorResult(status="error", message=src_data["error"], repository_id=repo_id, error_code="REF_002")
+            
+            content = src_data["content"]
+            element_code, start_line, end_line = self._extract_element(content, element_name, path)
+            if not element_code:
+                 return RefactorResult(status="error", message=f"Element '{element_name}' not found in {source_rel}", repository_id=repo_id, error_code="REF_003")
+
+            # 3. Calculate Changes
+            changes = []
+            
             # A. Update source file
             src_lines = content.splitlines(keepends=True)
             new_src_lines = src_lines[:start_line-1] + src_lines[end_line:]
-            self.fs.write_file(source_rel, "".join(new_src_lines), repo_id, dry_run=False)
+            new_src_content = "".join(new_src_lines)
+            src_diff = self._generate_diff(content, new_src_content, source_rel)
+            
+            changes.append(RefactorChange(
+                path=path, 
+                action="modify", 
+                description=f"Delete {element_name} (lines {start_line}-{end_line})",
+                diff=src_diff
+            ))
 
             # B. Update target file
             dest_data = self.fs.read_file(target_rel, repo_id)
             dest_content = dest_data.get("content", "") if "error" not in dest_data else ""
             new_dest_content = dest_content.rstrip() + "\n\n" + element_code + "\n"
+            dest_diff = self._generate_diff(dest_content, new_dest_content, target_rel)
+            
+            changes.append(RefactorChange(
+                path=target_file, 
+                action="modify", 
+                description=f"Append {element_name} to end of file",
+                diff=dest_diff
+            ))
+
+            # C. Update Callers (Imports)
+            callers = self._find_callers_by_name(repo_id, element_name, source_rel)
+            for caller_path, caller_rel in callers:
+                if caller_path == path: continue
+                
+                # For diff, we'd need to actually perform the import update in-memory
+                # This is complex, so for now we'll provide a descriptive diff or placeholder
+                # Ideally _update_import_python should return the new content instead of writing to disk.
+                changes.append(RefactorChange(
+                    path=caller_path, 
+                    action="update_import", 
+                    description=f"Redirect import of {element_name} from {source_rel} to {target_rel}",
+                    metadata={"from": source_rel, "to": target_rel}
+                ))
+
+            if dry_run:
+                return RefactorResult(status="dry_run", message="Refactor plan generated", repository_id=repo_id, changes=changes)
+
+            # 4. Execute Operations
+            # A. Update source file
+            self.fs.write_file(source_rel, new_src_content, repo_id, dry_run=False)
+
+            # B. Update target file
             self.fs.write_file(target_rel, new_dest_content, repo_id, dry_run=False)
 
             # C. Synchronize Imports
             for caller_path, caller_rel in callers:
                 if caller_path == path: continue
                 if caller_path.endswith(".py"):
-                    self._update_import_python(caller_path, repo_id, element_name, source_rel, target_rel)
+                    await self._update_import_python(caller_path, repo_id, element_name, source_rel, target_rel)
                 elif caller_path.endswith((".js", ".ts", ".tsx")):
-                    self._update_import_js(caller_path, repo_id, element_name, source_rel, target_rel)
-
-            # 5. Atomic Git Commit
-            affected_paths = [path, target_file] + [c[0] for c in callers if c[0] != path]
+                    await self._update_import_js(caller_path, repo_id, element_name, source_rel, target_rel)
+            
+            # 5. Commit Changes
+            affected_paths = [path, target_file] + [c[0] for c in callers]
             commit_msg = f"refactor: move {element_name} from {source_rel} to {target_rel}"
             commit_res = await self.git.stage_and_commit(root_path, affected_paths, commit_msg)
             commit_hash = commit_res.get("commit_hash") if isinstance(commit_res, dict) else None
@@ -206,39 +303,24 @@ class CodeRefactorService:
         """
         Rename a symbol (class, function, variable) semantically and update all references.
         """
-        self._log_event("INFO", "RENAME_SYMBOL_STARTED", {"old": old_name, "new": new_name, "file": path})
-        
-        root_path, repo_id = self._resolve_repo(path)
-        if not repo_id:
-            return RefactorResult(status="error", message="Repository root not found", repository_id="", error_code="REF_001")
-            
-        source_rel = self._get_rel_path(root_path, path)
-        
-        # 1. Identify Impact via CodeGraph
-        callers = self._find_callers_by_name(repo_id, old_name, source_rel)
-        
-        changes = []
-        changes.append(RefactorChange(
-            path=path, 
-            action="modify", 
-            description=f"Rename {old_name} to {new_name} in {source_rel}"
-        ))
-        
-        for caller_path, caller_rel in callers:
-            changes.append(RefactorChange(
-                path=caller_path, 
-                action="modify", 
-                description=f"Update reference: {old_name} -> {new_name} in {caller_rel}"
-            ))
-
-        if dry_run:
-            return RefactorResult(status="dry_run", message="Rename plan generated", repository_id=repo_id, changes=changes)
-
-        # 2. Execute Semantic Renaming
+        repo_id = ""
         try:
-            affected_files = set([path] + [c[0] for c in callers])
+            self._log_event("INFO", "RENAME_SYMBOL_STARTED", {"old": old_name, "new": new_name, "file": path})
+            
+            root_path, repo_id = self._resolve_repo(path)
+            if not repo_id:
+                return RefactorResult(status="error", message="Repository root not found", repository_id="", error_code="REF_001")
+                
+            source_rel = self._get_rel_path(root_path, path)
+            
+            # 1. Identify Impact via CodeGraph
+            callers = self._find_callers_by_name(repo_id, old_name, source_rel)
+            affected_files = sorted(list(set([path] + [c[0] for c in callers])))
+            
+            changes = []
             actual_changes = []
 
+            # 2. Process each file to generate diffs
             for file_path in affected_files:
                 rel_path = self._get_rel_path(root_path, file_path)
                 data = self.fs.read_file(rel_path, repo_id)
@@ -249,18 +331,25 @@ class CodeRefactorService:
                 
                 # Language-specific semantic rename
                 if file_path.endswith(".py"):
-                    new_content = self._rename_in_file_python(content, old_name, new_name)
-                elif file_path.endswith((".js", ".ts", ".tsx")):
-                    new_content = self._rename_in_file_js(content, old_name, new_name)
-                elif file_path.endswith(".go"):
-                    new_content = self._rename_in_file_go(content, old_name, new_name)
-                else:
-                    # Heuristic fallback for unknown languages
-                    new_content = re.sub(rf"\b{re.escape(old_name)}\b", new_name, content)
+                    new_content = self._semantic_rename_py(content, old_name, new_name)
+                elif file_path.endswith((".js", ".ts", ".jsx", ".tsx")):
+                    new_content = self._semantic_rename_js(content, old_name, new_name)
                 
                 if new_content != content:
-                    self.fs.write_file(rel_path, new_content, repo_id, dry_run=False)
-                    actual_changes.append(file_path)
+                    diff = self._generate_diff(content, new_content, rel_path)
+                    changes.append(RefactorChange(
+                        path=file_path, 
+                        action="modify", 
+                        description=f"Rename {old_name} to {new_name}",
+                        diff=diff
+                    ))
+                    
+                    if not dry_run:
+                        self.fs.write_file(rel_path, new_content, repo_id, dry_run=False)
+                        actual_changes.append(file_path)
+
+            if dry_run:
+                return RefactorResult(status="dry_run", message="Rename plan generated", repository_id=repo_id, changes=changes)
 
             # 3. Git Commit
             if actual_changes:
@@ -270,10 +359,14 @@ class CodeRefactorService:
                 return RefactorResult(status="success", message=f"Renamed {old_name} to {new_name}", repository_id=repo_id, changes=changes, commit_hash=commit_hash)
             
             return RefactorResult(status="success", message="No changes needed", repository_id=repo_id, changes=[])
-            
         except Exception as e:
             logger.error(f"Rename failed: {str(e)}")
             return RefactorResult(status="error", message=str(e), repository_id=repo_id, error_code="REF_005")
+
+            
+    def _generate_diff(self, old_content: str, new_content: str, file_path: str) -> str:
+        """Helper to use shared diff utility."""
+        return generate_unified_diff(old_content, new_content, file_path)
 
     def _resolve_repo(self, path: str) -> Tuple[Optional[str], Optional[str]]:
         abs_path = Path(path).resolve()
@@ -394,7 +487,7 @@ class CodeRefactorService:
         """Simple recipe to add basic Any type hints to unhinted parameters."""
         return content # Placeholder
 
-    def _rename_in_file_python(self, content: str, old_name: str, new_name: str) -> str:
+    def _semantic_rename_py(self, content: str, old_name: str, new_name: str) -> str:
         lang = self.ts.get_language_safe("python")
         parser = self.ts.create_parser("python")
         tree = parser.parse(bytes(content, "utf8"))
@@ -413,7 +506,7 @@ class CodeRefactorService:
                 edits.append((node.start_byte, node.end_byte, new_name))
         return self._apply_edits(content, edits)
 
-    def _rename_in_file_js(self, content: str, old_name: str, new_name: str) -> str:
+    def _semantic_rename_js(self, content: str, old_name: str, new_name: str) -> str:
         lang_name = "typescript"
         lang = self.ts.get_language_safe(lang_name)
         parser = self.ts.create_parser(lang_name)
@@ -433,7 +526,7 @@ class CodeRefactorService:
                 edits.append((node.start_byte, node.end_byte, new_name))
         return self._apply_edits(content, edits)
 
-    def _rename_in_file_go(self, content: str, old_name: str, new_name: str) -> str:
+    def _semantic_rename_go(self, content: str, old_name: str, new_name: str) -> str:
         lang = self.ts.get_language_safe("go")
         parser = self.ts.create_parser("go")
         tree = parser.parse(bytes(content, "utf8"))
@@ -452,7 +545,7 @@ class CodeRefactorService:
                 edits.append((node.start_byte, node.end_byte, new_name))
         return self._apply_edits(content, edits)
 
-    def _update_import_python(self, caller_path: str, repo_id: str, name: str, old_rel: str, new_rel: str):
+    async def _update_import_python(self, caller_path: str, repo_id: str, name: str, old_rel: str, new_rel: str):
         old_mod = old_rel.replace(".py", "").replace("/", ".")
         new_mod = new_rel.replace(".py", "").replace("/", ".")
         if old_mod == new_mod: return
@@ -483,7 +576,7 @@ class CodeRefactorService:
         if new_content != content:
             self.fs.write_file(caller_path, new_content, repo_id, dry_run=False)
 
-    def _update_import_js(self, caller_path: str, repo_id: str, name: str, old_rel: str, new_rel: str):
+    async def _update_import_js(self, caller_path: str, repo_id: str, name: str, old_rel: str, new_rel: str):
         old_mod = old_rel.replace(".ts", "").replace(".js", "").replace(".tsx", "")
         new_mod = new_rel.replace(".ts", "").replace(".js", "").replace(".tsx", "")
         data = self.fs.read_file(caller_path, repo_id)
@@ -517,3 +610,23 @@ class CodeRefactorService:
             logger.warning(msg)
         else:
             logger.info(msg)
+
+    def _rename_in_file(self, content: str, old_name: str, new_name: str, language: str) -> str:
+        """Rename a symbol in file content, skipping strings/comments."""
+        if language == "python":
+            return self._semantic_rename_py(content, old_name, new_name)
+        elif language in ("typescript", "javascript", "tsx", "jsx"):
+            return self._semantic_rename_js(content, old_name, new_name)
+        elif language == "go":
+            return self._semantic_rename_go(content, old_name, new_name)
+        else:
+            return content.replace(old_name, new_name)
+
+    @staticmethod
+    def _detect_lang(file_path: str) -> str:
+        ext = Path(file_path).suffix.lower()
+        lang_map = {".py": "python", ".js": "javascript", ".ts": "typescript",
+                    ".tsx": "tsx", ".jsx": "javascript", ".go": "go",
+                    ".rs": "rust", ".java": "java", ".rb": "ruby",
+                    ".php": "php", ".cs": "c_sharp", ".swift": "swift"}
+        return lang_map.get(ext, "unknown")

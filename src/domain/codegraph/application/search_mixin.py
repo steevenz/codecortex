@@ -479,6 +479,71 @@ class CodeSearchMixin:
                     "chain_length": chain_len,
                 })
             return transformed
+            
+    async def trace_execution_flow(self, start_symbol_id: str, max_depth: int = 5) -> Dict[str, Any]:
+        """
+        Recursively trace the call graph starting from a specific symbol.
+        Returns a hierarchical tree showing the execution flow.
+        """
+        # Resolve start symbol
+        cursor = self.db.conn.execute("""
+            SELECT s.id, s.name, s.symbol_type, d.relative_path || '/' || f.name as path, s.start_line
+            FROM symbols s
+            JOIN files f ON s.file_id = f.id
+            JOIN directories d ON f.directory_id = d.id
+            WHERE s.id = ?
+        """, (start_symbol_id,))
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError(f"Symbol ID '{start_symbol_id}' not found.")
+
+        async def _trace_recursive(sid: str, depth: int, seen: set) -> Dict[str, Any]:
+            # Fetch node info
+            n_cursor = self.db.conn.execute("""
+                SELECT s.name, s.symbol_type, d.relative_path || '/' || f.name as path, s.start_line
+                FROM symbols s
+                JOIN files f ON s.file_id = f.id
+                JOIN directories d ON f.directory_id = d.id
+                WHERE s.id = ?
+            """, (sid,))
+            n_row = n_cursor.fetchone()
+            if not n_row:
+                return {"id": sid, "name": "unknown"}
+            
+            node = {
+                "id": sid,
+                "name": n_row["name"],
+                "type": n_row["symbol_type"],
+                "path": n_row["path"],
+                "line": n_row["start_line"],
+                "callees": []
+            }
+            
+            if depth < max_depth:
+                # Cycle prevention: only recurse if we haven't seen this SID in the CURRENT path
+                if sid in seen:
+                    node["note"] = "circular reference"
+                    return node
+                
+                new_seen = seen | {sid}
+                
+                # Find callees via edges table
+                e_cursor = self.db.conn.execute("""
+                    SELECT target_id, relation_type, line_number, weight
+                    FROM edges
+                    WHERE source_id = ? AND relation_type = 'CALLS'
+                """, (sid,))
+                
+                for e_row in e_cursor.fetchall():
+                    child = await _trace_recursive(e_row["target_id"], depth + 1, new_seen)
+                    child["call_line"] = e_row["line_number"]
+                    child["call_weight"] = e_row["weight"]
+                    node["callees"].append(child)
+            
+            return node
+
+        flow_tree = await _trace_recursive(start_symbol_id, 1, set())
+        return {"flow": flow_tree}
 
     def find_module_dependencies(self, module_name: str, repo_path: Optional[str] = None, limit: int = 50) -> Dict[str, Any]:
         repo_filter = "AND file.path STARTS WITH $repo_path" if repo_path else ""

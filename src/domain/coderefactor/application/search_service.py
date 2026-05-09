@@ -85,7 +85,7 @@ class SearchService:
             self._log_event("ERROR", "SEARCH_FAILED", {"repo_id": repo_id, "query": query, "error": str(e)})
             return [{"error": str(e)}]
 
-    def replace_code(self, repo_id: str, find_query: str, replace_text: str, is_regex: bool = True, dry_run: bool = True) -> Dict[str, Any]:
+    async def replace_code(self, repo_id: str, find_query: str, replace_text: str, is_regex: bool = True, dry_run: bool = True) -> Dict[str, Any]:
         """Global find and replace across the repository."""
         try:
             search_results = self.search_code(repo_id, find_query, is_regex=is_regex, case_sensitive=True)
@@ -100,32 +100,39 @@ class SearchService:
             pattern = find_query if is_regex else re.escape(find_query)
             regex = re.compile(pattern, flags)
 
+            from src.core.utils.diff import generate_unified_diff
+
             for res in search_results:
                 file_id = res["file_id"]
                 file_path = res["file_path"]
                 
                 # Get full content
                 row = self.db.conn.execute("SELECT content FROM files WHERE id = ?", (file_id,)).fetchone()
-                new_content = regex.sub(replace_text, row["content"])
+                old_content = row["content"]
+                new_content = regex.sub(replace_text, old_content)
                 
-                affected_files.append({
-                    "file_id": file_id,
-                    "path": file_path,
-                    "match_count": res["match_count"]
-                })
-                total_matches += res["match_count"]
-
-                if not dry_run:
-                    # Physically update disk (needs repo root)
-                    cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
-                    repo_root = Path(cursor.fetchone()["root_path"])
-                    abs_path = repo_root / file_path
-                    
-                    abs_path.write_text(new_content, encoding="utf-8")
-                    
-                    # Update DB
-                    with self.db.transaction() as txn:
-                        txn.execute("UPDATE files SET content = ? WHERE id = ?", (new_content, file_id))
+                if new_content != old_content:
+                    diff = generate_unified_diff(old_content, new_content, file_path)
+                    affected_files.append({
+                        "file_id": file_id,
+                        "path": file_path,
+                        "match_count": res["match_count"],
+                        "diff": diff
+                    })
+                    total_matches += res["match_count"]
+    
+                    if not dry_run:
+                        # Physically update disk (needs repo root)
+                        cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
+                        repo_root = Path(cursor.fetchone()["root_path"])
+                        abs_path = repo_root / file_path
+                        
+                        abs_path.parent.mkdir(parents=True, exist_ok=True)
+                        abs_path.write_text(new_content, encoding="utf-8")
+                        
+                        # Update DB
+                        with self.db.transaction() as txn:
+                            txn.execute("UPDATE files SET content = ? WHERE id = ?", (new_content, file_id))
 
             return {
                 "status": "dry_run" if dry_run else "success",
@@ -133,6 +140,7 @@ class SearchService:
                 "files_count": len(affected_files),
                 "affected_files": affected_files
             }
+
         except Exception as e:
             self._log_event("ERROR", "REPLACE_FAILED", {"repo_id": repo_id, "find": find_query, "error": str(e)})
             return {"error": str(e)}

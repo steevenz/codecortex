@@ -16,6 +16,7 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Optional, Any, Union
 from src.domain.coderepository.infrastructure.git_adapter import GitAdapter
+from src.domain.coderepository.infrastructure.git_history import GitHistoryWorker
 from src.core.logging_config import get_logger
 from src.domain.coderepository.core.store import ICodeRepositoryStore
 
@@ -126,3 +127,14 @@ class GitService:
             return {"status": "initialized"}
         except Exception as e:
             return {"error": str(e)}
+
+    def git_audit(self, repo_path: Union[str, Path], repo_id: str = "", limit: int = 100) -> Dict[str, Any]:
+        """Scan git history for secrets and security risks."""
+        path = Path(repo_path).resolve() if isinstance(repo_path, (str, Path)) else repo_path
+        worker = GitHistoryWorker(self.store, path)
+        findings = worker.audit_commits(repo_id if repo_id else path.name, limit=limit)
+        return {
+            "secrets_found": findings,
+            "risk_level": "high" if any(f["risk"] == "high" for f in findings) else ("medium" if findings else "low"),
+            "total_scanned": min(limit, 100)
+        }

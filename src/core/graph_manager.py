@@ -17,6 +17,9 @@ import os
 import threading
 from typing import Optional
 
+import circuitbreaker
+from circuitbreaker import circuit
+
 from .backends.base import GraphBackend
 from .backends.kuzu_backend import KuzuBackend
 from .backends.neo4j_backend import Neo4jBackend
@@ -159,6 +162,16 @@ class GraphManager:
 
     def get_backend_type(self) -> str:
         return self._backend_type
+
+    @circuit(failure_threshold=5, recovery_timeout=30)
+    def execute_query(self, query: str, parameters: Optional[dict] = None) -> list:
+        """Execute a graph query with circuit breaker fault tolerance."""
+        backend = self.get_backend()
+        if backend.get_backend_type() == "none":
+            return []
+        with backend.get_session() as session:
+            result = session.run(query, **(parameters or {}))
+            return result.data()
 
     def test_connection(self) -> tuple[bool, Optional[str]]:
         """Test connectivity of the configured backend without instantiating it."""

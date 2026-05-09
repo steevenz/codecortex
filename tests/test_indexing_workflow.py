@@ -32,15 +32,18 @@ def test_native_indexing_builds_calls_edges(tmp_path: Path) -> None:
     )
 
     from src.core.database import DatabaseManager
-    from src.domain.repository.service import RepositoryService
-    from src.domain.codeindex.service import CodeIndexService
+    from src.domain.coderepository.application.service import CodeRepositoryService
+    from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
+    from src.domain.codeindex.application.service import CodeIndexService
+    import asyncio
 
     db = DatabaseManager(str(tmp_path / "codecortex.db"))
-    repo_service = RepositoryService(db)
-    repo_id = repo_service.sync_repository(str(repo_root))
+    store = SQLiteCodeRepositoryStore(db)
+    repo_service = CodeRepositoryService(store)
+    repo_id = asyncio.run(repo_service.sync_repository(str(repo_root)))
 
     index_service = CodeIndexService(db, codegraph_service=None)
-    index_service.index_repository(repo_id)
+    asyncio.run(index_service.index_repository(repo_id))
 
     a_row = db.conn.execute(
         "SELECT id FROM symbols WHERE repository_id = ? AND name = 'a' AND symbol_type IN ('function','method')",
@@ -69,21 +72,24 @@ def test_incremental_index_files_updates_manifest(tmp_path: Path) -> None:
     repo_root = _make_repo(tmp_path, {"x.py": "def x():\n    return 1\n"})
 
     from src.core.database import DatabaseManager
-    from src.domain.repository.service import RepositoryService
-    from src.domain.codeindex.service import CodeIndexService
+    from src.domain.coderepository.application.service import CodeRepositoryService
+    from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
+    from src.domain.codeindex.application.service import CodeIndexService
+    import asyncio
 
     db = DatabaseManager(str(tmp_path / "codecortex.db"))
-    repo_service = RepositoryService(db)
-    repo_id = repo_service.sync_repository(str(repo_root))
+    store = SQLiteCodeRepositoryStore(db)
+    repo_service = CodeRepositoryService(store)
+    repo_id = asyncio.run(repo_service.sync_repository(str(repo_root)))
 
     index_service = CodeIndexService(db, codegraph_service=None)
-    index_service.index_repository(repo_id)
+    asyncio.run(index_service.index_repository(repo_id))
 
     (repo_root / "x.py").write_text("def x():\n    return 2\n", encoding="utf-8")
-    _, changed = repo_service.sync_repository_with_changes(str(repo_root))
+    _, changed = asyncio.run(repo_service.sync_repository_with_changes(str(repo_root)))
     assert "x.py" in changed
 
-    stats = index_service.index_files(repo_id, changed)
+    stats = asyncio.run(index_service.index_files(repo_id, changed))
     assert stats["files_indexed"] >= 1
 
     row = db.conn.execute(
@@ -105,12 +111,15 @@ def test_python_builtin_fallback_when_parser_import_fails(tmp_path: Path) -> Non
     repo_root = _make_repo(tmp_path, {"f.py": "def a():\n    return 1\n"})
 
     from src.core.database import DatabaseManager
-    from src.domain.repository.service import RepositoryService
-    from src.domain.codeindex.service import CodeIndexService
+    from src.domain.coderepository.application.service import CodeRepositoryService
+    from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
+    from src.domain.codeindex.application.service import CodeIndexService
+    import asyncio
 
     db = DatabaseManager(str(tmp_path / "codecortex.db"))
-    repo_service = RepositoryService(db)
-    repo_id = repo_service.sync_repository(str(repo_root))
+    store = SQLiteCodeRepositoryStore(db)
+    repo_service = CodeRepositoryService(store)
+    repo_id = asyncio.run(repo_service.sync_repository(str(repo_root)))
 
     index_service = CodeIndexService(db, codegraph_service=None)
     parser = index_service._get_parser("python")
@@ -120,7 +129,7 @@ def test_python_builtin_fallback_when_parser_import_fails(tmp_path: Path) -> Non
 
     parser.parse = _raise_import_error  # type: ignore[attr-defined]
 
-    index_service.index_repository(repo_id)
+    asyncio.run(index_service.index_repository(repo_id))
 
     sym = db.conn.execute(
         "SELECT id, metadata FROM symbols WHERE repository_id = ? AND name = 'a'",
@@ -134,7 +143,7 @@ def test_python_builtin_fallback_when_parser_import_fails(tmp_path: Path) -> Non
 
 
 def test_converters_build_code_refs_and_file_symbol() -> None:
-    from src.domain.codeindex.converters import parsed_data_to_raw_symbols
+    from src.domain.codeindex.core.converters import parsed_data_to_raw_symbols
 
     parsed = {
         "lang": "python",
@@ -163,14 +172,17 @@ def test_converters_build_code_refs_and_file_symbol() -> None:
 
 def test_persist_raw_symbols_resolves_parent_ids(tmp_path: Path) -> None:
     from src.core.database import DatabaseManager
-    from src.domain.repository.service import RepositoryService
-    from src.domain.codeindex.service import CodeIndexService
-    from src.domain.codeindex.strategies.base import RawSymbol
+    from src.domain.coderepository.application.service import CodeRepositoryService
+    from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
+    from src.domain.codeindex.application.service import CodeIndexService
+    from src.domain.codeindex.infrastructure.strategies.base import RawSymbol
+    import asyncio
 
     repo_root = _make_repo(tmp_path, {"p.py": "class C:\n    def m(self):\n        return 1\n"})
     db = DatabaseManager(str(tmp_path / "codecortex.db"))
-    repo_service = RepositoryService(db)
-    repo_id = repo_service.sync_repository(str(repo_root))
+    store = SQLiteCodeRepositoryStore(db)
+    repo_service = CodeRepositoryService(store)
+    repo_id = asyncio.run(repo_service.sync_repository(str(repo_root)))
 
     row = db.conn.execute(
         "SELECT f.id AS file_id, d.relative_path AS dir_path, f.name AS name FROM files f JOIN directories d ON d.id = f.directory_id WHERE f.repository_id = ?",
@@ -189,7 +201,7 @@ def test_persist_raw_symbols_resolves_parent_ids(tmp_path: Path) -> None:
     ]
 
     idx = CodeIndexService(db, codegraph_service=None)
-    written = idx._persist_raw_symbols(repo_id, row["file_id"], raw_symbols)
+    written = asyncio.run(idx._persist_raw_symbols(repo_id, row["file_id"], raw_symbols))
     assert written == 2
 
     child = db.conn.execute("SELECT parent_id FROM symbols WHERE code = ?", (child_ref,)).fetchone()
@@ -201,13 +213,16 @@ def test_persist_raw_symbols_resolves_parent_ids(tmp_path: Path) -> None:
 
 def test_index_file_with_tree_sitter_rejects_unsupported_ext_and_too_large(tmp_path: Path) -> None:
     from src.core.database import DatabaseManager
-    from src.domain.repository.service import RepositoryService
-    from src.domain.codeindex.service import CodeIndexService
+    from src.domain.coderepository.application.service import CodeRepositoryService
+    from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
+    from src.domain.codeindex.application.service import CodeIndexService
+    import asyncio
 
     repo_root = _make_repo(tmp_path, {"x.unknown": "hello\n", "big.py": "x" * 10})
     db = DatabaseManager(str(tmp_path / "codecortex.db"))
-    repo_service = RepositoryService(db)
-    repo_id = repo_service.sync_repository(str(repo_root))
+    store = SQLiteCodeRepositoryStore(db)
+    repo_service = CodeRepositoryService(store)
+    repo_id = asyncio.run(repo_service.sync_repository(str(repo_root)))
 
     file_unknown = db.conn.execute(
         "SELECT f.id AS file_id, d.relative_path AS dir_path, f.name AS name FROM files f JOIN directories d ON d.id = f.directory_id WHERE f.repository_id = ? AND f.name = 'x.unknown'",
@@ -217,7 +232,7 @@ def test_index_file_with_tree_sitter_rejects_unsupported_ext_and_too_large(tmp_p
     p_unknown = repo_root / "x.unknown"
 
     idx = CodeIndexService(db, codegraph_service=None)
-    parsed = idx.index_file_with_tree_sitter(repo_id, file_unknown["file_id"], p_unknown)
+    parsed = asyncio.run(idx.index_file_with_tree_sitter(repo_id, file_unknown["file_id"], p_unknown))
     assert "error" in parsed
 
     file_big = db.conn.execute(
@@ -227,7 +242,7 @@ def test_index_file_with_tree_sitter_rejects_unsupported_ext_and_too_large(tmp_p
     assert file_big is not None
     p_big = repo_root / "big.py"
     idx.MAX_FILE_SIZE_BYTES = 1
-    parsed2 = idx.index_file_with_tree_sitter(repo_id, file_big["file_id"], p_big)
+    parsed2 = asyncio.run(idx.index_file_with_tree_sitter(repo_id, file_big["file_id"], p_big))
     assert parsed2.get("error") == "file_too_large"
 
     db.close()

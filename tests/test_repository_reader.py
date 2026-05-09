@@ -6,7 +6,7 @@ def test_file_reader_read_and_hash(tmp_path: Path) -> None:
     repo_root.mkdir(parents=True, exist_ok=True)
     (repo_root / "x.txt").write_text("hello\n", encoding="utf-8")
 
-    from src.domain.repository.reader import FileReader
+    from src.domain.coderepository.infrastructure.file_reader import FileReader
 
     r = FileReader(repo_root)
     content = r.read("x.txt")
@@ -22,11 +22,12 @@ def test_file_reader_blocks_path_traversal(tmp_path: Path) -> None:
     repo_root.mkdir(parents=True, exist_ok=True)
     (repo_root / "x.txt").write_text("hello\n", encoding="utf-8")
 
-    from src.domain.repository.reader import FileReader
+    from src.domain.coderepository.infrastructure.file_reader import FileReader
 
     r = FileReader(repo_root)
     assert "Path traversal detected" in r.read("../x.txt")
     assert "Path traversal detected" in r.read("..\\x.txt")
     assert "Path traversal detected" in r.read("/x.txt")
     assert "Path traversal detected" in r.read("sub\\x.txt")
+
 

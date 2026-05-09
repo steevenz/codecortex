@@ -1,3 +1,17 @@
+schema_version: "1.0"
+active_domain: "CodeRepository"
+repo_id: "e022a81f-9e92-44d3-b1ab-cfff20f343f6"
+pending_todos:
+  - content: "Verify telemetry in analyze pipeline"
+    status: completed
+    priority: high
+  - content: "Audit graph queries for repo_id isolation"
+    status: pending
+    priority: medium
+tracing_ids:
+  last_request_id: "internal-2026-05-07T14:26:39"
+  open_spans: []
+
 self_evaluation:
   task_id: "codecortex-restructure-20260501"
   workflow: "codebase-analysis-workflow"

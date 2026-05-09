@@ -1,0 +1,42 @@
+{
+  "repository_id": "550e8400-e29b-41d4-a716-446655440000",
+  "repository_name": "my-fastapi-app",
+  "symbols": [
+    {
+      "name": "UserModel",
+      "type": "class",
+      "file": "src/models/user.py",
+      "line": 10,
+      "signature": "class UserModel(BaseModel)",
+      "docstring": "SQLAlchemy model for users table.",
+      "methods": ["find_by_email", "verify_password"],
+      "decorators": ["@registry.mapped"]
+    },
+    {
+      "name": "create_user",
+      "type": "function",
+      "file": "src/api/users.py",
+      "line": 25,
+      "signature": "async def create_user(user: UserCreate, db: AsyncSession) -> UserResponse",
+      "docstring": "Register a new user account.",
+      "decorators": ["@router.post(\"/users\", status_code=201)"],
+      "framework": "fastapi"
+    },
+    {
+      "name": "process_order",
+      "type": "function",
+      "file": "src/domain/orders/service.py",
+      "line": 42,
+      "signature": "def process_order(order_id: UUID, payment_gateway: PaymentProvider) -> OrderResult",
+      "docstring": "Process a new order through the full lifecycle.",
+      "calls": [
+        {"name": "validate_inventory", "file": "src/domain/inventory/checks.py"},
+        {"name": "charge_payment", "file": "src/domain/payments/gateway.py"},
+        {"name": "send_confirmation", "file": "src/domain/notifications/email.py"}
+      ]
+    }
+  ],
+  "files_indexed": 47,
+  "total_symbols": 312,
+  "duration_ms": 1234
+}

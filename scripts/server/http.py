@@ -107,12 +107,14 @@ def create_app() -> FastAPI:
 
     @app.get(f"/codecortex-api/v1{mcp_path}")
     async def mcp_sse_endpoint(request: Request, x_api_key: Optional[str] = None):
-        _validate_key(x_api_key or api_key_header(request))
+        header_key = await api_key_header(request)
+        _validate_key(x_api_key or header_key)
         return await mcp_sse_handler(request)
 
     @app.post(f"/codecortex-api/v1{mcp_path}")
     async def sync(request: Request, x_api_key: Optional[str] = None) -> Dict[str, Any]:
-        _validate_key(x_api_key or api_key_header(request))
+        header_key = await api_key_header(request)
+        _validate_key(x_api_key or header_key)
         request_id = new_request_id()
         try:
             payload = await request.json()
@@ -168,56 +170,95 @@ def create_app() -> FastAPI:
                 error_code="RPC_002",
             )
 
-        orchestrator = CortexOrchestrator()
+        def rpc_err(code: int, message: str, data: Any = None) -> Dict[str, Any]:
+            return {
+                "jsonrpc": "2.0",
+                "id": rpc_id,
+                "error": {
+                    "code": code,
+                    "message": message,
+                    "data": data
+                }
+            }
+
         try:
-            # Fallback to FastMCP tool registry
-            mcp_tools = {t.name: t for t in mcp._tools}
-            if method in mcp_tools:
-                tool = mcp_tools[method]
-                # FastMCP tools are usually sync or wrapped async run()
-                if asyncio.iscoroutinefunction(tool.run):
-                    result = await tool.run(**params)
+            orchestrator = CortexOrchestrator()
+            try:
+                # Fallback to FastMCP tool registry
+                mcp_tools = {t.name: t for t in mcp._tools}
+                if method in mcp_tools:
+                    tool = mcp_tools[method]
+                    # FastMCP tools are usually sync or wrapped async run()
+                    if asyncio.iscoroutinefunction(tool.run):
+                        result = await tool.run(**params)
+                    else:
+                        result = tool.run(**params)
                 else:
-                    result = tool.run(**params)
-            else:
+                    msg = f"Unknown method: {method}"
+                    if rpc_id is not None:
+                        return rpc_err(-32601, msg)
+                    return api_response(
+                        success=False,
+                        status_code=404,
+                        message=msg,
+                        data=None,
+                        request_id=request_id,
+                        error_code="RPC_404",
+                    )
+
+                # Standardized successful response with redaction
+                redacted_data = _redact_sensitive(result)
+                
+                # If the request looks like a standard JSON-RPC, wrap it
+                if rpc_id is not None:
+                    # If the tool returned an api_response (dict with success=False), 
+                    # we should probably extract the error if it failed.
+                    if isinstance(redacted_data, dict) and redacted_data.get("success") is False:
+                        return rpc_err(
+                            code=-32000, 
+                            message=redacted_data.get("message", "Tool execution failed"),
+                            data=redacted_data.get("meta", {})
+                        )
+                    return rpc_ok(redacted_data)
+
+                return api_response(
+                    success=True,
+                    status_code=200,
+                    message="OK",
+                    data=redacted_data,
+                    request_id=request_id,
+                )
+            except Exception as e:
+                logger.exception("Execution failed for method=%s", method)
+                msg = f"Execution failed: {str(e)}"
+                if rpc_id is not None:
+                    return rpc_err(-32603, msg)
                 return api_response(
                     success=False,
-                    status_code=404,
-                    message=f"Unknown method: {method}",
+                    status_code=500,
+                    message=msg,
                     data=None,
                     request_id=request_id,
-                    error_code="RPC_404",
+                    error_code="RPC_500",
                 )
-
-            # Standardized successful response with redaction
-            redacted_data = _redact_sensitive(result)
-            
-            # If the request looks like a standard JSON-RPC, wrap it
-            if rpc_id is not None:
-                return rpc_ok(redacted_data)
-
-            return api_response(
-                success=True,
-                status_code=200,
-                message="OK",
-                data=redacted_data,
-                request_id=request_id,
-            )
+            finally:
+                try:
+                    orchestrator.db.close()
+                except Exception:
+                    pass
         except Exception as e:
-            logger.exception("sync handler failed for method=%s", method)
+            logger.exception("Orchestrator initialization failed")
+            msg = f"Internal Server Error: {str(e)}"
+            if rpc_id is not None:
+                return rpc_err(-32603, msg)
             return api_response(
                 success=False,
                 status_code=500,
-                message=f"Request failed: {str(e)}",
+                message=msg,
                 data=None,
                 request_id=request_id,
-                error_code="RPC_500",
+                error_code="SRV_500",
             )
-        finally:
-            try:
-                orchestrator.db.close()
-            except Exception:
-                pass
 
     return app
 
@@ -226,7 +267,7 @@ def main() -> None:
     host = (os.getenv("CODECORTEX_HOST") or "127.0.0.1").strip()
     port_raw = (os.getenv("CODECORTEX_PORT") or "8001").strip()
     port = int(port_raw) if port_raw.isdigit() else 8001
-    uvicorn.run("src.http_server:create_app", host=host, port=port, factory=True, log_level="info")
+    uvicorn.run("scripts.server.http:create_app", host=host, port=port, factory=True, log_level="info")
 
 
 if __name__ == "__main__":

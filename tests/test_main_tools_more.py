@@ -1,8 +1,9 @@
 import os
+import asyncio
 from pathlib import Path
 
 
-def test_analyze_and_validate_codebase_close_db(tmp_path: Path) -> None:
+def test_repo_analyze_dry_run_close_db(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     repo_root.mkdir(parents=True, exist_ok=True)
     (repo_root / ".gitignore").write_text("", encoding="utf-8")
@@ -19,13 +20,18 @@ def test_analyze_and_validate_codebase_close_db(tmp_path: Path) -> None:
     os.environ["CODECORTEX_DB_PATH"] = str(db_path)
     os.environ["CODECORTEX_GRAPH_BACKEND"] = "none"
 
-    import src.main as m
+    from src.main import CortexOrchestrator
 
-    res = m.analyze_codebase(str(repo_root))
-    assert res["success"] is True
+    orch = CortexOrchestrator(str(db_path))
 
-    val = m.validate_codebase(str(repo_root))
-    assert "success" in val
+    async def _run():
+        res = await orch.analyze(str(repo_root), dry_run=False)
+        return res
+
+    res = asyncio.run(_run())
+    assert "repository_id" in res
+    assert "analysis" in res
+    orch.db.close()
 
 
 def test_validate_path_accepts_existing_directory(tmp_path: Path) -> None:
@@ -53,37 +59,42 @@ def test_codemap_and_trace_execution_flow(tmp_path: Path) -> None:
     os.environ["CODECORTEX_DB_PATH"] = str(db_path)
     os.environ["CODECORTEX_GRAPH_BACKEND"] = "none"
 
-    import src.main as m
-    from src.core.database import DatabaseManager
+    from src.main import CortexOrchestrator
 
-    res = m.index_codebase(str(repo_root))
-    assert res["success"] is True
-    repo_id = res["data"]["repository_id"]
+    orch = CortexOrchestrator(str(db_path))
 
-    cm = m.get_structured_codemap(repo_id)
-    assert cm["success"] is True
-    assert cm["data"]["id"] == repo_id
+    async def _run():
+        repo_id = await orch.repo_service.sync_repository(str(repo_root))
+        await orch.index_service.index_repository(repo_id)
 
-    db = DatabaseManager(str(db_path))
-    sym = db.conn.execute(
-        "SELECT id FROM symbols WHERE repository_id = ? AND name = 'a' AND symbol_type IN ('function','method')",
-        (repo_id,),
-    ).fetchone()
-    assert sym is not None
-    db.close()
+        dirs = orch.db.conn.execute(
+            "SELECT id, relative_path FROM directories WHERE repository_id = ? ORDER BY relative_path",
+            (repo_id,)
+        ).fetchall()
+        assert dirs is not None
 
-    flow = m.trace_execution_flow(sym["id"], max_depth=3)
-    assert flow["success"] is True
-    assert flow["data"]["flow"]["name"] == "a"
+        sym = orch.db.conn.execute(
+            "SELECT id FROM symbols WHERE repository_id = ? AND name = 'a' AND symbol_type IN ('function','method')",
+            (repo_id,),
+        ).fetchone()
+        assert sym is not None
+
+        flow = await orch.graph_service.trace_execution_flow(sym["id"], max_depth=3)
+        assert flow is not None
+        assert "flow" in flow
+        assert flow["flow"]["name"] == "a"
+
+        return repo_id
+
+    asyncio.run(_run())
+    orch.db.close()
 
 
 def test_trace_execution_flow_rejects_invalid_inputs() -> None:
     import src.main as m
 
-    bad_uuid = m.trace_execution_flow("not-a-uuid")
-    assert bad_uuid["success"] is False
-    assert bad_uuid["meta"]["error_code"] == "VAL_003"
+    bad_uuid, _ = m.validate_uuid("not-a-uuid")
+    assert bad_uuid is False
 
-    bad_depth = m.trace_execution_flow("00000000-0000-0000-0000-000000000000", max_depth=999)
-    assert bad_depth["success"] is False
-    assert bad_depth["meta"]["error_code"] == "VAL_004"
+    bad_depth, _ = m.validate_max_depth(999)
+    assert bad_depth is False

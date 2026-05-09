@@ -142,6 +142,24 @@ LANGUAGE_ALIASES = {
     "scss": "css",
     "sass": "css",
     "less": "css",
+    # Additional languages
+    "vue": "vue",
+    "cob": "cobol",
+    "cbl": "cobol",
+    "cobol": "cobol",
+    "jl": "julia",
+    "julia": "julia",
+    "lua": "lua",
+    "m": "objc",
+    "mm": "objc",
+    "objectivec": "objc",
+    "ps1": "powershell",
+    "powershell": "powershell",
+    "v": "verilog",
+    "sv": "verilog",
+    "verilog": "verilog",
+    "zig": "zig",
+    "zir": "zig",
 }
 
 # Canonical names that differ from tree-sitter-language-pack names
@@ -232,7 +250,7 @@ def create_parser(lang: str) -> Parser:
 def execute_query(language: Language, query_string: str, node: Any):
     """
     Execute a tree-sitter query and return captures in backward-compatible format.
-    Compatible with tree-sitter 0.20.x and 0.25+ APIs.
+    Compatible with tree-sitter 0.20.x, 0.24.x, and 0.25+ APIs.
     """
     try:
         from tree_sitter import Query, QueryCursor
@@ -240,26 +258,40 @@ def execute_query(language: Language, query_string: str, node: Any):
         raise _missing_tree_sitter_error(e) from e
     query = Query(language, query_string)
 
+    # Try 0.25.x API: QueryCursor(query) then cursor.matches(node)
+    # Returns [(pattern_idx, {capture_name: [node, ...]})]
     try:
         cursor = QueryCursor(query)
-        captured = cursor.captures(node)
+        matched = cursor.matches(node)
         captures = []
-        if isinstance(captured, dict):
-            for name, nodes in captured.items():
+        for _pattern_idx, capture_dict in matched:
+            for name, nodes in capture_dict.items():
                 if not isinstance(nodes, list):
                     continue
                 for n in nodes:
                     captures.append((n, name))
+        if captures:
             return captures
-    except TypeError:
+    except (TypeError, AttributeError):
         pass
 
-    cursor = QueryCursor()
-    cursor.exec(query, node)
-    captures = []
-    capture = cursor.next_capture()
-    while capture is not None:
-        node_ref, capture_index = capture
-        captures.append((node_ref, query.capture_names[capture_index]))
+    # Try 0.20.x API: QueryCursor() then cursor.exec() / cursor.next_capture()
+    try:
+        cursor = QueryCursor()
+        cursor.exec(query, node)
+        captures = []
         capture = cursor.next_capture()
-    return captures
+        while capture is not None:
+            node_ref, capture_index = capture
+            captures.append((node_ref, query.capture_names[capture_index]))
+            capture = cursor.next_capture()
+        return captures
+    except (TypeError, AttributeError):
+        pass
+
+    return []
+
+
+# ── Query.captures() backward compatibility is handled by replacing
+#    query.captures() with execute_query() in each language parser.
+#    See src/domain/codeindex/infrastructure/parsers/languages/*.py

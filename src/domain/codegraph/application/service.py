@@ -393,7 +393,7 @@ class CodeGraphService(
             
         coupling = await asyncio.to_thread(_calc_coupling)
 
-        security = await self._audit_security_hygiene(repo_id)
+        security = self._audit_security_hygiene(repo_id)
         questions = await asyncio.to_thread(self.suggest_architectural_questions, G, god_nodes)
 
         analysis_result = {

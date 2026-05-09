@@ -2,18 +2,6 @@
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from .config_parser import ConfigParser
-from src.domain.codeindex.infrastructure.parsers.frameworks import nextjs
-from src.domain.codeindex.infrastructure.parsers.frameworks import flutter
-from src.domain.codeindex.infrastructure.parsers.frameworks import laravel
-from src.domain.codeindex.infrastructure.parsers.frameworks import react
-from src.domain.codeindex.infrastructure.parsers.frameworks import vue
-from src.domain.codeindex.infrastructure.parsers.frameworks import angular
-from src.domain.codeindex.infrastructure.parsers.frameworks import django
-from src.domain.codeindex.infrastructure.parsers.frameworks import rails
-from src.domain.codeindex.infrastructure.parsers.frameworks import express
-from src.domain.codeindex.infrastructure.parsers.frameworks import nestjs
-from src.domain.codeindex.infrastructure.parsers.frameworks import symfony
-from src.domain.codeindex.infrastructure.parsers.frameworks import aspnet
 
 
 class RepositoryFrameworkDetector:
@@ -23,6 +11,13 @@ class RepositoryFrameworkDetector:
         self.repo_root = repo_root
         self.repo_configs = ConfigParser.parse_all_configs(repo_root)
         self._detected_frameworks: Optional[List[str]] = None
+        # Lazy imports to break circular dependency with codeindex
+        self._framework_modules = None
+    def _get_fw_module(self, name):
+        """Lazy-load a framework detection module to avoid circular imports."""
+        import importlib
+        return importlib.import_module(f'src.domain.codeindex.infrastructure.parsers.frameworks.{name}')
+
     
     def detect_all_frameworks(self) -> List[str]:
         """Detect all frameworks used in the repository."""
@@ -220,44 +215,44 @@ class RepositoryFrameworkDetector:
         
         # JavaScript/TypeScript
         if rel_path.endswith((".ts", ".tsx", ".js", ".jsx")):
-            if nextjs.detect_nextjs(rel_path, source, imports, functions, self.repo_configs):
+            if self._get_fw_module("nextjs").detect_nextjs(rel_path, source, imports, functions, self.repo_configs):
                 detected.append("nextjs")
-            if react.detect_react(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("react").detect_react(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("react")
-            if vue.detect_vue(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("vue").detect_vue(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("vue")
-            if angular.detect_angular(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("angular").detect_angular(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("angular")
-            if express.detect_express(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("express").detect_express(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("express")
-            if nestjs.detect_nestjs(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("nestjs").detect_nestjs(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("nestjs")
         
         # Python
         elif rel_path.endswith(".py"):
-            if django.detect_django(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("django").detect_django(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("django")
         
         # PHP
         elif rel_path.endswith(".php"):
-            if laravel.detect_laravel(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("laravel").detect_laravel(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("laravel")
-            if symfony.detect_symfony(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("symfony").detect_symfony(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("symfony")
         
         # Ruby
         elif rel_path.endswith(".rb"):
-            if rails.detect_rails(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("rails").detect_rails(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("rails")
         
         # Dart
         elif rel_path.endswith(".dart"):
-            if flutter.detect_flutter(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("flutter").detect_flutter(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("flutter")
         
         # C#
         elif rel_path.endswith((".cs", ".csx")):
-            if aspnet.detect_aspnet(rel_path, source, imports, classes, functions, self.repo_configs):
+            if self._get_fw_module("aspnet").detect_aspnet(rel_path, source, imports, classes, functions, self.repo_configs):
                 detected.append("aspnet")
         
         result["frameworks"] = detected
@@ -266,39 +261,39 @@ class RepositoryFrameworkDetector:
         for cls in classes:
             cls_meta = {}
             if "react" in detected:
-                meta = react.enrich_class(cls)
+                meta = self._get_fw_module("react").enrich_class(cls)
                 if meta:
                     cls_meta["react"] = meta
             if "vue" in detected:
-                meta = vue.enrich_class(cls)
+                meta = self._get_fw_module("vue").enrich_class(cls)
                 if meta:
                     cls_meta["vue"] = meta
             if "angular" in detected:
-                meta = angular.enrich_class(cls)
+                meta = self._get_fw_module("angular").enrich_class(cls)
                 if meta:
                     cls_meta["angular"] = meta
             if "django" in detected:
-                meta = django.enrich_class(cls)
+                meta = self._get_fw_module("django").enrich_class(cls)
                 if meta:
                     cls_meta["django"] = meta
             if "rails" in detected:
-                meta = rails.enrich_class(cls)
+                meta = self._get_fw_module("rails").enrich_class(cls)
                 if meta:
                     cls_meta["rails"] = meta
             if "laravel" in detected:
-                meta = laravel.enrich_class(cls)
+                meta = self._get_fw_module("laravel").enrich_class(cls)
                 if meta:
                     cls_meta["laravel"] = meta
             if "symfony" in detected:
-                meta = symfony.enrich_class(cls)
+                meta = self._get_fw_module("symfony").enrich_class(cls)
                 if meta:
                     cls_meta["symfony"] = meta
             if "nestjs" in detected:
-                meta = nestjs.enrich_class(cls)
+                meta = self._get_fw_module("nestjs").enrich_class(cls)
                 if meta:
                     cls_meta["nestjs"] = meta
             if "aspnet" in detected:
-                meta = aspnet.enrich_class(cls)
+                meta = self._get_fw_module("aspnet").enrich_class(cls)
                 if meta:
                     cls_meta["aspnet"] = meta
             if cls_meta:
@@ -308,47 +303,47 @@ class RepositoryFrameworkDetector:
         for fn in functions:
             fn_meta = {}
             if "react" in detected:
-                meta = react.enrich_function(fn)
+                meta = self._get_fw_module("react").enrich_function(fn)
                 if meta:
                     fn_meta["react"] = meta
             if "vue" in detected:
-                meta = vue.enrich_function(fn)
+                meta = self._get_fw_module("vue").enrich_function(fn)
                 if meta:
                     fn_meta["vue"] = meta
             if "angular" in detected:
-                meta = angular.enrich_function(fn)
+                meta = self._get_fw_module("angular").enrich_function(fn)
                 if meta:
                     fn_meta["angular"] = meta
             if "django" in detected:
-                meta = django.enrich_function(fn)
+                meta = self._get_fw_module("django").enrich_function(fn)
                 if meta:
                     fn_meta["django"] = meta
             if "rails" in detected:
-                meta = rails.enrich_function(fn)
+                meta = self._get_fw_module("rails").enrich_function(fn)
                 if meta:
                     fn_meta["rails"] = meta
             if "laravel" in detected:
-                meta = laravel.enrich_function(fn)
+                meta = self._get_fw_module("laravel").enrich_function(fn)
                 if meta:
                     fn_meta["laravel"] = meta
             if "nextjs" in detected:
-                meta = nextjs.enrich_function(fn, rel_path)
+                meta = self._get_fw_module("nextjs").enrich_function(fn, rel_path)
                 if meta:
                     fn_meta["nextjs"] = meta
             if "flutter" in detected:
-                meta = flutter.enrich_function(fn)
+                meta = self._get_fw_module("flutter").enrich_function(fn)
                 if meta:
                     fn_meta["flutter"] = meta
             if "express" in detected:
-                meta = express.enrich_function(fn)
+                meta = self._get_fw_module("express").enrich_function(fn)
                 if meta:
                     fn_meta["express"] = meta
             if "nestjs" in detected:
-                meta = nestjs.enrich_function(fn)
+                meta = self._get_fw_module("nestjs").enrich_function(fn)
                 if meta:
                     fn_meta["nestjs"] = meta
             if "aspnet" in detected:
-                meta = aspnet.enrich_function(fn)
+                meta = self._get_fw_module("aspnet").enrich_function(fn)
                 if meta:
                     fn_meta["aspnet"] = meta
             if fn_meta:

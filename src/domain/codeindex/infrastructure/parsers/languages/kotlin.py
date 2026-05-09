@@ -311,9 +311,9 @@ class KotlinTreeSitterParser:
 
     def _execute_query(self, query_str, root_node):
         """Execute tree-sitter query and yield (node, capture_name) tuples."""
-        query = self.language.query(query_str)
-        for capture in query.captures(root_node):
-            yield capture.node, capture.name
+        from src.core.tree_sitter_manager import execute_query
+        for node, name in execute_query(self.language, query_str, root_node):
+            yield node, name
 
 
 def pre_scan_kotlin(files: List[Path], parser_wrapper) -> Dict[str, List[str]]:

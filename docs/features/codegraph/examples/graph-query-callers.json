@@ -1,0 +1,22 @@
+{
+  "query_type": "callers",
+  "target": "process_payment",
+  "repository": "my-fastapi-app",
+  "results": [
+    {
+      "symbol_name": "checkout_cart",
+      "type": "function",
+      "file": "src/api/checkout.py",
+      "line": 42,
+      "signature": "async def checkout_cart(cart_id: UUID, user: User) -> OrderResponse"
+    },
+    {
+      "symbol_name": "retry_failed_payment",
+      "type": "function",
+      "file": "src/domain/payments/retry.py",
+      "line": 15,
+      "signature": "async def retry_failed_payment(order_id: UUID) -> PaymentResult"
+    }
+  ],
+  "total_callers": 2
+}

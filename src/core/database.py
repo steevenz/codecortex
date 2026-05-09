@@ -110,7 +110,7 @@ class DatabaseManager:
             # Ensure the directory exists
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             
-            self._lock = threading.Lock()
+            self._lock = threading.RLock()
             # Open connection with check_same_thread=False for async compatibility
             raw_conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
             raw_conn.row_factory = sqlite3.Row

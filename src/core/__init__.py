@@ -98,6 +98,8 @@ def api_response(
     tenant_id: Optional[str] = None,
     organization_id: Optional[str] = None,
     workspace_id: Optional[str] = "local",
+    summary_mode: bool = False,
+    max_tokens: Optional[int] = None,
 ) -> dict:
     # Rule R4: success MUST be false for status_code >= 400
     actual_success = False if status_code >= 400 else bool(success)
@@ -105,20 +107,46 @@ def api_response(
     # Rule R3: data MUST be null for error responses
     actual_data = None if status_code >= 400 else data
 
-    return {
+    # Token economy: auto-optimize if summary_mode or data exceeds budget
+    meta_payload = {
+        "user_id": user_id,
+        "tenant_id": tenant_id,
+        "organization_id": organization_id,
+        "workspace_id": workspace_id,
+        "request_id": request_id,
+        "timestamp": utc_now_iso(),
+        "version": version or load_version(),
+        "api_version": "v1",
+        "error_code": error_code,
+    }
+
+    token_economy = None
+    if actual_data is not None and (summary_mode or actual_data):
+        from .token_economy import estimate_tokens, optimize_response, get_token_budget
+        import json as _json
+        budget = max_tokens or get_token_budget()
+        data_str = _json.dumps(actual_data, default=str)
+        tok = estimate_tokens(data_str)
+        if summary_mode or tok > budget:
+            optimized = optimize_response(actual_data, budget)
+            if summary_mode:
+                actual_data = optimized.to_dict(include_details=False)
+            else:
+                actual_data = optimized.to_dict(include_details=True)
+            token_economy = {
+                "used": optimized.token_count,
+                "budget": optimized.budget,
+                "truncated": optimized.truncated,
+                "cache_hit": optimized.cache_hit,
+            }
+
+    result = {
         "success": actual_success,
         "status_code": int(status_code),
         "message": message,
         "data": actual_data,
-        "meta": {
-            "user_id": user_id,
-            "tenant_id": tenant_id,
-            "organization_id": organization_id,
-            "workspace_id": workspace_id,
-            "request_id": request_id,
-            "timestamp": utc_now_iso(),
-            "version": version or load_version(),
-            "api_version": "v1",
-            "error_code": error_code,
-        },
+        "meta": meta_payload,
     }
+    if token_economy:
+        result["token_economy"] = token_economy
+    return result

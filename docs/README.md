@@ -27,9 +27,12 @@ This directory contains all project documentation following the Aegis Codeworks 
 ### 🚀 **features/** - Feature-Based Documentation
 Each feature gets its own subfolder containing:
 - `concept.md` - Business concept and why this feature exists
-- `technical-spec.md` - Detailed technical requirements
-- `technical-design.md` - Diagrams and class structures
-- `ui-ux.md` - User flows and wireframes
+- `flow.md` - Execution pipeline and data flow
+- `tools.md` - MCP tool reference with parameters
+- `output.md` - Data shape, schema, and example output
+- `llm-impact.md` - How the feature enriches LLM code understanding
+- `examples/` - Sample JSON payloads and response data
+- `sub-features/` - Recursive sub-feature documentation
 
 ### 📚 **guides/** - Setup and Operations Guides
 Installation, deployment, configuration, and operational procedures.
@@ -61,6 +64,15 @@ All documentation must:
 
 ## Quick Links
 
+- **features/index.md** - Feature map with documentation by domain (6 domains + Core)
+- **features/support-matrix.md** - Languages, frameworks, MCP, LLMs, OS, databases, backends, QA tools
+- **features/codeindex/concept.md** - Code indexing docs (TreeSitter, semantic search, etc.)
+- **features/codegraph/concept.md** - Code graph & architecture analysis docs
+- **features/coderepository/concept.md** - Repository management docs
+- **features/filesystem/concept.md** - File operations docs
+- **features/coderefactor/concept.md** - Code refactoring docs
+- **features/codetester/concept.md** - QA automation docs
+- **features/core/concept.md** - Core infrastructure docs (database, token economy, CLI)
 - **architecture/ARCHITECTURE.md** - Domain map, DI wiring, pipeline flow, backend abstraction
 - **architecture/SECURITY.md** - SSRF guards, path validation, label sanitization reference
 - **versions/CHANGELOG.md** - Version history and recent changes

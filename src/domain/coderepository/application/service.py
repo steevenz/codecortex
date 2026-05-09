@@ -13,6 +13,9 @@
 import os
 import uuid
 import json
+import re
+import subprocess
+import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
@@ -26,6 +29,7 @@ from src.domain.coderepository.application.analyzer import RepoStructureAnalyzer
 from src.domain.coderepository.core.dto import FileStructure
 from src.domain.coderepository.core.store import ICodeRepositoryStore
 from src.domain.coderepository.infrastructure.git_history import GitHistoryWorker
+from src.domain.filesystem.infrastructure.glob_walker import walk_repository_paths, read_file_contents, ScannedFile, DEFAULT_MAX_FILE_SIZE_MB
 import re
 import asyncio
 
@@ -57,27 +61,30 @@ class CodeRepositoryService:
         else:
             logger.info(msg, extra={"context": context})
 
-    async def sync_repository(self, root_path: str, request_id: str = "internal") -> str:
-        """
-        Synchronize physical files with the database.
-        Returns the repository_id.
-        """
+    async def sync_repository(self, root_path: str, request_id: str = "internal", max_depth: Optional[int] = None, max_file_size_mb: int = DEFAULT_MAX_FILE_SIZE_MB, auth_type: str = "https") -> str:
+        """Sync repository with resource limits: max depth, file size (MB), and auth type."""
+        if max_file_size_mb < 0:
+            raise ValueError("max_file_size_mb must be non-negative")
         root = Path(root_path).resolve()
         repo_name = root.name
 
-        self._log_event("INFO", "REPO_SYNC_STARTED", {"path": str(root)}, request_id)
+        self._log_event("INFO", "REPO_SYNC_STARTED", {"path": str(root), "max_depth": max_depth, "auth_type": auth_type, "max_file_size_mb": max_file_size_mb}, request_id)
 
         hash_reader = FileReader(root)
         repo_id = self.store.upsert_repository(repo_name, str(root))
         root_dir_id = self.store.ensure_directory_chain(repo_id, "")
 
-        # 2. Get Ignore Spec
-        spec = self._load_ignore_spec(root)
+        # 3. Glob-based Discovery with Concurrent Stat (replaces os.walk)
+        def _walk_and_upsert():
+            scanned = walk_repository_paths(root, max_file_size_mb=max_file_size_mb)
+            for sf in scanned:
+                # Ensure directory chain
+                parent = str(Path(sf.path).parent).replace("\\", "/")
+                parent = "" if parent == "." else parent
+                dir_id = self.store.ensure_directory_chain(repo_id, parent)
+                self._upsert_file_from_scan(repo_id, root, sf, dir_id, hash_reader)
 
-        # 3. Recursive Discovery (Running in thread pool to avoid blocking)
-        await asyncio.to_thread(
-            self._discover_recursive, root, root, repo_id, root_dir_id, spec, hash_reader=hash_reader
-        )
+        await asyncio.to_thread(_walk_and_upsert)
 
         # 4. Index Git History (NEW)
         try:
@@ -89,6 +96,125 @@ class CodeRepositoryService:
         self.store.update_indexing_time(repo_id)
         self._log_event("INFO", "REPO_SYNC_COMPLETED", {"repo_id": repo_id}, request_id)
         return repo_id
+
+    async def sync_repository_incremental(self, root_path: str, request_id: str = "internal") -> Tuple[str, List[str]]:
+        """
+        Git diff-based incremental sync — only re-index changed files.
+        Uses `git diff --name-only HEAD` to find files modified since last commit.
+        Much faster than full sync for large repos with small changes.
+        """
+        root = Path(root_path).resolve()
+        repo_id = self.store.upsert_repository(root.name, str(root))
+
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--name-only", "HEAD"],
+                cwd=root, capture_output=True, text=True, timeout=30
+            )
+            if result.returncode != 0:
+                self._log_event("WARN", "INCREMENTAL_SYNC_FALLBACK", {"reason": "git diff failed"}, request_id)
+                repo_id = await self.sync_repository(root_path, request_id=request_id)
+                return repo_id, []
+        except Exception:
+            self._log_event("WARN", "INCREMENTAL_SYNC_FALLBACK", {"reason": "no git repo"}, request_id)
+            repo_id = await self.sync_repository(root_path, request_id=request_id)
+            return repo_id, []
+
+        changed_paths = [p.strip() for p in result.stdout.split("\n") if p.strip()]
+        if not changed_paths:
+            self._log_event("INFO", "INCREMENTAL_SYNC_UP_TO_DATE", {"repo_id": repo_id}, request_id)
+            return repo_id, []
+
+        self._log_event("INFO", "INCREMENTAL_SYNC_STARTED", {"repo_id": repo_id, "changed_files": len(changed_paths)}, request_id)
+        hash_reader = FileReader(root)
+        spec = self._load_ignore_spec(root)
+        changed = []
+
+        for rel_path in changed_paths:
+            abs_path = root / rel_path
+            if not abs_path.exists() or not abs_path.is_file():
+                continue
+            if spec.match_file(rel_path):
+                continue
+            parent = str(Path(rel_path).parent).replace("\\", "/")
+            parent = "" if parent == "." else parent
+            dir_id = self.store.ensure_directory_chain(repo_id, parent)
+            scanned = ScannedFile(path=rel_path, size=abs_path.stat().st_size)
+            self._upsert_file_from_scan(repo_id, root, scanned, dir_id, hash_reader)
+            changed.append(rel_path)
+
+        self._log_event("INFO", "INCREMENTAL_SYNC_COMPLETED", {"repo_id": repo_id, "reindexed": len(changed)}, request_id)
+        return repo_id, changed
+
+    def _upsert_file_from_scan(self, repo_id: str, root: Path, scanned, parent_dir_id: str, hash_reader) -> None:
+        """Upsert a file from glob walker scan result."""
+        rel_path = scanned.path
+        item = root / rel_path
+        classification = self._classify_file(item)
+        try:
+            stat = item.stat()
+            size_bytes = stat.st_size
+            mtime = datetime.fromtimestamp(stat.st_mtime)
+            mtime_epoch = float(stat.st_mtime)
+        except OSError:
+            return
+
+        row = self.store.get_manifest_entry(repo_id, rel_path)
+        if row and row["last_size_bytes"] is not None and row["last_mtime"] is not None:
+            if int(row["last_size_bytes"]) == int(size_bytes) and float(row["last_mtime"]) == mtime_epoch:
+                return
+
+        file_hash = hash_reader.calculate_hash(rel_path)
+        is_changed = (not row) or row["last_hash"] != file_hash
+        if not is_changed:
+            return
+
+        content = None
+        if classification in ('code', 'doc', 'config'):
+            if size_bytes <= 5 * 1024 * 1024:
+                try:
+                    content = item.read_text(encoding="utf-8", errors="ignore")
+                except Exception as e:
+                    self._log_event("WARN", "FILE_READ_FAILED", {"path": rel_path, "error": str(e)})
+            else:
+                self._log_event("INFO", "FILE_CONTENT_SKIPPED", {"path": rel_path, "size": size_bytes, "reason": "exceeds_5mb_limit"})
+
+        self.store.upsert_file_and_manifest(
+            {
+                "id": str(uuid.uuid4()),
+                "repository_id": repo_id,
+                "directory_id": parent_dir_id,
+                "name": item.name,
+                "classification": classification,
+                "size_bytes": size_bytes,
+                "content": content,
+                "content_hash": file_hash,
+                "mtime": mtime
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "repository_id": repo_id,
+                "file_path": rel_path,
+                "last_hash": file_hash,
+                "last_size_bytes": int(size_bytes),
+                "last_mtime": mtime_epoch
+            }
+        )
+
+    async def multi_repo_sync(self, repo_list: List[str], request_id: str = "internal", max_depth: Optional[int] = None, max_file_size_mb: int = 10, auth_type: str = "https", max_repos: int = 50) -> dict:
+        """Sync multiple repositories in sequence with quota enforcement."""
+        if len(repo_list) > max_repos:
+            raise ValueError(f"max_repos exceeded: {len(repo_list)} > {max_repos}")
+        self._log_event("INFO", "MULTI_REPO_SYNC_STARTED", {"count": len(repo_list), "max_repos": max_repos}, request_id)
+        synced = []
+        for path in repo_list:
+            try:
+                repo_id = await self.sync_repository(path, request_id=request_id, max_depth=max_depth, max_file_size_mb=max_file_size_mb, auth_type=auth_type)
+                synced.append(path)
+            except Exception as e:
+                self._log_event("WARN", "MULTI_REPO_SYNC_FAILED", {"path": path, "error": str(e)}, request_id)
+        self._log_event("INFO", "MULTI_REPO_SYNC_COMPLETED", {"synced": len(synced), "failed": len(repo_list) - len(synced)}, request_id)
+        return {"synced_repos": synced, "total": len(synced)}
 
     async def sync_repository_with_changes(self, root_path: str) -> Tuple[str, List[str]]:
         root = Path(root_path).resolve()
@@ -185,9 +311,14 @@ class CodeRepositoryService:
 
 
     def _load_ignore_spec(self, root: Path) -> PathSpec:
-        """Load .gitignore if present."""
-        gitignore = root / ".gitignore"
-        patterns = [
+        """
+        Load ignore patterns with full gitignore support:
+        - Built-in hardcoded patterns (always applied)
+        - Root-level .gitignore
+        - Root-level .codecortexignore (CodeCortex custom excludes)
+        - Nested .gitignore files in subdirectories (prefixed with their relative path)
+        """
+        BUILT_IN = [
             ".git/",
             "__pycache__/",
             "*.pyc",
@@ -208,9 +339,56 @@ class CodeRepositoryService:
             ".pytest_cache/",
             ".ruff_cache/",
         ]
-        if gitignore.exists():
-            with open(gitignore, "r") as f:
-                patterns.extend(f.readlines())
+        patterns: List[str] = list(BUILT_IN)
+
+        def _read_ignore_file(path: Path, prefix: str = "") -> List[str]:
+            """Read an ignore file and optionally prefix patterns with a directory."""
+            result: List[str] = []
+            try:
+                with open(path, "r", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        if prefix:
+                            # Prefix nested patterns with their relative directory
+                            if line.startswith("/"):
+                                result.append(f"{prefix}{line}")
+                            else:
+                                result.append(f"{prefix}/{line}")
+                        else:
+                            result.append(line)
+            except Exception:
+                pass
+            return result
+
+        # 1. Root-level .gitignore
+        root_gitignore = root / ".gitignore"
+        if root_gitignore.exists():
+            patterns.extend(_read_ignore_file(root_gitignore))
+
+        # 2. Root-level .codecortexignore (CodeCortex custom user excludes)
+        codecortexignore = root / ".codecortexignore"
+        if codecortexignore.exists():
+            patterns.extend(_read_ignore_file(codecortexignore))
+
+        # 3. Build initial spec to prune ignored dirs during nested scan
+        initial_spec = PathSpec.from_lines(GitWildMatchPattern, patterns)
+
+        # 4. Scan for nested .gitignore files (skip already-ignored directories)
+        try:
+            for nested_gitignore in sorted(root.rglob(".gitignore")):
+                parent_rel = nested_gitignore.parent.relative_to(root)
+                rel_str = str(parent_rel).replace("\\", "/")
+                if not rel_str or rel_str == ".":
+                    continue  # Already processed root-level above
+                # Skip if this directory itself is already ignored
+                if initial_spec.match_file(rel_str + "/"):
+                    continue
+                patterns.extend(_read_ignore_file(nested_gitignore, prefix=rel_str))
+        except Exception as e:
+            self._log_event("WARN", "NESTED_GITIGNORE_SCAN_FAILED", {"error": str(e)})
+
         return PathSpec.from_lines(GitWildMatchPattern, patterns)
 
     def _discover_recursive(
@@ -223,8 +401,13 @@ class CodeRepositoryService:
         *,
         hash_reader: Optional[FileReader] = None,
         changed_paths: Optional[List[str]] = None,
+        max_depth: Optional[int] = None,
+        current_depth: int = 0
     ):
         """Recursively index directories and files."""
+        if max_depth is not None and current_depth > max_depth:
+            return
+
         try:
             items = list(current_path.iterdir())
         except PermissionError:
@@ -250,6 +433,8 @@ class CodeRepositoryService:
                         spec,
                         hash_reader=hash_reader,
                         changed_paths=changed_paths,
+                        max_depth=max_depth,
+                        current_depth=current_depth + 1
                     )
                     continue
 
@@ -307,8 +492,10 @@ class CodeRepositoryService:
             if size_bytes <= 5 * 1024 * 1024:
                 try:
                     content = item.read_text(encoding="utf-8", errors="ignore")
-                except Exception:
-                    pass
+                except Exception as e:
+                    self._log_event("WARN", "FILE_READ_FAILED", {"path": str(rel_path), "error": str(e)})
+            else:
+                self._log_event("INFO", "FILE_CONTENT_SKIPPED", {"path": str(rel_path), "size": size_bytes, "reason": "exceeds_5mb_limit"})
 
         self.store.upsert_file_and_manifest(
             {
@@ -401,19 +588,20 @@ class CodeRepositoryService:
 
         return 'other'
 
-    async def initialize(self, path: str) -> str:
+    async def initialize(self, path: str, max_depth: Optional[int] = None) -> str:
         """
         Initialize repository for analysis.
 
         @param path: Absolute path to repository root
+        @param max_depth: Optional maximum directory depth to scan.
         @return: Status message
         """
         try:
             self.repo_path = Path(path).resolve()
             self.reader = FileReader(self.repo_path)
             self.analyzer = RepoStructureAnalyzer(self.repo_path)
-            repo_id = await self.sync_repository(path)
-            return f"Successfully initialized repository at: {path} (ID: {repo_id})"
+            repo_id = await self.sync_repository(path, max_depth=max_depth)
+            return repo_id
         except Exception as e:
             self._log_event("ERROR", "INIT_FAILED", {"path": path, "error": str(e)})
             raise

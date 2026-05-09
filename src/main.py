@@ -11,6 +11,7 @@
 """
 
 import os
+import asyncio
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -26,6 +27,7 @@ from src.domain.codegraph import CodeGraphService
 from src.domain.filesystem.application.service import FilesystemService
 from src.domain.coderefactor import CodeRefactorService
 from src.domain.codetester.application.qa_service import QAService
+from src.core.telemetry import trace  # OpenTelemetry tracing
 
 # Initialize FastMCP Server
 mcp = FastMCP("CodeCortex")
@@ -44,19 +46,12 @@ class CortexOrchestrator:
         self.db = DatabaseManager(db_path)
         self.repo_store = SQLiteCodeRepositoryStore(self.db)
         self.repo_service = CodeRepositoryService(self.repo_store)
-        # Wire graph ↔ index bidirectionally so pre_scan + graph sync are shared
         self.graph_service = CodeGraphService(self.db)
         self.index_service = CodeIndexService(self.db, codegraph_service=self.graph_service)
         self.graph_service.code_index_service = self.index_service
-
         self.fs_service = FilesystemService(self.db, self.repo_store)
         self.git_service = GitService(self.repo_store)
-        self.refactor_service = CodeRefactorService(
-            self.db, 
-            self.fs_service, 
-            self.git_service, 
-            self.graph_service
-        )
+        self.refactor_service = CodeRefactorService(self.db, self.fs_service, self.git_service, self.graph_service)
         self.qa_service = QAService(self.db)
         self.logger = get_logger(f"{__name__}.Orchestrator")
 
@@ -75,27 +70,103 @@ class CortexOrchestrator:
             extra["request_id"] = request_id
         self.logger.log(log_level, f"{event_code}", extra=extra)
 
-    async def analyze(self, root_path: str, request_id: Optional[str] = None) -> Dict[str, Any]:
-        """Execute the full intelligence pipeline with production guards."""
-        self._log_event("INFO", "ANALYSIS_STARTED", {"root_path": root_path}, request_id)
+    async def analyze(
+        self, 
+        root_path: str, 
+        request_id: Optional[str] = None, 
+        dry_run: bool = True,
+        max_depth: Optional[int] = None,
+        include_codemap: bool = False,
+        max_repos: int = 50
+    ) -> Dict[str, Any]:
+        """
+        Execute the full intelligence pipeline with production guards.
+        
+        @param root_path: Absolute path to the repository
+        @param request_id: Optional tracing ID
+        @param dry_run: If True (default), skip DB mutations (sync/index) and analyze existing data.
+                        Set False to perform a full refresh of the index before analysis.
+        @param max_depth: Optional recursion limit for file discovery.
+        @param include_codemap: If True, includes a structured symbol map in the response.
+        @param max_repos: Quota limit for concurrent repository analysis.
+        """
+        self._log_event("INFO", "ANALYSIS_STARTED", {"root_path": root_path, "dry_run": dry_run, "max_depth": max_depth}, request_id)
         try:
-            # 1. Physical Discovery
-            repo_id = await self.repo_service.sync_repository(root_path, request_id=request_id)
+            repo_id = self.get_repo_id(root_path)
 
-            # 2. Semantic Indexing (AST) + Graph Sync (unified)
-            await self.index_service.index_repository(repo_id, request_id=request_id)
+            if not dry_run:
+                # 1. Physical Discovery (Mutating)
+                repo_id = await self.repo_service.sync_repository(root_path, request_id=request_id, max_depth=max_depth)
 
-            # 3. Architectural Analysis (Unified CodeGraph)
+                # 2. Semantic Indexing (AST) + Graph Sync (Mutating)
+                await self.index_service.index_repository(repo_id, request_id=request_id)
+            else:
+                if not repo_id:
+                    raise ValueError(f"Repository at {root_path} has not been initialized. Please run with dry_run=False first to create the initial index.")
+
+            # 3. Architectural Analysis (Unified CodeGraph - Read-only)
             analysis = await self.graph_service.build_comprehensive_report(repo_id, request_id=request_id)
+            
+            # 4. Optional Codemap (Read-only)
+            codemap = None
+            if include_codemap:
+                codemap = await self._build_codemap(repo_id)
 
-            self._log_event("INFO", "ANALYSIS_COMPLETED", {"repository_id": repo_id}, request_id)
+            self._log_event("INFO", "ANALYSIS_COMPLETED", {"repository_id": repo_id, "dry_run": dry_run}, request_id)
             return {
                 "repository_id": repo_id,
-                "analysis": analysis
+                "analysis": analysis,
+                "codemap": codemap,
+                "mode": "dry_run" if dry_run else "full_refresh"
             }
         except Exception as e:
             self._log_event("ERROR", "ANALYSIS_FAILED", {"error": str(e)}, request_id)
             raise
+
+    async def _build_codemap(self, repo_id: str) -> Dict[str, Any]:
+        """Internal helper to build a structured map of folders, files, and symbols."""
+        def _execute():
+            # 1. Get all directories
+            dirs = self.db.conn.execute(
+                "SELECT id, name, relative_path FROM directories WHERE repository_id = ? ORDER BY relative_path",
+                (repo_id,)
+            ).fetchall()
+
+            # 2. Get all files
+            files = self.db.conn.execute(
+                "SELECT id, name, directory_id FROM files WHERE repository_id = ?",
+                (repo_id,)
+            ).fetchall()
+
+            # 3. Get all key symbols (classes and functions)
+            symbols = self.db.conn.execute(
+                "SELECT id, name, symbol_type, file_id FROM symbols WHERE repository_id = ? AND symbol_type IN ('class', 'function')",
+                (repo_id,)
+            ).fetchall()
+
+            # Map construction
+            tree = {}
+            file_symbols = {}
+            for s in symbols:
+                f_id = s['file_id']
+                if f_id not in file_symbols: file_symbols[f_id] = []
+                file_symbols[f_id].append({"id": s['id'], "name": s['name'], "type": s['symbol_type']})
+
+            dir_files = {}
+            for f in files:
+                d_id = f['directory_id']
+                if d_id not in dir_files: dir_files[d_id] = []
+                dir_files[d_id].append({
+                    "id": f['id'],
+                    "name": f['name'],
+                    "symbols": file_symbols.get(f['id'], [])
+                })
+
+            for d in dirs:
+                tree[d['relative_path'] or "."] = dir_files.get(d['id'], [])
+            return tree
+
+        return await self.graph_service.run_in_thread(_execute)
 
 # --- MCP Tool Wrapper ---
 def _ok(message: str, data: Any, request_id: str) -> Dict[str, Any]:
@@ -192,282 +263,15 @@ def create_orchestrator(db_path: Optional[str] = None) -> CortexOrchestrator:
     """
     return CortexOrchestrator(db_path)
 
-# --- Top-Level Pipeline Tools ---
+# Initialize Domain Tools
+register_fs_tools(mcp, create_orchestrator)
+register_refactor_tools(mcp, create_orchestrator)
+register_graph_tools(mcp, create_orchestrator)
+register_repository_tools(mcp, create_orchestrator)
+register_qa_tools(mcp, create_orchestrator)
+register_index_tools(mcp, create_orchestrator)
 
-@mcp.tool()
-async def analyze_codebase(path: str) -> Dict[str, Any]:
-    """
-    Perform a deep, multi-dimensional analysis of a codebase.
-    Returns unified intelligence envelope.
-    """
-    request_id = new_request_id()
-    is_valid, error_msg = validate_path(path)
-    if not is_valid:
-        return _err(error_msg, "VAL_001", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    try:
-        result = await orchestrator.analyze(path, request_id=request_id)
-        return _ok("Codebase analysis completed", result, request_id)
-    except Exception as e:
-        return _err(f"Codebase analysis failed: {str(e)}", "SRV_001", request_id, status_code=500)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
-
-@mcp.tool()
-async def search_symbols(path: str, query: str, is_regex: bool = False, limit: int = 100) -> Dict[str, Any]:
-    """
-    Search for symbols across the codebase by name.
-    Supports literal and regex queries.
-    """
-    request_id = new_request_id()
-    is_valid, error_msg = validate_path(path)
-    if not is_valid:
-        return _err(error_msg, "VAL_001", request_id, status_code=422)
-
-    if not query or not isinstance(query, str):
-        return _err("Query must be a non-empty string", "VAL_003", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    try:
-        repo_id = orchestrator.get_repo_id(path)
-        if not repo_id:
-            # Auto-sync if repository not yet indexed
-            repo_id = await orchestrator.repo_service.sync_repository(path)
-            await orchestrator.index_service.index_repository(repo_id, request_id=request_id)
-
-        hits = await asyncio.to_thread(orchestrator.index_service.search_symbols, repo_id, query, is_regex=is_regex, limit=limit)
-        return _ok(f"Symbol search completed: {len(hits)} hits", {"hits": hits}, request_id)
-    except Exception as e:
-        return _err(f"Symbol search failed: {str(e)}", "SRV_002", request_id, status_code=500)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
-
-@mcp.tool()
-async def get_architecture_summary(path: str) -> Dict[str, Any]:
-    """
-    Fetch a high-craft architectural summary of the codebase.
-    Includes: Vital metrics, God Nodes, Temporal Hotspots, Module Dependencies, and Inquiry.
-
-    @param path: Absolute path to the repository root.
-    """
-    request_id = new_request_id()
-    is_valid, error_msg = validate_path(path)
-    if not is_valid:
-        return _err(error_msg, "VAL_001", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    try:
-        repo_id = orchestrator.get_repo_id(path)
-
-        # Auto-sync if not found
-        if not repo_id:
-            repo_id = await orchestrator.repo_service.sync_repository(path)
-            await orchestrator.index_service.index_repository(repo_id)
-
-        # Generate raw data report
-        data = await orchestrator.graph_service.build_comprehensive_report(repo_id)
-
-        # Generate human-readable markdown
-        markdown = data.get("summary", "") # build_comprehensive_report already generates markdown in 'summary'
-
-        return _ok(
-            "Architectural summary generated successfully",
-            {
-                "markdown": markdown,
-                "raw_data": data
-            },
-            request_id
-        )
-    except Exception as e:
-        logger.error(f"Architecture summary failed: {e}", exc_info=True)
-        return _err(f"Architecture summary failed: {str(e)}", "SRV_003", request_id, status_code=500)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
-
-@mcp.tool()
-async def trace_execution_flow(start_symbol_id: str, max_depth: int = 5) -> Dict[str, Any]:
-    """
-    Recursively trace the call graph starting from a specific symbol.
-    Identify the 'Happy Path' and dependencies of an entry point.
-    """
-    request_id = new_request_id()
-    is_valid_uuid, error_uuid = validate_uuid(start_symbol_id)
-    if not is_valid_uuid:
-        return _err(error_uuid, "VAL_003", request_id, status_code=422)
-
-    is_valid_depth, error_depth = validate_max_depth(max_depth)
-    if not is_valid_depth:
-        return _err(error_depth, "VAL_004", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    db = orchestrator.db
-
-    visited = set()
-
-    async def trace(s_id, depth):
-        if depth > max_depth or s_id in visited:
-            return None
-        visited.add(s_id)
-
-        # Get symbol info and outgoing edges in a thread-safe way
-        def _get_node_data():
-            cursor = db.conn.execute("SELECT id, name, code, symbol_type FROM symbols WHERE id = ?", (s_id,))
-            row = cursor.fetchone()
-            if not row: return None, []
-
-            cursor = db.conn.execute("""
-                SELECT target_id FROM edges
-                WHERE source_id = ? AND relation_type = 'CALLS'
-            """, (s_id,))
-            targets = [r['target_id'] for r in cursor.fetchall()]
-            return dict(row), targets
-
-        current_node, targets = await asyncio.to_thread(_get_node_data)
-        if not current_node: return None
-        
-        current_node['calls'] = []
-        for t_id in targets:
-            child_flow = await trace(t_id, depth + 1)
-            if child_flow:
-                current_node['calls'].append(child_flow)
-
-        return current_node
-
-    result = await trace(start_symbol_id, 0)
-    try:
-        return _ok("Execution flow traced", {"flow": result, "depth_traced": max_depth}, request_id)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
-
-@mcp.tool()
-async def index_codebase(path: str) -> Dict[str, Any]:
-    """
-    Index a codebase for semantic search and analysis.
-    """
-    request_id = new_request_id()
-    is_valid, error_msg = validate_path(path)
-    if not is_valid:
-        return _err(error_msg, "VAL_101", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    try:
-        repo_id = await orchestrator.repo_service.sync_repository(path)
-        await orchestrator.index_service.index_repository(repo_id, request_id=request_id)
-        
-        def _get_counts():
-            symbols_count = orchestrator.db.conn.execute(
-                "SELECT COUNT(1) AS c FROM symbols WHERE repository_id = ?",
-                (repo_id,),
-            ).fetchone()["c"]
-            edges_count = orchestrator.db.conn.execute(
-                "SELECT COUNT(1) AS c FROM edges WHERE repository_id = ?",
-                (repo_id,),
-            ).fetchone()["c"]
-            return int(symbols_count), int(edges_count)
-            
-        symbols_count, edges_count = await asyncio.to_thread(_get_counts)
-        return _ok(
-            "Indexing completed",
-            {
-                "repository_id": repo_id,
-                "symbols_count": int(symbols_count),
-                "edges_count": int(edges_count),
-            },
-            request_id,
-        )
-    except Exception as e:
-        logger.exception("index_codebase failed")
-        return _err(f"Indexing failed: {str(e)}", "SRV_101", request_id, status_code=500)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
-
-@mcp.tool()
-async def get_structured_codemap(path: str) -> Dict[str, Any]:
-    """
-    Generate a high-density structured map of the codebase.
-    Includes folders, files, and key symbols (classes/functions) for each file.
-    """
-    request_id = new_request_id()
-    is_valid, error_msg = validate_path(path)
-    if not is_valid:
-        return _err(error_msg, "VAL_001", request_id, status_code=422)
-
-    orchestrator = create_orchestrator()
-    try:
-        repo_id = orchestrator.get_repo_id(path)
-        if not repo_id:
-            return _err("Repository not indexed. Run index_codebase first.", "VAL_002", request_id, status_code=404)
-
-        def _build_map():
-            # Build a nested structure
-            # 1. Get all directories
-            dirs = orchestrator.db.conn.execute(
-                "SELECT id, name, relative_path FROM directories WHERE repository_id = ? ORDER BY relative_path",
-                (repo_id,)
-            ).fetchall()
-
-            # 2. Get all files
-            files = orchestrator.db.conn.execute(
-                "SELECT id, name, directory_id FROM files WHERE repository_id = ?",
-                (repo_id,)
-            ).fetchall()
-
-            # 3. Get all key symbols
-            symbols = orchestrator.db.conn.execute(
-                "SELECT id, name, symbol_type, file_id FROM symbols WHERE repository_id = ? AND symbol_type IN ('class', 'function')",
-                (repo_id,)
-            ).fetchall()
-
-            # Map construction
-            tree = {}
-            # Group symbols by file
-            file_symbols = {}
-            for s in symbols:
-                f_id = s['file_id']
-                if f_id not in file_symbols: file_symbols[f_id] = []
-                file_symbols[f_id].append({"id": s['id'], "name": s['name'], "type": s['symbol_type']})
-
-            # Group files by directory
-            dir_files = {}
-            for f in files:
-                d_id = f['directory_id']
-                if d_id not in dir_files: dir_files[d_id] = []
-                dir_files[d_id].append({
-                    "id": f['id'],
-                    "name": f['name'],
-                    "symbols": file_symbols.get(f['id'], [])
-                })
-
-            for d in dirs:
-                tree[d['relative_path'] or "."] = dir_files.get(d['id'], [])
-            return tree
-
-        tree = await asyncio.to_thread(_build_map)
-
-        return _ok("Structured codemap generated", {"codemap": tree}, request_id)
-    except Exception as e:
-        return _err(f"Codemap generation failed: {str(e)}", "SRV_004", request_id, status_code=500)
-    finally:
-        try:
-            orchestrator.db.close()
-        except Exception:
-            pass
+# All tools are now registered via domain-specific modules for better cohesion and performance.
 
 if __name__ == "__main__":
     import sys
@@ -477,7 +281,7 @@ if __name__ == "__main__":
     if transport in ("sse", "http"):
         # Launching the FastAPI wrapper (defined in http_server.py)
         # We import it here to avoid circular dependencies
-        from src.http_server import main as run_server
+        from scripts.server.http import main as run_server
         run_server()
     else:
         # Standard MCP Stdio transport

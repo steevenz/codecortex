@@ -23,17 +23,44 @@ if TYPE_CHECKING:
     from tree_sitter import Language
 
 
+class _GenericFunctionParser:
+    """Wraps a standalone parse function into TreeSitterParser-compatible interface."""
+    def __init__(self, parse_func):
+        self._parse_func = parse_func
+    
+    def parse(self, path: Path, is_dependency: bool = False, **kwargs) -> Dict[str, Any]:
+        return self._parse_func(path, **kwargs)
+
+
 class TreeSitterParser:
     """A generic parser wrapper for a specific language using tree-sitter."""
 
     def __init__(self, language_name: str):
         self.language_name = language_name
-        self.ts_manager = get_tree_sitter_manager()
+        self.language = None
+        self.parser = None
+        self.language_specific_parser = None
 
+        # Languages that don't need TreeSitter
+        NON_TS_LANGUAGES = {"cobol", "vue"}
+        if language_name in NON_TS_LANGUAGES:
+            self._init_non_ts(language_name)
+            return
+
+        self.ts_manager = get_tree_sitter_manager()
         self.language: "Language" = self.ts_manager.get_language_safe(language_name)
         self.parser = self.ts_manager.create_parser(language_name)
+        self._init_language_specific(language_name)
 
-        self.language_specific_parser = None
+    def _init_non_ts(self, language_name: str):
+        if language_name == "vue":
+            from .languages.vue import parse_vue
+            self.language_specific_parser = _GenericFunctionParser(parse_vue)
+        elif language_name == "cobol":
+            from .languages.cobol import parse_cobol
+            self.language_specific_parser = _GenericFunctionParser(parse_cobol)
+
+    def _init_language_specific(self, language_name: str):
         if self.language_name == "python":
             from .languages.python import PythonTreeSitterParser
             self.language_specific_parser = PythonTreeSitterParser(self)
@@ -94,6 +121,11 @@ class TreeSitterParser:
         elif self.language_name == "css":
             from .languages.css import CSSTreeSitterParser
             self.language_specific_parser = CSSTreeSitterParser(self)
+        elif self.language_name in ("julia", "lua", "objc", "powershell", "verilog", "zig"):
+            from .languages.generic_ts import parse_generic
+            self.language_specific_parser = _GenericFunctionParser(
+                lambda path, **kw: parse_generic(path, self.language_name, **kw)
+            )
 
     def parse(self, path: Path, is_dependency: bool = False, **kwargs) -> Dict[str, Any]:
         """Dispatches parsing to the language-specific parser."""

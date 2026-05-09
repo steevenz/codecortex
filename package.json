@@ -1,22 +1,40 @@
 {
   "name": "codecortex",
   "version": "1.0.0",
-  "description": "Production-hardened CodeCortex MCP Server with SSE and Shared-Proxy support",
+  "description": "CodeCortex — Universal Code Intelligence Engine. Works with Claude, Cursor, Windsurf, Cline, and all MCP-compatible AI coders.",
   "main": "scripts/server/js/index.js",
   "bin": {
-    "codecortex": "scripts/server/js/index.js"
+    "codecortex": "scripts/server/js/index.js",
+    "codecortex-mcp": "scripts/server/js/index.js",
+    "codecortex-cli": "scripts/cli.py"
+  },
+  "mcp": {
+    "server": {
+      "command": "node",
+      "args": ["scripts/server/js/index.js"]
+    },
+    "stdio": {
+      "command": "python",
+      "args": ["-m", "src.main"]
+    }
   },
   "scripts": {
     "start": "node scripts/server/js/index.js",
-    "dev": "node scripts/server/js/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cli": "python scripts/cli.py",
+    "mcp": "python -m src.main",
+    "serve": "python -m scripts.server.http",
+    "version": "python -c \"from src.core import load_version; print(load_version())\""
   },
   "keywords": [
     "mcp",
     "codecortex",
     "agentic",
     "architecture",
-    "ai"
+    "ai",
+    "claude",
+    "cursor",
+    "windsurf",
+    "cline"
   ],
   "author": "Aegis Codework / Steeven Andrian",
   "license": "MIT",

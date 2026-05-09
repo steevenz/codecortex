@@ -23,9 +23,13 @@ from pathlib import Path
 
 from src.core.database import DatabaseManager
 from src.core.logging_config import get_logger
-from src.core import env_flag
-from src.domain.codeindex.infrastructure.strategies.base import BaseStrategy, RawSymbol
+from src.core.ast_cache import get_ast_cache
+from src.core.tree_sitter_manager import TreeSitterManager, get_tree_sitter_manager
 from src.domain.codeindex.infrastructure.parsers.tree_sitter_parser import TreeSitterParser
+from src.domain.codeindex.infrastructure.scope_resolution import (
+    build_workspace_index, resolve_workspace_references, ScopeExtractor
+)
+from src.domain.codeindex.infrastructure.worker_pool import WorkerPool, should_use_worker_pool
 from src.domain.codeindex.infrastructure.parsers.languages.python import pre_scan_python
 from src.domain.codeindex.core.converters import parsed_data_to_raw_symbols
 from src.domain.codeindex.infrastructure.parsers.frameworks import nextjs as nextjs_fw
@@ -83,6 +87,22 @@ class CodeIndexService:
             ".pm": "perl",
             ".ex": "elixir",
             ".exs": "elixir",
+            # Additional languages
+            ".vue": "vue",
+            ".cob": "cobol",
+            ".cbl": "cobol",
+            ".cobol": "cobol",
+            ".cpy": "cobol",
+            ".copybook": "cobol",
+            ".jl": "julia",
+            ".lua": "lua",
+            ".m": "objc",
+            ".mm": "objc",
+            ".ps1": "powershell",
+            ".psm1": "powershell",
+            ".v": "verilog",
+            ".sv": "verilog",
+            ".zig": "zig",
         }
 
     def _get_repo_detector(self, repo_id: str, repo_root: Path) -> RepositoryFrameworkDetector:
@@ -164,7 +184,6 @@ class CodeIndexService:
     async def _parse_with_timeout(self, parser, file_path: Path, **kwargs):
         """Run parser.parse with a cross-platform timeout guard using asyncio.to_thread."""
         try:
-            # Use asyncio.wait_for to enforce timeout on the thread execution
             return await asyncio.wait_for(
                 asyncio.to_thread(parser.parse, file_path, **kwargs),
                 timeout=self.PARSE_TIMEOUT_SECONDS
@@ -266,9 +285,18 @@ class CodeIndexService:
                     try:
                         parser = self._get_parser(lang_name)
                         is_notebook = ext == ".ipynb"
-                        parsed = await self._parse_with_timeout(
-                            parser, file_path, is_notebook=is_notebook, index_source=True
-                        )
+
+                        # AST cache check
+                        content = await asyncio.to_thread(lambda: file_path.read_text(encoding="utf-8", errors="ignore"))
+                        ast_cache = get_ast_cache()
+                        cached = ast_cache.get(file_rel_path, content)
+                        if cached is not None:
+                            parsed = cached
+                        else:
+                            parsed = await self._parse_with_timeout(
+                                parser, file_path, is_notebook=is_notebook, index_source=True
+                            )
+                            ast_cache.set(file_rel_path, content, parsed)
                     except ImportError as e:
                         if lang_name == "python" and ext == ".py":
                             parsed = await asyncio.to_thread(self._parse_python_builtin, file_path, file_rel_path)
@@ -281,6 +309,7 @@ class CodeIndexService:
                         parsed = await asyncio.to_thread(self._enrich_frameworks, file_path, parsed, repo_id, repo_root)
                         # Write to SQLite via converter
                         await self._write_parsed_to_sqlite(repo_id, f['id'], file_rel_path, parsed)
+                        parsed["_file_path"] = file_rel_path
                         parsed_files.append(parsed)
                         indexed_count += 1
                     else:
@@ -301,15 +330,102 @@ class CodeIndexService:
                 self._log_event("ERROR", "FILE_INDEX_FAILED", {"path": file_rel_path, "error": str(e)}, request_id)
                 await self._record_insight(repo_id, "lint", "index_failed", {"path": file_rel_path, "error": str(e)})
 
-        # Batch process with concurrency control
-        tasks = []
-        for f in files:
-            async def _guarded_process(file_data=f):
-                async with self._index_semaphore:
-                    await _process_file(file_data)
-            tasks.append(_guarded_process())
+        # Batch process with concurrency — use WorkerPool for CPU-bound parsing, asyncio for I/O-bound
+        code_files = [f for f in files if f["classification"] == "code"]
+        dir_path_key = "dir_path"
+        total_bytes = 0
+        for f in code_files:
+            rel_parts = []
+            if f[dir_path_key]:
+                rel_parts.append(f[dir_path_key])
+            rel_parts.append(f["name"])
+            path = repo_root / "/".join(rel_parts)
+            if not path.exists():
+                continue
+            try:
+                total_bytes += path.stat().st_size
+            except OSError:
+                continue
         
-        await asyncio.gather(*tasks)
+        if should_use_worker_pool(len(code_files), total_bytes):
+            # Parallel path: use ThreadPoolExecutor for CPU-bound TreeSitter parsing
+            pool = WorkerPool(max_workers=os.cpu_count() or 4)
+            file_data_list = []
+            for f in code_files:
+                dir_path = (f["dir_path"] or "").replace("\\", "/")
+                file_rel_path = f"{dir_path}/{f['name']}" if dir_path else f["name"]
+                file_path = repo_root / file_rel_path
+                if not file_path.exists():
+                    continue
+                try:
+                    stats = file_path.stat()
+                except OSError:
+                    continue
+                if stats.st_size > self.MAX_FILE_SIZE_BYTES:
+                    continue
+                file_data_list.append((f["id"], file_rel_path, file_path))
+            
+            def _parse_single(args):
+                fid, rel_path, fpath = args
+                try:
+                    ext = fpath.suffix.lower()
+                    lang_name = self.ts_parsers.get(ext)
+                    if not lang_name:
+                        return None
+                    parser = self._get_parser(lang_name)
+                    result = parser.parse(fpath, is_notebook=(ext == ".ipynb"), index_source=True)
+                    if result and "error" not in result:
+                        return (fid, rel_path, result)
+                except Exception:
+                    pass
+                return None
+            
+            parse_results = pool.map(file_data_list, _parse_single, desc="Parsing files")
+            for pr in parse_results:
+                if pr is not None:
+                    fid, rel_path, parsed = pr
+                    try:
+                        parsed["_file_path"] = rel_path
+                        parsed_files.append(parsed)
+                        indexed_count += 1
+                    except Exception:
+                        pass
+        else:
+            # Sequential async path for small repos
+            tasks = []
+            for f in code_files:
+                async def _guarded_process(file_data=f):
+                    async with self._index_semaphore:
+                        await _process_file(file_data)
+                tasks.append(_guarded_process())
+            await asyncio.gather(*tasks)
+
+        # Scope Resolution — multi-pass cross-file reference resolution
+        if parsed_files:
+            try:
+                files_for_scope = []
+                for p in parsed_files:
+                    path = p.get("_file_path", "")
+                    if path:
+                        files_for_scope.append({"path": path, "parsed": p})
+                if files_for_scope:
+                    workspace = build_workspace_index(files_for_scope)
+                    scope_stats = resolve_workspace_references(workspace)
+                    self._log_event("INFO", "SCOPE_RESOLUTION_COMPLETED", {
+                        "repository_id": repo_id,
+                        "files": len(files_for_scope),
+                        **scope_stats
+                    }, request_id)
+                    # Store resolution insights
+                    if scope_stats.get("unresolved", 0) > 0:
+                        await self._record_insight(
+                            repo_id, "lint", "unresolved_references",
+                            {"count": scope_stats["unresolved"], "total": scope_stats["total_references"]}
+                        )
+            except Exception as e:
+                self._log_event("WARN", "SCOPE_RESOLUTION_FAILED", {
+                    "repository_id": repo_id, "error": str(e)
+                }, request_id)
 
         # Graph backend sync — single pass to avoid duplicate edge risk
         if self.codegraph_service and parsed_files:
@@ -525,7 +641,7 @@ class CodeIndexService:
         
         return await asyncio.to_thread(_write)
 
-    def index_file(self, repo_id: str, file_id: str, file_rel_path: str, content: str):
+    async def index_file(self, repo_id: str, file_id: str, file_rel_path: str, content: str):
         """
         Legacy BaseStrategy path. Retained for backward compatibility.
         New code should use TreeSitterParser via index_repository().
@@ -538,7 +654,7 @@ class CodeIndexService:
 
         try:
             raw_symbols = strategy.parse(content, file_rel_path)
-            return self._persist_raw_symbols(repo_id, file_id, raw_symbols)
+            return await self._persist_raw_symbols(repo_id, file_id, raw_symbols)
         except Exception as e:
             self._log_event("ERROR", "AST_PARSE_FAILED", {"path": file_rel_path, "error": str(e)})
             return 0
@@ -745,7 +861,7 @@ class CodeIndexService:
         # Collect pending calls from symbol metadata JSON
         pending: List[tuple] = []
         for row in rows:
-            if row["symbol_type"] != "function":
+            if row["symbol_type"] not in ("function", "method", "file"):
                 continue
             meta_raw = row["metadata"]
             if not meta_raw:

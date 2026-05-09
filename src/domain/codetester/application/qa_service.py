@@ -20,6 +20,28 @@ from src.core.database import DatabaseManager
 from src.core.logging_config import get_logger
 from src.domain.codetester.infrastructure.adapters.pytest_adapter import PytestAdapter
 from src.domain.codetester.infrastructure.adapters.flake8_adapter import Flake8Adapter
+from src.domain.codetester.infrastructure.adapters.unittest_adapter import UnittestAdapter
+from src.domain.codetester.infrastructure.adapters.jest_adapter import JestAdapter
+from src.domain.codetester.infrastructure.adapters.phpunit_adapter import PHPUnitAdapter
+from src.domain.codetester.infrastructure.adapters.npm_adapter import NpmAdapter
+from src.domain.codetester.infrastructure.adapters.pnpm_adapter import PnpmAdapter
+from src.domain.codetester.infrastructure.adapters.vitest_adapter import VitestAdapter
+from src.domain.codetester.infrastructure.adapters.yarn_adapter import YarnAdapter
+from src.domain.codetester.infrastructure.adapters.go_test_adapter import GoTestAdapter
+from src.domain.codetester.infrastructure.adapters.cargo_test_adapter import CargoTestAdapter
+from src.domain.codetester.infrastructure.adapters.swift_test_adapter import SwiftTestAdapter
+from src.domain.codetester.infrastructure.adapters.kotlin_test_adapter import KotlinTestAdapter
+from src.domain.codetester.infrastructure.adapters.sbt_test_adapter import SbtTestAdapter
+from src.domain.codetester.infrastructure.adapters.maven_test_adapter import MavenTestAdapter
+from src.domain.codetester.infrastructure.adapters.ruby_test_adapter import RubyTestAdapter
+from src.domain.codetester.infrastructure.adapters.flutter_test_adapter import FlutterTestAdapter
+from src.domain.codetester.infrastructure.adapters.dart_test_adapter import DartTestAdapter
+from src.domain.codetester.infrastructure.adapters.haskell_test_adapter import HaskellTestAdapter
+from src.domain.codetester.infrastructure.adapters.elixir_test_adapter import ElixirTestAdapter
+from src.domain.codetester.infrastructure.adapters.dotnet_test_adapter import DotNetTestAdapter
+from src.domain.codetester.infrastructure.adapters.perl_test_adapter import PerlTestAdapter
+from src.domain.codetester.infrastructure.adapters.stylelint_adapter import StylelintAdapter
+from src.domain.codetester.infrastructure.adapters.ctest_adapter import CtestAdapter
 
 logger = get_logger("CodeCortex.Domain.CodeTester.QA")
 
@@ -28,7 +50,29 @@ class QAService:
         self.db = db
         self.adapters = {
             "pytest": PytestAdapter(),
-            "flake8": Flake8Adapter()
+            "flake8": Flake8Adapter(),
+            "unittest": UnittestAdapter(),
+            "jest": JestAdapter(),
+            "phpunit": PHPUnitAdapter(),
+            "npm": NpmAdapter(),
+            "pnpm": PnpmAdapter(),
+            "vitest": VitestAdapter(),
+            "yarn": YarnAdapter(),
+            "go_test": GoTestAdapter(),
+            "cargo_test": CargoTestAdapter(),
+            "swift_test": SwiftTestAdapter(),
+            "kotlin_test": KotlinTestAdapter(),
+            "sbt_test": SbtTestAdapter(),
+            "maven_test": MavenTestAdapter(),
+            "ruby_test": RubyTestAdapter(),
+            "flutter_test": FlutterTestAdapter(),
+            "dart_test": DartTestAdapter(),
+            "haskell_test": HaskellTestAdapter(),
+            "elixir_test": ElixirTestAdapter(),
+            "dotnet_test": DotNetTestAdapter(),
+            "perl_test": PerlTestAdapter(),
+            "stylelint": StylelintAdapter(),
+            "ctest": CtestAdapter()
         }
 
     def _log_event(self, level: str, event_code: str, context: Dict):

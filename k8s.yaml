@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codecortex
+  labels:
+    app: codecortex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: codecortex
+  template:
+    metadata:
+      labels:
+        app: codecortex
+    spec:
+      containers:
+      - name: codecortex
+        image: codecortex:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+          name: http
+        env:
+        - name: CODECORTEX_TRANSPORT
+          value: "http"
+        - name: CODECORTEX_DB_PATH
+          value: "/data/codecortex.db"
+        - name: CODECORTEX_HOST
+          value: "0.0.0.0"
+        - name: CODECORTEX_PORT
+          value: "8001"
+        - name: CODECORTEX_DASHBOARD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: codecortex-secret
+              key: api-key
+        - name: CODECORTEX_GRAPH_BACKEND
+          value: "none"
+        - name: CODECORTEX_MAX_REPOS
+          value: "50"
+        - name: CODECORTEX_LOG_LEVEL
+          value: "INFO"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: repos
+          mountPath: /repos
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: codecortex-data
+      - name: repos
+        hostPath:
+          path: /repos
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codecortex
+spec:
+  selector:
+    app: codecortex
+  ports:
+  - port: 8001
+    targetPort: 8001
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: codecortex-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: codecortex-secret
+type: Opaque
+stringData:
+  api-key: "change-me-in-production"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: codecortex
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: codecortex.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: codecortex
+            port:
+              name: http

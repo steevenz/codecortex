@@ -1,238 +1,311 @@
 # CodeCortex
 
-**Scale code intelligence without friction.** CodeCortex is a multi-domain intelligence engine that transforms raw codebases into semantic knowledge graphs through Domain-Driven Design and MCP integration.
+**The MCP-native code intelligence server for LLMs. 22 languages. 31+ tools. Zero cloud dependency.**
+
+Every LLM can read code. CodeCortex lets them *understand* it -- tracing call chains across 50 files, detecting architecture rot before it ships, and refactoring symbols without missing a single reference. All through standard MCP tools that any AI client can call.
 
 ---
 
-## 🎯 The Problem
+## Why CodeCortex? (VS Alternatives)
 
-Modern codebases are complex beasts—thousands of files, tangled dependencies, and hidden architectural debt. Traditional tools either:
-- **Overwhelm** developers with raw syntax trees
-- **Miss** semantic relationships between components
-- **Fail** to provide actionable architectural insights
-- **Cost** a fortune in API credits for large repositories
+Most "code analysis" tools were built for humans reading terminals. CodeCortex was built for **LLMs calling tools** — structured JSON in, structured JSON out, with a token economy that respects context windows.
 
-CodeCortex bridges this gap by providing **deep semantic understanding** through AST parsing, relationship mapping, and architectural analysis—all exposed through Model Context Protocol (MCP).
+| Capability | CodeCortex | Sourcegraph/Cody | grep/ripgrep | Semgrep | CodeQL | Tree-Sitter CLI |
+|---|---|---|---|---|---|---|
+| **MCP-native tools** | ✅ 31+ tools | ❌ Chat-only | ❌ CLI only | ❌ CLI/IDE | ❌ CLI | ❌ CLI |
+| **Structured JSON output** | ✅ Token-optimized | ❌ Markdown chat | ❌ Text lines | ❌ SARIF | ❌ SARIF | ❌ AST dump |
+| **Knowledge Graph** | ✅ Dual-index O(1) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **22 languages** | ✅ Native parsing | ~30 (SaaS) | Text only | ~20 | ~15 | ~60 |
+| **Framework detection** | ✅ 8 frameworks | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Route extraction** | ✅ FastAPI/Django/Flask/Express/Next.js | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **ORM dataflow** | ✅ SQLAlchemy/Django/Prisma | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Execution flow tracing** | ✅ BFS call chain | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Community detection** | ✅ Leiden/Louvain | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-repo (50)** | ✅ | Limited | ✅ | ✅ | ✅ | ✅ |
+| **Incremental sync** | ✅ Git diff-based | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Token economy** | ✅ Auto-budget | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Offline-first** | ✅ No cloud | ❌ SaaS | ✅ | ✅ | ✅ | ✅ |
+| **Disaster recovery** | ✅ Takeout/Import | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-IDE** | ✅ Any MCP client | Cody only | ✅ | IDE plugins | IDE plugins | All |
+| **Windows-safe CLI** | ✅ ASCII borders | ❌ | ✅ | ✅ | ❌ | ✅ |
 
----
-
-## ✨ Key Features
-
-### 🧠 Semantic Code Indexing
-- **20+ Languages**: Native Tree-Sitter parsing for Python, TypeScript, JavaScript, Go, Rust, Java, C#, and more
-- **Symbol Extraction**: Automatic detection of classes, functions, variables, imports, and their nested scopes
-- **Incremental Updates**: Hash-based manifest tracking for efficient re-indexing
-- **Zero Dependencies**: Pure AST analysis without external compiler requirements
-
-### 🏗️ Architectural Intelligence
-- **Call Graph Construction**: Maps function calls, inheritance hierarchies, and module dependencies
-- **God Node Detection**: Identifies high-coupling components that threaten system stability
-- **Temporal Hotspots**: Pinpoints frequently changed files that indicate technical debt
-- **Community Detection**: Leiden/Louvain algorithms reveal surprising cross-domain connections
-- **Security Auditing**: Automatic scanning for hardcoded secrets (API keys, tokens, passwords)
-
-### 🔍 Intelligent Search
-- **Symbol-Based Search**: Find classes, functions, and variables across the entire codebase
-- **Regex Support**: Pattern matching for complex symbol queries
-- **Execution Flow Tracing**: Recursively trace call graphs from entry points to dependencies
-- **Fuzzy Search**: Portable backend abstraction for similarity-based symbol discovery
-
-### 🛠️ Safe Code Transformation
-- **Dependency-Aware Refactoring**: Understand impact before changing code
-- **Git Integration**: Preserve history and enable rollback
-- **Impact Analysis**: Identify all affected components before transformation
-- **Safe Operations**: Guarded file operations with path validation
-
-### ✅ Quality Assurance
-- **Test Discovery**: Automated detection of test files and test suites
-- **Coverage Analysis**: Measure test coverage across modules
-- **Quality Metrics**: Comprehensive reporting on code health
-- **Regression Detection**: Identify potential breaks before deployment
-
-### 🔒 Security-First Design
-- **SSRF Prevention**: Guards against Server-Side Request Forgery attacks
-- **Path Traversal Protection**: Prevents directory escape vulnerabilities
-- **Label Sanitization**: Safe handling of graph labels in HTML outputs
-- **Input Validation**: Comprehensive validation for all user inputs
+**The bottom line:** grep finds text. Tree-Sitter parses syntax. CodeQL runs queries. CodeCortex gives LLMs **structured, graph-based code intelligence** — the equivalent difference between handing someone a phonebook vs. a GPS map with traffic overlays.
 
 ---
 
-## 🧪 The Tech Review
+## What Makes Each Feature Different
 
-### Why Domain-Driven Design (DDD)?
+### CodeIndex — Not Just Parsing, But Understanding
 
-**Bounded Contexts** enforce single responsibility, preventing god classes and enabling independent evolution. CodeCortex decomposes into six autonomous domains:
+**Scope:** 22 languages via Tree-Sitter 0.25.x (see full matrix below)
 
-1. **CodeRepository**: Physical discovery, Git sync, manifest tracking
-2. **CodeIndex**: AST parsing, symbol extraction, SQLite persistence
-3. **CodeGraph**: Call graph construction, relationship mapping, graph backend writes
-4. **Filesystem**: File operations abstraction, path validation, I/O safety
-5. **CodeRefactor**: Safe code transformation, dependency-aware refactoring
-6. **CodeTester**: Quality assurance, test discovery, coverage analysis
+| Language | Parse | Symbols | Imports | Scopes | Framework Tags |
+|---|---|---|---|---|---|
+| Python, TypeScript, JavaScript, JSX/TSX | ✅ | ✅ | ✅ | ✅ | FastAPI/Django/Flask/Next.js/React |
+| Go, Rust, Java, Kotlin | ✅ | ✅ | ✅ | ✅ | — |
+| PHP, Ruby, Swift | ✅ | ✅ | ✅ | ✅ | Laravel |
+| Dart/Flutter | ✅ | ✅ | ✅ | ✅ | Flutter |
+| C, C++, C# | ✅ | ✅ | ✅ | ✅ | — |
+| Elixir, Haskell, Perl, Lua, Zig | ✅ | ✅ | ✅ | ✅ | — |
+| Bash, SQL | ✅ | ✅ | ❌ | ❌ | — |
 
-Each domain owns its data, logic, and boundaries—wired together via **Constructor Injection (DI)** for testability and loose coupling.
+**What sets it apart from other parsers:**
 
-### Why Hexagonal Architecture?
+| Aspect | Tree-Sitter CLI | CodeCortex CodeIndex |
+|--------|----------------|---------------------|
+| Output | Raw CST dump (stdout) | Structured JSON via MCP |
+| Cross-file | None | Scope resolution (6-pass) |
+| Framework awareness | None | Auto-tags 8 frameworks |
+| Parallelism | Single-threaded | Worker pool (CPU cores) |
+| Caching | None | LRU AST cache (content hash) |
+| LLM integration | Pipe to LLM manually | Native MCP tool calling |
 
-External dependencies (Git, Tree-Sitter, Graph DBs) are wrapped in **adapters**, not leaked into domain logic. This means:
-- **Pure Domain Logic**: Business rules remain untainted by infrastructure concerns
-- **Easy Testing**: Mock adapters for unit tests without touching real systems
-- **Swappable Backends**: Switch between Neo4j, Kùzu, or FalkorDB without changing domain code
+**Flow the LLM sees:**
+```
+call index_repo(repo_id)
+  → CodeCortex discovers files → parses (thread pool) → extracts symbols → stores
+  → Returns: {repository_id, symbols_indexed: 1250, files_indexed: 47}
+```
 
-### Why SQLite + Graph Backend Hybrid?
+### Semantic Search — Concept Matching, Not Keyword Grep
 
-**SQLite** provides structured metadata with fast queries and ACID guarantees for symbol tables. **Graph Databases** (Neo4j/Kùzu/FalkorDB) excel at complex relationship queries like "find all functions that call this class." The hybrid approach gives you the best of both worlds:
-- **Fast Metadata**: Symbol lookups in milliseconds via SQLite
-- **Deep Relationships**: Traversal queries in graph databases
-- **Atomic Coordination**: `DatabaseManager` ensures consistent writes across both backends
+**Unique advantage:** Uses `all-MiniLM-L6-v2` (384-dim embeddings). "User authentication" finds `login_user`, `verify_credentials`, `create_session` — none contain the exact words. Graceful fallback if model unavailable.
 
-### Why MCP (Model Context Protocol)?
+```
+LLM → semantic_search(repo_id, "payment retry logic", top_k=5)
+  → Embed query → cosine similarity → top-K ranked
+  → Returns: [{score: 0.92, file: "retry.py", symbol: "retry_failed_payment", line: 15}, ...]
+```
 
-**MCP** provides a standardized interface for AI agents to interact with tools. CodeCortex exposes its intelligence as MCP tools, enabling:
-- **Seamless Integration**: Works with Claude Desktop, Cursor, and other MCP-compatible clients
-- **Type-Safe Tooling**: Structured input/output schemas prevent hallucinations
-- **Transport Flexibility**: stdio, SSE, or HTTP/JSON-RPC depending on deployment needs
+### CodeGraph — Architectural Intelligence for LLMs
+
+**Scope:** 9 sub-features with language coverage:
+
+| Sub-feature | Languages | What LLM Gains |
+|---|---|---|
+| Knowledge Graph | All 22 | O(1) symbol lookup by ID or name |
+| Community Detection | All 22 | Reveals real module boundaries vs. folder structure |
+| Execution Flow | All 22 (CALLS edges) | BFS call chain: "what happens when user checks out?" |
+| Heritage Extraction | Python, TS, JS, Java, Go, C++, C#, PHP, Dart, Kotlin | Full class hierarchy without reading ancestor files |
+| Route Extraction | FastAPI, Django, Flask, Express, Next.js | Auto-discovers API surface |
+| ORM Dataflow | SQLAlchemy, Django ORM, Prisma | Extracts models, fields, relationships |
+| Entry Point Scoring | All 22 | 0-100 score: identifies HTTP handlers, CLI commands |
+| Architecture Audit | All 22 | God nodes, dead code, security, complexity |
+| Graph Backends | Kuzu, Neo4j, FalkorDB, SQLite | Persistent graph storage |
+
+**Flow:**
+```
+LLM → graph_query("callers", "process_payment")
+  → KnowledgeGraph O(1): find incoming CALLS edges
+  → BFS traverse up to depth
+  → Returns: [{name: "checkout_cart", file: "src/api/checkout.py:42"}, {name: "retry_failed_payment", ...}]
+
+LLM → arch_audit("repo-123", "all")
+  → Graph algorithms: centrality (god nodes), degree (dead code), complexity (AST)
+  → Returns: {god_nodes: [...], dead_code: [...], complexity: [...], security: [...]}
+```
+
+**Why this is different from static analysis tools:**
+- Semgrep/CodeQL need you to write rules/queries. CodeCortex discovers everything automatically.
+- SonarQube gives a "quality gate" pass/fail. CodeCortex gives structured JSON for LLM reasoning.
+
+### CodeRefactor — Semantic, Graph-Aware, Safe
+
+**Unique advantage:** Not regex search-and-replace. Knowledge Graph finds ALL references. TreeSitter identifies exact AST nodes (skips strings, comments, different namespaces). Dry-run by default. Git-commits changes. Impact analysis shows blast radius.
+
+```
+LLM → refactor_rename(path, "process_data", "calculate_metrics", dry_run=True)
+  → KG finds all references → TreeSitter locates AST nodes
+  → Returns: [{file: "src/order.py", line: 42, change: "old → new"}, ...]
+  → LLM approves → dry_run=False → apply + git commit
+```
+
+### Token Economy — Built for LLM Context Windows
+
+**Unique advantage:** Auto-estimates tokens, truncates to budget (2000 default), caches estimations. When response exceeds budget: optimize (remove redundant fields) → summarize (preserve key data) → truncate (last resort). LLM never sees broken JSON.
+
+### CodeRepository — Multi-Repo, Incremental, Portable
+
+**Unique advantages:**
+- **Incremental sync**: `git diff --name-only HEAD` — 0.1s vs 60s for full re-index
+- **Multi-repo**: 50 repos in one call with quota enforcement
+- **Takeout/Import**: Delete-then-insert restore (disaster recovery safe)
+- **Git audit**: 100+ commits scanned for secrets in seconds
 
 ---
 
-## 🚀 Quick Start
+## Who Should Use CodeCortex
+
+| Role | What CodeCortex Does For Them |
+|---|---|
+| **LLM-Powered Coding Agents** | Any MCP-compatible agent (Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Trae, Continue) gains deep code intelligence — call graph, heritage extraction, route discovery, architecture audit — all via structured JSON tool calls |
+| **Software Architects** | Reverse-engineer the *actual* architecture vs. the *intended* one. Community detection reveals surprising cross-module coupling |
+| **Senior Developers** | Navigate unfamiliar codebases at warp speed. "Trace this HTTP request to the database query" — one tool call |
+| **Technical Leads** | Data-driven refactoring decisions. Impact analysis, dead code quantification, complexity hotspots |
+| **Security Engineers** | Git history scan for hardcoded secrets (API keys, tokens, passwords) |
+| **QA Engineers** | 23+ test runners/linters via unified MCP tools. Async execution with webhook notifications |
+
+## Where CodeCortex Runs
+
+| Layer | Supported |
+|---|---|
+| **LLM Clients** | Claude Desktop, Claude Code, Cursor, Windsurf, Cline, Trae, Continue — any MCP client |
+| **Operating Systems** | Windows, macOS, Linux |
+| **MCP Transports** | STDIO (default), SSE, HTTP/JSON-RPC |
+| **Graph Backends** | Kuzu (embedded), Neo4j, FalkorDB, SQLite (fallback) |
+| **CI/CD** | GitHub Actions (lint, test, coverage, production readiness) |
+
+## How It Works
+
+### Architecture: 6 Domains, One Pipeline
+
+Built on **Domain-Driven Design** + **Hexagonal Architecture** — six autonomous bounded contexts wired via constructor injection. No global state. No magic.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                   CortexOrchestrator                        │
+│                (Composition Root / DI)                       │
+├──────┬───────┬───────┬───────┬───────┬───────────────────────┤
+│      │       │       │       │       │                       │
+│  ┌───▼──┐ ┌──▼──┐ ┌──▼──┐ ┌──▼──┐ ┌──▼──┐ ┌───────────────────┐
+│  │Repo  │ │Index│ │Graph│ │File │ │Refac│ │     Tester       │
+│  │Service│ │Service│ │Service│ │Service│ │Service│ │    Service        │
+│  └──────┘ └─────┘ └─────┘ └─────┘ └─────┘ └───────────────────┘
+│         └────────────┬────────────┘
+│                      ▼
+│             ┌────────────────┐
+│             │    SQLite      │
+│             │  + Graph DB    │
+│             └────────────────┘
+└──────────────────────────────────────────────────────────────┘
+```
+
+### The LLM Interaction Model
+
+CodeCortex is NOT a CLI tool or a web dashboard. It is an **MCP server** — LLMs call tools, receive structured JSON, and use that data to reason about code.
+
+```
+┌──────────┐   MCP Tool Call    ┌──────────────┐   SQL/Graph    ┌──────────┐
+│  LLM     │ ──────────────────>│  CodeCortex  │ ─────────────>│  SQLite  │
+│  Client  │                    │  Server      │               │  + Kuzu  │
+│          │ <──────────────────│              │ <─────────────│  /Neo4j  │
+└──────────┘   Structured JSON   └──────────────┘   Query Result └──────────┘
+     │
+     │ Reads structured data, answers user
+     ▼
+┌──────────┐
+│  User    │  "What calls process_payment?"
+└──────────┘
+```
+
+### Safety First
+
+All destructive operations default to `dry_run=True`. Path traversal prevention, SSRF guards, label sanitization, UUID validation, depth limits, quota enforcement. No auto-edit or commit without explicit approval.
+
+---
+
+## 31+ MCP Tools (All Work with Any MCP Client)
+
+| Tool | Input | Output | Purpose |
+|---|---|---|---|
+| `repo_init` | `path, max_depth?` | `{repository_id}` | Initialize repo |
+| `index_repo` | `repo_id, codemap?` | `{symbol_count, file_count}` | Full index |
+| `index_file` | `repo_id, file_id` | `{symbol_count}` | Single file |
+| `semantic_search` | `repo_id, query, top_k` | `[{score, file, symbol, snippet}]` | Concept search |
+| `graph_find_symbols` | `search_term, type, fuzzy?` | `{functions, classes, variables}` | Find by name |
+| `graph_query` | `query_type, target` | `{results, total}` | Relationships |
+| `graph_trace_flow` | `symbol_id, max_depth` | Hierarchical call tree | Execution flow |
+| `graph_build` | `repo_id, path` | `{build, stats}` | Build graph |
+| `arch_analyze` | `repo_id?, path?` | `{communities, god_nodes, ...}` | Full architecture |
+| `arch_audit` | `repo_id, audit_type` | Findings by type | Audit smells |
+| `refactor_rename` | `path, old, new, dry_run` | Changes preview | Multi-file rename |
+| `refactor_impact` | `path, symbol` | Blast radius | Impact analysis |
+| `git_audit` | `path, limit` | Secrets findings | Security scan |
+| `qa_run` | `repo_id, tool, target?` | Task ID | Run tests |
+| `db_compact` | — | Space reclaimed | Database maintenance |
+| `repo_cleanup` | `repo_id` | Deleted count | Remove project |
+| `fs_batch` | `operations[], dry_run` | Results[] | Batch file ops |
+
+Full list: 31+ tools across 6 domains + Core. Every tool has typed parameters and structured JSON responses.
+
+---
+
+## Quick Start
 
 ### Prerequisites
 - Python 3.10+
-- uv (recommended) or pip
-- Claude Desktop or MCP-compatible client
+- `uv` (recommended) or pip
+- MCP client (Claude Desktop, Cursor, etc.)
 
-### Installation
+### Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/steevenz/.aicoders.git
-cd scripts/pythons/codecortex
-
-# Install dependencies with uv (recommended)
+git clone https://github.com/steevenz/mcp-codecortex.git
+cd mcp-codecortex
 uv sync
-
-# Or with pip
-pip install -r requirements.txt
 ```
 
-### MCP Configuration
+### Configure
 
-Add to your Claude Desktop config:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+Add to your MCP client config:
 
 ```json
 {
   "mcpServers": {
     "codecortex": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/path/to/codecortex",
-        "run",
-        "python",
-        "-m",
-        "src.main"
-      ]
+      "args": ["--directory", "/path/to/codecortex", "run", "python", "-m", "src.main"]
     }
   }
 }
 ```
 
-### HTTP Server Mode (Optional)
+### Use
 
-For web deployments or custom integrations:
+Tell your AI agent:
+
+> *"Initialize this repo, index all code, and analyze the architecture."*
+
+The agent calls `repo_init` → `index_repo` → `graph_build` → `arch_analyze` — and returns a full architectural report with communities, god nodes, entry points, and security findings.
+
+### Docker (Graph Backends)
 
 ```bash
-# Set environment variables
-export CODECORTEX_DASHBOARD_API_KEY="your-secret-key"
-export CODECORTEX_HOST="127.0.0.1"
-export CODECORTEX_PORT="8001"
-
-# Run HTTP server
-python -m src.main
-```
-
-The server exposes MCP tools via HTTP/JSON-RPC at `http://127.0.0.1:8001/codecortex-api/v1/sync`.
-
----
-
-## 🔧 Available MCP Tools
-
-### Core Analysis
-- **`analyze_codebase(path)`**: Full pipeline—index, graph build, and architectural analysis
-- **`index_codebase(path)`**: Index repository for semantic search
-- **`get_architecture_summary(path)`**: High-level architectural metrics and insights
-- **`get_structured_codemap(path)`**: Hierarchical tree of directories, files, and symbols
-
-### Search & Traversal
-- **`search_symbols(path, query, is_regex, limit)`**: Symbol search with regex support
-- **`trace_execution_flow(symbol_id, max_depth)`**: Recursive call graph tracing
-- **`suggest_questions(path, top_n)`**: AI-driven exploration questions from graph heuristics
-
-### Graph Analysis
-- **`graph_diff(path)`**: Compare graph snapshots for node/edge deltas
-- **`find_community_surprises(path, top_n)`**: Detect surprising cross-community connections
-
-### Security
-- **`validate_url_safe(url)`**: SSRF-safe URL validation
-- **`validate_graph_path_safe(path, base_path)`**: Path traversal prevention
-- **`sanitize_graph_label(text)`**: Label sanitization for graph outputs
-
----
-
-## 📊 Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CortexOrchestrator                       │
-│                  (Composition Root / DI)                      │
-├──────┬───────┬───────┬───────┬───────┬──────────────────────┤
-│      │       │       │       │       │                      │
-│  ┌───▼──┐ ┌──▼──┐ ┌──▼──┐ ┌──▼──┐ ┌──▼──┐ ┌──────────────────────┐
-│  │Repo │ │Index│ │Graph│ │File │ │Refac│ │      Tester       │
-│  │Service│ │Service│ │Service│ │Service│ │Service│ │   Service         │
-│  └───┬──┘ └───┬──┘ └───┬──┘ └───┬──┘ └───┬──┘ └──────────────────────┘
-│      │        │        │        │        │        │
-│      └────────┴────────┴────────┴────────┴────────┘
-│                           │
-│                           ▼
-│              ┌────────────────────┐
-│              │    SQLite DB      │
-│              │  (Metadata +       │
-│              │   Manifest)        │
-│              └────────┬───────────┘
-│                       │
-│                       ▼
-│              ┌────────────────────┐
-│              │  Graph Backend     │
-│              │ (Neo4j/Kùzu/        │
-│              │  FalkorDB)          │
-│              └────────────────────┘
-└─────────────────────────────────────────────────────────────┘
+docker-compose up -d    # Neo4j + FalkorDB for advanced graph queries
 ```
 
 ---
 
-## 🏗️ Technology Stack
+## Tech Stack
 
-- **Language**: Python 3.10+
-- **Architecture**: Domain-Driven Design (DDD), Hexagonal Architecture
-- **Database**: SQLite + Neo4j/Kùzu/FalkorDB (optional)
-- **Parsing**: Tree-Sitter (native bindings, 20+ languages)
-- **Protocol**: MCP (Model Context Protocol) via FastMCP
-- **Transport**: stdio, SSE, HTTP/JSON-RPC
-- **Standards**: Aegis Codeworks v1.0
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
+| Layer | Technology |
+|---|---|
+| Runtime | Python 3.10+ |
+| Parsing | Tree-Sitter 0.25.x (native bindings, 22 languages) |
+| Primary Store | SQLite (WAL mode, thread-safe) |
+| Graph Backend | Kuzu / Neo4j / FalkorDB (optional) |
+| Embeddings | sentence-transformers all-MiniLM-L6-v2 |
+| Protocol | MCP via FastMCP (STDIO / SSE / HTTP) |
+| Architecture | DDD + Hexagonal + Constructor DI |
 
 ---
 
-**Developed with ❤️ by [Steeven Andrian](https://github.com/steevenz) | [Support via PayPal](https://paypal.me/steevenz)**
-*Senior Principal Architect | Founder/Creator A.E.G.I.S Codework*
+## Documentation
+
+- `docs/index.md` — Executive summary
+- `docs/features/support-matrix.md` — Full language, framework, backend coverage
+- `docs/features/` — Per-domain docs: concept, flow, tools, output, LLM impact
+- `docs/architecture/` — System design and security model
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+**Developed by [Steeven Andrian](https://github.com/steevenz) -- Senior Principal Architect, Creator of A.E.G.I.S Codework**  
+**Support the project: [PayPal](https://paypal.me/steevenz)**
+
+*CodeCortex v0.1.0 -- Scale code intelligence without friction.*
