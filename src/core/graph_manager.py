@@ -24,6 +24,7 @@ from .backends.base import GraphBackend
 from .backends.kuzu_backend import KuzuBackend
 from .backends.neo4j_backend import Neo4jBackend
 from .backends.falkordb_backend import FalkorDBBackend
+from .backends.supabase_backend import SupabaseBackend
 from .logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -34,6 +35,8 @@ BACKEND_REGISTRY: dict[str, type[GraphBackend]] = {
     "kuzudb": KuzuBackend,
     "neo4j": Neo4jBackend,
     "falkordb": FalkorDBBackend,
+    "supabase": SupabaseBackend,
+    "postgres": SupabaseBackend,
 }
 
 
