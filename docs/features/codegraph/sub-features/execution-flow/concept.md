@@ -34,3 +34,22 @@ graph_trace_flow("process_order", max_depth=5)
 | 1-2 | Direct dependencies only | 5-20 |
 | 3-5 | Full function trace | 20-100 |
 | 5-10 | System-wide flow | 100-500 |
+
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| EF_001 | graph_query (execution_flow) | BFS traversal failed |
+| EF_002 | graph_query (execution_flow) | Cycle detected (infinite loop prevention) |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(V+E) for BFS traversal
+- **Depth Limiting:** Max depth parameter prevents runaway
+- **Memory Usage:** O(depth) for recursion stack
+- **Optimization:** Cycle detection prevents infinite loops

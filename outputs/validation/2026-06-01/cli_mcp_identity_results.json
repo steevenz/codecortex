@@ -1,0 +1,60 @@
+[
+  {
+    "name": "scaffolder_list_stacks",
+    "cli_output": {
+      "error": "C:\\Users\\steevenz\\AppData\\Roaming\\Python\\Python314\\site-packages\\requests\\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.4.3)/charset_normalizer (3.4.5) doesn't match a supported version!\n  warnings.warn(\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\cli\\unified.py\", line 360, in <module>\n    main()\n    ~~~~^^\n  File \"C:\\Users\\s",
+      "stdout": "",
+      "returncode": 1
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "'ActionRouter' object has no attribute 'dispatch'",
+      "data": null
+    },
+    "comparison": {
+      "cli_keys": [
+        "error",
+        "returncode",
+        "stdout"
+      ],
+      "mcp_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "has_success": false,
+      "has_data": false
+    },
+    "cli_time": 2.4987456798553467,
+    "mcp_time": 8.177757263183594e-05
+  },
+  {
+    "name": "scaffolder_validate_name",
+    "cli_output": {
+      "error": "C:\\Users\\steevenz\\AppData\\Roaming\\Python\\Python314\\site-packages\\requests\\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.4.3)/charset_normalizer (3.4.5) doesn't match a supported version!\n  warnings.warn(\nTraceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\cli\\unified.py\", line 360, in <module>\n    main()\n    ~~~~^^\n  File \"C:\\Users\\s",
+      "stdout": "",
+      "returncode": 1
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "'ActionRouter' object has no attribute 'dispatch'",
+      "data": null
+    },
+    "comparison": {
+      "cli_keys": [
+        "error",
+        "returncode",
+        "stdout"
+      ],
+      "mcp_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "has_success": false,
+      "has_data": false
+    },
+    "cli_time": 2.856703042984009,
+    "mcp_time": 1.0728836059570312e-05
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "request": {
+    "tool": "scaffold_get_stack",
+    "stack_name": "python"
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Stack 'Python' found",
+    "data": {
+      "stack": {
+        "name": "python",
+        "display_name": "Python",
+        "version": "3.12",
+        "file_conventions": {
+          "directories": "snake_case",
+          "modules": "snake_case.py",
+          "classes": "PascalCase"
+        },
+        "project_types": [
+          {
+            "id": "standard",
+            "display_name": "Standard",
+            "description": "Standard Python project",
+            "pattern": "layered"
+          },
+          {
+            "id": "web_api",
+            "display_name": "Web API",
+            "description": "FastAPI web service",
+            "pattern": "layered"
+          }
+        ]
+      }
+    },
+    "request_id": "req_def456"
+  }
+}

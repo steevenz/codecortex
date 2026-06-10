@@ -1,0 +1,45 @@
+"""
+@project   {{ project_name }}
+@package   tests.unit
+@author    {{ author }}
+@copyright (c) {{ author }}
+@fileoverview Unit tests for the main entry point.
+"""
+
+import pytest
+
+{% if project_type_id == "web_api" %}
+from fastapi.testclient import TestClient
+from src.main import app
+
+client = TestClient(app)
+
+
+def test_root_endpoint():
+    """Test the health check endpoint returns 200."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert "message" in data
+    assert "{{ project_name }}" in data["message"]
+{% elif project_type_id == "cli_tool" %}
+from click.testing import CliRunner
+from src.main import cli
+
+
+def test_hello_command():
+    """Test the hello CLI command."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["hello"])
+    assert result.exit_code == 0
+    assert "Hello from {{ project_name }}" in result.output
+{% else %}
+from src.main import cli
+
+
+def test_cli_runs(capsys):
+    """Test CLI entry point runs without error."""
+    cli()
+    captured = capsys.readouterr()
+    assert "Hello from {{ project_name }}" in captured.out
+{% endif %}

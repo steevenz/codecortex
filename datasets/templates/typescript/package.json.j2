@@ -1,0 +1,19 @@
+{
+  "name": "{{ project_slug }}",
+  "version": "{{ project_version }}",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:test": "tsc -p tsconfig.test.json",
+    "start": "node dist/src/MainEntry.js",
+    "test": "npm run build:test && node --test dist/tests/unit/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "typescript": "5.7.3"
+  }
+}

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CodeCortex Bootstrap API Key Generator
+CodeCortex Client API Key Generator
 
-Generates a secure bootstrap API key and optionally installs it into .env.
+Generates a secure client API key and optionally installs it into .env.
 
 Author: Steeven Andrian Salim — Senior Principal Architect
 
@@ -20,11 +20,11 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENV_PATH = PROJECT_ROOT / ".env"
-KEY_NAME = "CODECORTEX_BOOTSTRAP_API_KEY"
+KEY_NAME = "CODECORTEX_CLIENT_API_KEY"
 
 
 def generate_key() -> str:
-    return f"codecortex_bootstrap_{secrets.token_urlsafe(32)}"
+    return f"codecortex_client_{secrets.token_urlsafe(32)}"
 
 
 def install_to_env(value: str, *, force: bool = False) -> tuple[bool, str]:
@@ -52,7 +52,7 @@ def install_to_env(value: str, *, force: bool = False) -> tuple[bool, str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate bootstrap API key for CodeCortex shared server auth.")
+    parser = argparse.ArgumentParser(description="Generate client API key for CodeCortex shared server auth.")
     parser.add_argument("--install", action="store_true", help="Install generated key into .env")
     parser.add_argument("--force", action="store_true", help="Overwrite existing key in .env when used with --install")
     args = parser.parse_args()

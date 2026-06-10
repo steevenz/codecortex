@@ -1,0 +1,39 @@
+"""
+@project   {{ project_name }}
+@package   src.core
+@author    {{ author }}
+@copyright (c) {{ author }}
+@fileoverview Settings management using Pydantic BaseSettings.
+"""
+
+from __future__ import annotations
+
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables.
+
+    Configure via ``.env`` file or system environment variables.
+    """
+
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+    APP_NAME: str = "{{ project_name }}"
+    APP_ENV: str = "development"
+    DEBUG: bool = True
+    SECRET_KEY: str = "change-me-to-a-secure-random-key"
+{% if project_type_id == "web_api" %}
+
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+    DATABASE_URL: str = "sqlite:///db.sqlite3"
+{% endif %}
+{% if project_type_id == "data_science" %}
+
+    DATA_PATH: str = "datasets/"
+    MODEL_PATH: str = "outputs/results/models/"
+{% endif %}
+
+
+settings = Settings()

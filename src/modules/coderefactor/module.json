@@ -1,0 +1,48 @@
+{
+  "name": "coderefactor",
+  "version": "0.1.0",
+  "description": "Code refactor domain — rename, move, impact analysis, blast radius calculation, and safe refactoring with git-backed undo across 22 languages",
+  "type": "module",
+  "dependencies": {
+    "modules": ["coderepository", "codegraph", "filesystem"],
+    "core": ["config", "database", "errors", "logging", "telemetry"]
+  },
+  "providers": {
+    "services": [
+      "refactor_service"
+    ],
+    "dtos": [
+      "refactor_change",
+      "refactor_result",
+      "impact_result",
+      "blast_radius"
+    ]
+  },
+  "tools": {
+    "prefix": "refactor_",
+    "entries": [
+      "refactor_rename",
+      "refactor_move",
+      "refactor_impact",
+      "refactor_analyze",
+      "refactor_apply",
+      "refactor_undo"
+    ]
+  },
+  "actions": [
+    "rename_symbol",
+    "move_symbol",
+    "extract_function",
+    "inline_variable",
+    "impact_analysis",
+    "blast_radius",
+    "apply_changes",
+    "undo_changes"
+  ],
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "copyright": "Copyright (c) 2026 Aegis Codework",
+  "standard": "Aegis-CrossStack-v1.0"
+}

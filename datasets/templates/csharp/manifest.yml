@@ -1,0 +1,33 @@
+stack:
+  name: csharp
+  display_name: "C# (.NET)"
+  version: "8.0"
+  file_conventions:
+    directories: PascalCase
+    modules: "PascalCase.cs"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard C# Project"
+    description: "Minimal, standard-compliant .NET console project"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "src/App"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

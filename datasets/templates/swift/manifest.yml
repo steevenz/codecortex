@@ -1,0 +1,34 @@
+stack:
+  name: swift
+  display_name: "Swift"
+  version: "5.9"
+  file_conventions:
+    directories: PascalCase
+    modules: "PascalCase.swift"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard Swift Package"
+    description: "Minimal, standard-compliant Swift Package"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "Sources/App"
+      - "Tests/AppTests"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

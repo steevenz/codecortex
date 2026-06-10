@@ -1,0 +1,39 @@
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+static std::string json_escape(const std::string& input) {
+  std::string out;
+  out.reserve(input.size());
+  for (char c : input) {
+    switch (c) {
+      case '\\': out += "\\\\"; break;
+      case '"': out += "\\\""; break;
+      case '\n': out += "\\n"; break;
+      case '\r': out += "\\r"; break;
+      case '\t': out += "\\t"; break;
+      default: out += c; break;
+    }
+  }
+  return out;
+}
+
+int main() {
+  const char* env = std::getenv("ENVIRONMENT");
+  const char* req = std::getenv("REQUEST_ID");
+
+  std::string environment = env ? env : "development";
+  std::string request_id = req ? req : "";
+
+  std::cout
+      << "{"
+      << "\"level\":\"INFO\","
+      << "\"service\":\"" << json_escape("{{ project_slug }}") << "\","
+      << "\"environment\":\"" << json_escape(environment) << "\","
+      << "\"request_id\":" << (request_id.empty() ? "null" : "\"" + json_escape(request_id) + "\"") << ","
+      << "\"message\":\"Service started\","
+      << "\"version\":\"" << json_escape("{{ project_version }}") << "\""
+      << "}"
+      << std::endl;
+  return 0;
+}

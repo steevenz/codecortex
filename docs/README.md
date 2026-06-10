@@ -5,10 +5,8 @@ This directory contains all project documentation following the Aegis Codeworks 
 ## Documentation Structure
 
 ### 📋 **drafts/** - Work in Progress
-- `archives/` - Deprecated documents kept for reference
+- `archives/` - Deprecated documents kept for reference (currently empty; historical docs removed after merge)
 - `concepts/` - Draft architectural concepts and ideas
-- `prd/` - Draft Product Requirements Documents
-- `technical-specs/` - Draft technical specifications
 
 ### 🎯 **product/** - Product Management Artifacts
 - `prd/` - Approved Product Requirements Documents
@@ -16,8 +14,8 @@ This directory contains all project documentation following the Aegis Codeworks 
 - `success-metrics.md` - OKRs, KPIs, and success criteria
 
 ### 🏗️ **architecture/** - System Architecture Documentation
-- `ARCHITECTURE.md` - Core architectural design and domain map
-- `SECURITY.md` - Security guards, SSRF prevention, path validation
+- `architecture.md` - Core architectural design and domain map
+- `security.md` - Security guards, SSRF prevention, path validation
 - `api/` - Global API documentation
   - `specs.md` - OpenAPI/Swagger contracts
   - `endpoints.md` - MCP tool endpoints reference
@@ -37,7 +35,10 @@ Each feature gets its own subfolder containing:
 ### 📚 **guides/** - Setup and Operations Guides
 Installation, deployment, configuration, and operational procedures.
 
-### 📌 **versions/** - Versioned Documentation Snapshots
+### � **workflows/** - Agentic Workflow Playbooks
+Structured workflows for AI agents: CCT reasoning, bug hunting, refactoring, security audits, and multi-repo operations.
+
+### � **versions/** - Versioned Documentation Snapshots
 - `CHANGELOG.md` - Version history and recent changes
 - `v[MAJOR].[MINOR]/` - Documentation for each version
   - `implementation-plans/` - Implementation plans
@@ -73,9 +74,12 @@ All documentation must:
 - **features/coderefactor/concept.md** - Code refactoring docs
 - **features/codetester/concept.md** - QA automation docs
 - **features/core/concept.md** - Core infrastructure docs (database, token economy, CLI)
-- **architecture/ARCHITECTURE.md** - Domain map, DI wiring, pipeline flow, backend abstraction
-- **architecture/SECURITY.md** - SSRF guards, path validation, label sanitization reference
-- **versions/CHANGELOG.md** - Version history and recent changes
+- **architecture/architecture.md** - Domain map, DI wiring, pipeline flow, backend abstraction
+- **architecture/security.md** - SSRF guards, path validation, label sanitization reference
+- **guides/how-to-setup-mcp.md** - MCP server setup and configuration
+- **guides/how-to-use-cli.md** - CLI usage guide
+- **workflows/workflow-index.md** - Master index of all agentic workflows
+- **versions/changelog.md** - Version history and recent changes
 - **index.md** - Executive summary and project overview
 - **../README.md** - Project root README with quick start guide
 

@@ -39,3 +39,21 @@ Heritage extraction reconstructs the **full class hierarchy** for a given class:
   "width": 3
 }
 ```
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| HE_001 | graph_query (hierarchy) | Class hierarchy extraction failed |
+| HE_002 | graph_query (hierarchy) | Circular inheritance detected |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(V+E) for BFS traversal of INHERITS edges
+- **Depth Limiting:** Max depth parameter prevents runaway on deep hierarchies
+- **Memory Usage:** O(depth) for recursion stack
+- **Optimization:** Cycles detected early to prevent infinite loops

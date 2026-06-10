@@ -1,0 +1,38 @@
+export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
+
+type LogFields = Record<string, unknown>;
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+export function log(
+  level: LogLevel,
+  message: string,
+  fields: LogFields = {},
+): void {
+  const requestId =
+    (process.env.REQUEST_ID || "").trim() ||
+    (fields.request_id as string | undefined) ||
+    null;
+
+  const payload = {
+    timestamp: nowIso(),
+    level,
+    service: "{{ project_slug }}",
+    environment: (process.env.ENVIRONMENT || "development").trim(),
+    request_id: requestId,
+    message,
+    ...fields,
+  };
+
+  process.stdout.write(JSON.stringify(payload) + "\n");
+}
+
+export function info(message: string, fields: LogFields = {}): void {
+  log("INFO", message, fields);
+}
+
+export function error(message: string, fields: LogFields = {}): void {
+  log("ERROR", message, fields);
+}

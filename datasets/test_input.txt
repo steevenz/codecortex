@@ -1,0 +1,11 @@
+Test Project
+test_project
+TP
+outputs/projects/test_project
+Your Name
+your_name@example.com
+1
+1
+y
+y
+y

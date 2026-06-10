@@ -1,0 +1,648 @@
+[
+  {
+    "scenario": {
+      "name": "list_current_directory",
+      "description": "List contents of current directory",
+      "cli_action": "list",
+      "mcp_action": "list",
+      "args": {
+        "path": "."
+      }
+    },
+    "cli_output": {
+      "success": true,
+      "error": null,
+      "data": {
+        "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex",
+        "entries": [
+          {
+            "name": ".agents",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.agents",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".aicoders",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.aicoders",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".aiignore",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.aiignore",
+            "is_dir": false,
+            "size": 813
+          },
+          {
+            "name": ".author",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.author",
+            "is_dir": false,
+            "size": 312
+          },
+          {
+            "name": ".claude",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.claude",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".config",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.config",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".env",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.env",
+            "is_dir": false,
+            "size": 937
+          },
+          {
+            "name": ".env.example",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.env.example",
+            "is_dir": false,
+            "size": 1889
+          },
+          {
+            "name": ".git",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.git",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".github",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.github",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".gitignore",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.gitignore",
+            "is_dir": false,
+            "size": 710
+          },
+          {
+            "name": ".pre-commit-config.yaml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.pre-commit-config.yaml",
+            "is_dir": false,
+            "size": 768
+          },
+          {
+            "name": ".pytest_cache",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.pytest_cache",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".trae",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.trae",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".venv",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.venv",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".version",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.version",
+            "is_dir": false,
+            "size": 5
+          },
+          {
+            "name": "_tmp_translate.py",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\_tmp_translate.py",
+            "is_dir": false,
+            "size": 10250
+          },
+          {
+            "name": "AGENTS.md",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\AGENTS.md",
+            "is_dir": false,
+            "size": 4536
+          },
+          {
+            "name": "database",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\database",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "datasets",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\datasets",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "docker-compose.yml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\docker-compose.yml",
+            "is_dir": false,
+            "size": 729
+          },
+          {
+            "name": "Dockerfile",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\Dockerfile",
+            "is_dir": false,
+            "size": 856
+          },
+          {
+            "name": "docs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\docs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "k8s.yaml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\k8s.yaml",
+            "is_dir": false,
+            "size": 2670
+          },
+          {
+            "name": "LICENSE",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\LICENSE",
+            "is_dir": false,
+            "size": 1087
+          },
+          {
+            "name": "logs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\logs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "migrations",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\migrations",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "outputs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\outputs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "package.json",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\package.json",
+            "is_dir": false,
+            "size": 984
+          },
+          {
+            "name": "pyproject.toml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\pyproject.toml",
+            "is_dir": false,
+            "size": 1144
+          },
+          {
+            "name": "pytest.ini",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\pytest.ini",
+            "is_dir": false,
+            "size": 445
+          },
+          {
+            "name": "README.md",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\README.md",
+            "is_dir": false,
+            "size": 22459
+          },
+          {
+            "name": "relay",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\relay",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "scripts",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\scripts",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "src",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "tests",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\tests",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "uv.lock",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\uv.lock",
+            "is_dir": false,
+            "size": 491717
+          }
+        ]
+      }
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "An asyncio.Future, a coroutine or an awaitable is required"
+    },
+    "comparison": {
+      "cli_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "mcp_keys": [
+        "error",
+        "success"
+      ],
+      "identical": false,
+      "cli_hash": "b4e59d3a22f20567c2cec85121f74151b236b581baf21337c41678561c14e0b7",
+      "mcp_hash": "fb2b9fbd4c1dc96f1c39acb9e47e7809ad1ff2b2b5474e62f315d4d9e33e1f5d"
+    },
+    "cli_time": 2.6667892932891846,
+    "mcp_time": 1.8143489360809326
+  },
+  {
+    "scenario": {
+      "name": "list_src_directory",
+      "description": "List contents of src directory",
+      "cli_action": "list",
+      "mcp_action": "list",
+      "args": {
+        "path": "src"
+      }
+    },
+    "cli_output": {
+      "success": true,
+      "error": null,
+      "data": {
+        "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src",
+        "entries": [
+          {
+            "name": "__init__.py",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\__init__.py",
+            "is_dir": false,
+            "size": 177
+          },
+          {
+            "name": "__pycache__",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\__pycache__",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "api",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\api",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "cli",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\cli",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "core",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\core",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "main.py",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\main.py",
+            "is_dir": false,
+            "size": 13710
+          },
+          {
+            "name": "modules",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src\\modules",
+            "is_dir": true,
+            "size": 0
+          }
+        ]
+      }
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "An asyncio.Future, a coroutine or an awaitable is required"
+    },
+    "comparison": {
+      "cli_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "mcp_keys": [
+        "error",
+        "success"
+      ],
+      "identical": false,
+      "cli_hash": "73f633dadb7621cccd1635e90f0d72fde095cb9e104350456e5d6ee915dc2228",
+      "mcp_hash": "fb2b9fbd4c1dc96f1c39acb9e47e7809ad1ff2b2b5474e62f315d4d9e33e1f5d"
+    },
+    "cli_time": 2.5893070697784424,
+    "mcp_time": 0.002561330795288086
+  },
+  {
+    "scenario": {
+      "name": "read_package_json",
+      "description": "Read package.json file",
+      "cli_action": "read",
+      "mcp_action": "read",
+      "args": {
+        "path": "package.json"
+      }
+    },
+    "cli_output": {
+      "success": true,
+      "error": null,
+      "data": {
+        "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\package.json",
+        "content": "{\n  \"name\": \"codecortex-mcp\",\n  \"version\": \"1.2.0\",\n  \"description\": \"Production-grade MCP server for advanced codebase intelligence, indexing, refactoring, and architecture audit\",\n  \"keywords\": [\n    \"mcp\",\n    \"code-intelligence\",\n    \"code-analysis\",\n    \"refactoring\",\n    \"architecture\"\n  ],\n  \"author\": \"steevenz\",\n  \"license\": \"MIT\",\n  \"type\": \"module\",\n  \"bin\": {\n    \"codecortex\": \"scripts/server/run_cli.js\",\n    \"codecortex-mcp\": \"scripts/server/run_server.js\"\n  },\n  \"main\": \"scripts/server/run_server.js\",\n  \"scripts\": {\n    \"start\": \"node scripts/server/run_server.js\",\n    \"dev\": \"uv run python -m src.main\",\n    \"cli\": \"uv run python -m src.cli.unified\",\n    \"setup\": \"bash scripts/setup/setup.sh\"\n  },\n  \"dependencies\": {},\n  \"optionalDependencies\": {},\n  \"config\": {\n    \"codeCortex\": {\n      \"dbPath\": \"./database/codecortex.db\",\n      \"graphBackend\": \"kuzu\",\n      \"maxRepos\": 50,\n      \"transport\": \"stdio\"\n    }\n  },\n  \"engines\": {\n    \"node\": \">=18.0.0\"\n  }\n}\n",
+        "size": 984
+      }
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "An asyncio.Future, a coroutine or an awaitable is required"
+    },
+    "comparison": {
+      "cli_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "mcp_keys": [
+        "error",
+        "success"
+      ],
+      "identical": false,
+      "cli_hash": "b9aa43ee518892d71bf64ff65b0fd138f112c77aa6d6635b612bd569e1d7f3ee",
+      "mcp_hash": "fb2b9fbd4c1dc96f1c39acb9e47e7809ad1ff2b2b5474e62f315d4d9e33e1f5d"
+    },
+    "cli_time": 2.4996283054351807,
+    "mcp_time": 0.0015745162963867188
+  },
+  {
+    "scenario": {
+      "name": "check_dir_exists",
+      "description": "Check if directory exists",
+      "cli_action": "list",
+      "mcp_action": "list",
+      "args": {
+        "path": "."
+      }
+    },
+    "cli_output": {
+      "success": true,
+      "error": null,
+      "data": {
+        "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex",
+        "entries": [
+          {
+            "name": ".agents",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.agents",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".aicoders",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.aicoders",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".aiignore",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.aiignore",
+            "is_dir": false,
+            "size": 813
+          },
+          {
+            "name": ".author",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.author",
+            "is_dir": false,
+            "size": 312
+          },
+          {
+            "name": ".claude",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.claude",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".config",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.config",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".env",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.env",
+            "is_dir": false,
+            "size": 937
+          },
+          {
+            "name": ".env.example",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.env.example",
+            "is_dir": false,
+            "size": 1889
+          },
+          {
+            "name": ".git",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.git",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".github",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.github",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".gitignore",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.gitignore",
+            "is_dir": false,
+            "size": 710
+          },
+          {
+            "name": ".pre-commit-config.yaml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.pre-commit-config.yaml",
+            "is_dir": false,
+            "size": 768
+          },
+          {
+            "name": ".pytest_cache",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.pytest_cache",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".trae",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.trae",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".venv",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.venv",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": ".version",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\.version",
+            "is_dir": false,
+            "size": 5
+          },
+          {
+            "name": "_tmp_translate.py",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\_tmp_translate.py",
+            "is_dir": false,
+            "size": 10250
+          },
+          {
+            "name": "AGENTS.md",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\AGENTS.md",
+            "is_dir": false,
+            "size": 4536
+          },
+          {
+            "name": "database",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\database",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "datasets",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\datasets",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "docker-compose.yml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\docker-compose.yml",
+            "is_dir": false,
+            "size": 729
+          },
+          {
+            "name": "Dockerfile",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\Dockerfile",
+            "is_dir": false,
+            "size": 856
+          },
+          {
+            "name": "docs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\docs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "k8s.yaml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\k8s.yaml",
+            "is_dir": false,
+            "size": 2670
+          },
+          {
+            "name": "LICENSE",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\LICENSE",
+            "is_dir": false,
+            "size": 1087
+          },
+          {
+            "name": "logs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\logs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "migrations",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\migrations",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "outputs",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\outputs",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "package.json",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\package.json",
+            "is_dir": false,
+            "size": 984
+          },
+          {
+            "name": "pyproject.toml",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\pyproject.toml",
+            "is_dir": false,
+            "size": 1144
+          },
+          {
+            "name": "pytest.ini",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\pytest.ini",
+            "is_dir": false,
+            "size": 445
+          },
+          {
+            "name": "README.md",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\README.md",
+            "is_dir": false,
+            "size": 22459
+          },
+          {
+            "name": "relay",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\relay",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "scripts",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\scripts",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "src",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\src",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "tests",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\tests",
+            "is_dir": true,
+            "size": 0
+          },
+          {
+            "name": "uv.lock",
+            "path": "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\uv.lock",
+            "is_dir": false,
+            "size": 491717
+          }
+        ]
+      }
+    },
+    "mcp_output": {
+      "success": false,
+      "error": "An asyncio.Future, a coroutine or an awaitable is required"
+    },
+    "comparison": {
+      "cli_keys": [
+        "data",
+        "error",
+        "success"
+      ],
+      "mcp_keys": [
+        "error",
+        "success"
+      ],
+      "identical": false,
+      "cli_hash": "b4e59d3a22f20567c2cec85121f74151b236b581baf21337c41678561c14e0b7",
+      "mcp_hash": "fb2b9fbd4c1dc96f1c39acb9e47e7809ad1ff2b2b5474e62f315d4d9e33e1f5d"
+    },
+    "cli_time": 2.613020420074463,
+    "mcp_time": 0.006350040435791016
+  }
+]

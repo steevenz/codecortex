@@ -1,0 +1,34 @@
+stack:
+  name: dart
+  display_name: "Dart"
+  version: "3.6"
+  file_conventions:
+    directories: snake_case
+    modules: "snake_case.dart"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard Dart Project"
+    description: "Minimal, standard-compliant Dart project"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "bin"
+      - "test"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

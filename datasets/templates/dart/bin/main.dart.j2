@@ -1,0 +1,19 @@
+import "dart:convert";
+import "dart:io";
+
+void main() {
+  final environment = (Platform.environment["ENVIRONMENT"] ?? "development").trim();
+  final requestId = (Platform.environment["REQUEST_ID"] ?? "").trim();
+
+  final payload = <String, dynamic>{
+    "level": "INFO",
+    "service": "{{ project_slug }}",
+    "environment": environment,
+    "request_id": requestId.isEmpty ? null : requestId,
+    "message": "Service started",
+    "version": "{{ project_version }}",
+  };
+
+  stdout.writeln(jsonEncode(payload));
+}
+

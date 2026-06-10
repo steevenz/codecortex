@@ -1,0 +1,31 @@
+stack:
+  name: cpp
+  display_name: "C++"
+  version: "C++20"
+  file_conventions:
+    directories: snake_case
+    modules: "snake_case.cpp"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard C++ Project"
+    description: "Minimal, standard-compliant C++ project"
+    pattern: layered
+    dependencies: []
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

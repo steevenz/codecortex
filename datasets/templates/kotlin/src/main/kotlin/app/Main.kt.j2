@@ -1,0 +1,21 @@
+package app
+
+fun main() {
+    val environment = System.getenv("ENVIRONMENT") ?: "development"
+    val requestId = System.getenv("REQUEST_ID")
+
+    val json = buildString {
+        append("{")
+        append("\"level\":\"INFO\",")
+        append("\"service\":\"").append("{{ project_slug }}").append("\",")
+        append("\"environment\":\"").append(environment).append("\",")
+        append("\"request_id\":")
+        if (requestId.isNullOrBlank()) append("null") else append("\"").append(requestId).append("\"")
+        append(",")
+        append("\"message\":\"Service started\",")
+        append("\"version\":\"").append("{{ project_version }}").append("\"")
+        append("}")
+    }
+
+    println(json)
+}

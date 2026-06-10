@@ -1,0 +1,50 @@
+package app;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public final class Main {
+    public static void main(String[] args) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("level", "INFO");
+        payload.put("service", "{{ project_slug }}");
+        payload.put("environment", System.getenv().getOrDefault("ENVIRONMENT", "development"));
+        payload.put("request_id", System.getenv("REQUEST_ID"));
+        payload.put("message", "Service started");
+        payload.put("version", "{{ project_version }}");
+
+        System.out.println(Json.stringify(payload));
+    }
+}
+
+final class Json {
+    private Json() {}
+
+    static String stringify(Map<String, Object> payload) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : payload.entrySet()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"").append(escape(entry.getKey())).append("\":");
+            Object value = entry.getValue();
+            if (value == null) {
+                sb.append("null");
+            } else {
+                sb.append("\"").append(escape(String.valueOf(value))).append("\"");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    static String escape(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
+}

@@ -1,0 +1,31 @@
+import Foundation
+
+struct LogEntry: Codable {
+    let timestamp: String
+    let level: String
+    let service: String
+    let environment: String
+    let request_id: String?
+    let message: String
+    let version: String
+}
+
+func nowIso() -> String {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter.string(from: Date())
+}
+
+let entry = LogEntry(
+    timestamp: nowIso(),
+    level: "INFO",
+    service: "{{ project_slug }}",
+    environment: ProcessInfo.processInfo.environment["ENVIRONMENT"] ?? "development",
+    request_id: ProcessInfo.processInfo.environment["REQUEST_ID"],
+    message: "Service started",
+    version: "{{ project_version }}"
+)
+
+let data = try JSONEncoder().encode(entry)
+FileHandle.standardOutput.write(data)
+FileHandle.standardOutput.write(Data("\n".utf8))

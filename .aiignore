@@ -1,0 +1,66 @@
+# AI Agent Ignore Rules — Paths excluded from AI agent context windows
+# This file tells AI coding agents which files NOT to read or analyze.
+
+# Virtual environment & dependencies
+.venv/
+venv/
+vendor/
+uv.lock
+
+# Build & distribution artifacts
+build/
+dist/
+*.egg-info/
+*.whl
+*.so
+*.pyc
+__pycache__/
+
+# Databases & runtime data
+database/
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Cache directories
+.cache/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+.nox/
+
+# IDE & editor config
+.idea/
+.vscode/
+.trae/
+.settings/
+*.swp
+*.swo
+
+# Test coverage artifacts
+.coverage
+htmlcov/
+.hypothesis/
+
+# Environment & secrets
+.env
+
+# Node.js proxy bridge (generated)
+scripts/server/js/
+
+# Dev scratch pad
+scratch/
+
+# Output artifacts
+outputs/
+
+# Docker & infra
+${HOME}/
+
+# Large docs drafts
+docs/drafts/
+
+# Test fixtures
+tests/fixtures/

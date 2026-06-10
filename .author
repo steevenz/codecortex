@@ -1,7 +1,6 @@
-AUTHOR_USERNAME=steevenz
-AUTHOR_FULLNAME=Steeven Andrian
-AUTHOR_EMAIL=steevenz@users.noreply.github.com
-AUTHOR_GITHUB=https://github.com/steevenz
-AUTHOR_WEBSITE=
-AUTHOR_COPYRIGHT=Steeven Andrian
-COPYRIGHT_YEAR=2026
+name: Steeven Andrian
+username: steevenz
+email: steevenz@steevenz.com
+github_url: https://github.com/steevenz
+role: Founder & Principal Engineer
+bio: Founder of Aegis Codework, architect of CodeCortex MCP Server and O2System Framework. Specializes in code intelligence, DDD, and multi-IDE developer tooling.

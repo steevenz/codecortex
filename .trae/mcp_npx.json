@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "codecortex": {
+      "command": "node",
+      "args": [
+        "scripts/server/run_server.js"
+      ],
+      "env": {
+        "CODECORTEX_DB_PATH": "${HOME}/.codecortex/db.sqlite",
+        "CODECORTEX_GRAPH_BACKEND": "kuzu",
+        "CODECORTEX_MAX_REPOS": "50",
+        "CODECORTEX_MAX_DEPTH": "10",
+        "CODECORTEX_MAX_FILE_SIZE_MB": "10",
+        "CODECORTEX_TRANSPORT": "stdio"
+      },
+      "systemPrompt": ".trae/system_prompt.md"
+    },
+    "codecortex-npx": {
+      "command": "npx",
+      "args": [
+        "codecortex-mcp"
+      ],
+      "env": {
+        "CODECORTEX_DB_PATH": "${HOME}/.codecortex/db.sqlite",
+        "CODECORTEX_GRAPH_BACKEND": "kuzu",
+        "CODECORTEX_MAX_REPOS": "50"
+      }
+    }
+  }
+}

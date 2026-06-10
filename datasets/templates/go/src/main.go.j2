@@ -1,0 +1,43 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"time"
+)
+
+type LogEntry struct {
+	Timestamp   string `json:"timestamp"`
+	Level       string `json:"level"`
+	Service     string `json:"service"`
+	Environment string `json:"environment"`
+	RequestID   string `json:"request_id,omitempty"`
+	Message     string `json:"message"`
+	Version     string `json:"version"`
+}
+
+func main() {
+	reqID := os.Getenv("REQUEST_ID")
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		env = "development"
+	}
+
+	entry := LogEntry{
+		Timestamp:   time.Now().UTC().Format(time.RFC3339Nano),
+		Level:       "INFO",
+		Service:     "{{ project_slug }}",
+		Environment: env,
+		RequestID:   reqID,
+		Message:     "Service started",
+		Version:     "{{ project_version }}",
+	}
+
+	b, err := json.Marshal(entry)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, `{"level":"ERROR","message":"failed to marshal log entry"}`)
+		return
+	}
+	fmt.Fprintln(os.Stdout, string(b))
+}

@@ -1,0 +1,8 @@
+version: 1.0.0
+date: 2026-06-03
+state: initialization
+phase: greenfield
+project: Myawesomeproject
+stack: python
+project_type: web_api
+author: Steeven Andrian

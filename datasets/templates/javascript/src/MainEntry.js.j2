@@ -1,0 +1,14 @@
+import { info } from "./core/LogWriter.js";
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+export function main() {
+  info("Service started", {
+    timestamp: nowIso(),
+    version: "{{ project_version }}",
+  });
+}
+
+main();

@@ -273,18 +273,16 @@ def generate_mcp_client_config(port: int) -> tuple[bool, Path | None]:
     base_url = active_base or f"http://localhost:{effective_port}"
     mcp_url = f"{base_url}/codecortex-api/v1{mcp_path}"
 
-    # Resolve API key from multiple sources
+    # Resolve API key from environment
     api_key = (
-        _parse_env_value(env_path, "CODECORTEX_BOOTSTRAP_API_KEY")
-        or os.getenv("CODECORTEX_BOOTSTRAP_API_KEY", "").strip()
-        or _parse_env_value(env_path, "CODECORTEX_DASHBOARD_API_KEY")
-        or os.getenv("CODECORTEX_DASHBOARD_API_KEY", "").strip()
+        _parse_env_value(env_path, "CODECORTEX_CLIENT_API_KEY")
+        or os.getenv("CODECORTEX_CLIENT_API_KEY", "").strip()
     )
 
     if not api_key:
         show_status("Generating MCP Client Config", "SKIPPED", "yellow")
         print("  WARN  No API key available from .env or process environment.")
-        print("  INFO  Set CODECORTEX_BOOTSTRAP_API_KEY or CODECORTEX_DASHBOARD_API_KEY, then re-run setup.\n")
+        print("  INFO  Set CODECORTEX_CLIENT_API_KEY, then re-run setup.\n")
         return False, None
 
     headers = {"X-API-KEY": api_key}

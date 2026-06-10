@@ -17,7 +17,7 @@ import hmac
 import hashlib
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request, Depends
-from src.core.logging_config import get_logger
+from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 

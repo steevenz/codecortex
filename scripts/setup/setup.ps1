@@ -1,52 +1,12 @@
 # CodeCortex Setup Script (Windows)
 # -----------------------------------
-# This script initializes the development environment for CodeCortex.
+# Initializes the environment for CodeCortex.
+# For a faster one-command experience, use: .\scripts\setup\quickstart.ps1
 
 Write-Host "Starting CodeCortex Setup..." -ForegroundColor Cyan
 
 $codecortexRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$pythonsDir = Resolve-Path (Join-Path $PSScriptRoot "..\\..")
-
-# 0. Vendored upstreams are required for detached mode
-$vendoredChecks = @(
-    (Join-Path $codecortexRoot "vendor\\upstreams\\codegraph"),
-    (Join-Path $codecortexRoot "vendor\\upstreams\\codeindex"),
-    (Join-Path $codecortexRoot "vendor\\upstreams\\graphify"),
-    (Join-Path $codecortexRoot "src\\domain\\codegraph\\upstream\\codegraphcontext"),
-    (Join-Path $codecortexRoot "src\\domain\\codeindex\\upstream\\code_index_mcp"),
-    (Join-Path $codecortexRoot "src\\domain\\graphify\\upstream\\graphify")
-)
-foreach ($p in $vendoredChecks) {
-    if (-not (Test-Path $p)) {
-        Write-Host "Missing vendored upstream artifact: $p" -ForegroundColor Red
-        Write-Host "Run: python scripts\\harvest_upstreams.py --source pythons --mode both --clone-missing" -ForegroundColor Yellow
-        exit 1
-    }
-}
-
-# Optional: fetch external upstream clones (only for refreshing vendor)
-if ($env:CODECORTEX_FETCH_UPSTREAMS -eq "1") {
-    if (-not (Get-Command "git" -ErrorAction SilentlyContinue)) {
-        Write-Host "git not found. Please install Git to fetch upstream repos." -ForegroundColor Red
-        exit 1
-    }
-    $upstreams = @(
-        @{ Name = "codegraph"; Url = "https://github.com/steevenz/codegraph.git" },
-        @{ Name = "codeindex"; Url = "https://github.com/steevenz/codeindex.git" },
-        @{ Name = "graphify"; Url = "https://github.com/steevenz/graphify.git" }
-    )
-    foreach ($u in $upstreams) {
-        $target = Join-Path $pythonsDir $u.Name
-        if (-not (Test-Path $target)) {
-            Write-Host "Cloning upstream repo '$($u.Name)' into: $target" -ForegroundColor Yellow
-            git clone $u.Url $target
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "Failed to clone '$($u.Name)'. Please check git auth/network." -ForegroundColor Red
-                exit 1
-            }
-        }
-    }
-}
+Set-Location $codecortexRoot
 
 # 1. Copy .env.example if .env doesn't exist
 if (-not (Test-Path ".env")) {
@@ -56,13 +16,30 @@ if (-not (Test-Path ".env")) {
     Write-Host ".env already exists, skipping." -ForegroundColor Gray
 }
 
-# 2. Sync dependencies using uv
+# 2. Sync dependencies
 if (Get-Command "uv" -ErrorAction SilentlyContinue) {
     Write-Host "Syncing dependencies with uv..." -ForegroundColor Yellow
-    uv sync
+    uv sync --no-dev
 } else {
-    Write-Host "uv not found. Please install uv first (https://github.com/astral-sh/uv)." -ForegroundColor Red
-    exit 1
+    Write-Host "uv not found. Falling back to pip..." -ForegroundColor Yellow
+    if (-not (Test-Path ".venv")) {
+        python -m venv .venv
+    }
+    & ".venv\Scripts\python.exe" -m pip install -e . --quiet
 }
 
-Write-Host "Setup Complete! CodeCortex is ready." -ForegroundColor Green
+# 3. Generate API key if missing
+$envContent = Get-Content ".env" -Raw
+if ($envContent -match "CODECORTEX_CLIENT_API_KEY=\s*$" -or $envContent -notmatch "CODECORTEX_CLIENT_API_KEY=") {
+    Write-Host "Generating API key..." -ForegroundColor Yellow
+    if (Get-Command "uv" -ErrorAction SilentlyContinue) {
+        uv run python scripts/server/keygen.py --install --force
+    } else {
+        & ".venv\Scripts\python.exe" scripts/server/keygen.py --install --force
+    }
+} else {
+    Write-Host "API key already configured, skipping." -ForegroundColor Gray
+}
+
+Write-Host "`nSetup Complete! CodeCortex is ready." -ForegroundColor Green
+Write-Host "Next: Add to your MCP client config and restart your IDE." -ForegroundColor Gray

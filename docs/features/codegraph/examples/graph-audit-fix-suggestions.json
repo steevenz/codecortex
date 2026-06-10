@@ -1,0 +1,40 @@
+{
+  "repo_id": "uuid-1234-5678",
+  "audit_types": ["god_nodes", "dead_code", "security"],
+  "include_fix_suggestions": true,
+  "degree_threshold": 10,
+  "limit": 50,
+  "result": {
+    "god_nodes": [
+      {
+        "name": "Utils",
+        "type": "module",
+        "file": "src/utils/__init__.py",
+        "in_degree": 47,
+        "out_degree": 32,
+        "risk": "high",
+        "recommendation": "Split into domain-specific utility modules",
+        "fix_suggestion": {
+          "command": "codecortex cg refactor uuid-1234-5678 apply split_module Utils",
+          "hint": "Run: codecortex cg refactor uuid-1234-5678 impact split_module Utils"
+        }
+      }
+    ],
+    "dead_code": [
+      {
+        "name": "legacy_migration",
+        "file": "src/db/migrate.py:12",
+        "risk": "medium",
+        "recommendation": "Remove unused code; keep only if explicitly exported"
+      }
+    ],
+    "security": [
+      {
+        "type": "hardcoded_api_key",
+        "file": "src/config.py:5",
+        "risk": "critical",
+        "recommendation": "Move to environment variables or secret manager"
+      }
+    ]
+  }
+}

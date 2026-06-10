@@ -1,0 +1,42 @@
+{
+  "request": {
+    "tool": "scaffold_create",
+    "name": "my-project",
+    "stack": "python",
+    "project_type": "standard",
+    "author": "John Doe",
+    "email": "john@example.com",
+    "version": "0.1.0",
+    "license": "MIT",
+    "dry_run": true
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Dry-run: project 'My Project' ready to scaffold",
+    "data": {
+      "dry_run": true,
+      "name": {
+        "display": "My Project",
+        "slug": "my-project",
+        "snake": "my_project",
+        "pascal": "MyProject"
+      },
+      "stack": "python",
+      "stack_display": "Python",
+      "project_type": "standard",
+      "project_type_display": "Standard",
+      "target_path": "/path/to/outputs/projects/my-project",
+      "author": "John Doe",
+      "email": "john@example.com",
+      "version": "0.1.0",
+      "license": "MIT",
+      "include_ai": false,
+      "include_trainer": false,
+      "template_count": 15,
+      "directory_count": 33,
+      "template_context_keys": ["project_name", "project_slug", "project_snake", "project_pascal", "author", "email", "year", "stack_name", "project_type_id"]
+    },
+    "request_id": "req_pqr678"
+  }
+}

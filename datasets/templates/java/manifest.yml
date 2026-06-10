@@ -1,0 +1,34 @@
+stack:
+  name: java
+  display_name: "Java"
+  version: "21"
+  file_conventions:
+    directories: lowercase
+    modules: "PascalCase.java"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard Java Project"
+    description: "Minimal, standard-compliant Java project (Maven)"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "src/main/java/app"
+      - "src/test/java/app"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

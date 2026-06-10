@@ -1,0 +1,48 @@
+{
+  "name": "codeindex",
+  "version": "0.1.0",
+  "description": "Code index domain — tree-sitter AST parsing, symbol extraction, scope resolution, import resolution, embeddings, and semantic search across 22 languages and 11 framework parsers",
+  "type": "module",
+  "dependencies": {
+    "modules": ["coderepository", "codegraph"],
+    "core": ["config", "database", "errors", "logging", "parser", "telemetry", "token"]
+  },
+  "providers": {
+    "services": [
+      "index_service",
+      "framework_detection"
+    ],
+    "parsers": {
+      "languages": [
+        "python", "typescript", "typescriptjsx", "javascript",
+        "c", "cpp", "csharp", "go", "rust", "java", "kotlin",
+        "scala", "swift", "ruby", "php", "elixir", "dart",
+        "haskell", "perl", "cobol", "css", "vue", "generic_ts"
+      ],
+      "frameworks": [
+        "angular", "aspnet", "django", "express", "flutter",
+        "laravel", "nestjs", "nextjs", "rails", "react", "symfony", "vue"
+      ]
+    }
+  },
+  "tools": {
+    "prefix": "index_",
+    "entries": [
+      "index_repository"
+    ]
+  },
+  "features": [
+    "incremental_indexing",
+    "parallel_processing",
+    "ast_caching",
+    "scope_resolution",
+    "wildcard_import_resolution",
+    "semantic_embeddings"
+  ],
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "copyright": "Copyright (c) 2026 Aegis Codework",
+  "standard": "Aegis-CrossStack-v1.0"
+}

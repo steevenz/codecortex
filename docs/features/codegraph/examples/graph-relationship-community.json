@@ -1,0 +1,43 @@
+{
+  "repo_id": "uuid-1234-5678",
+  "target_node": "PaymentModule",
+  "relation_type": ["calls", "imports"],
+  "direction": "both",
+  "depth": 2,
+  "include_community": true,
+  "min_confidence": "INFERRED",
+  "limit": 100,
+  "result": {
+    "target_node": "PaymentModule",
+    "nodes": [
+      {
+        "symbol_name": "PaymentGateway",
+        "symbol_type": "class",
+        "file": "src/payment/gateway.py",
+        "relation": "calls",
+        "direction": "outbound"
+      },
+      {
+        "symbol_name": "InvoiceService",
+        "symbol_type": "class",
+        "file": "src/billing/invoice.py",
+        "relation": "calls",
+        "direction": "outbound"
+      },
+      {
+        "symbol_name": "OrderController",
+        "symbol_type": "class",
+        "file": "src/api/orders.py",
+        "relation": "calls",
+        "direction": "inbound"
+      }
+    ],
+    "community": {
+      "id": 2,
+      "size": 5,
+      "cohesion": 0.89,
+      "members": ["PaymentModule", "PaymentGateway", "InvoiceService", "BillingModel", "TransactionModel"]
+    },
+    "total": 3
+  }
+}

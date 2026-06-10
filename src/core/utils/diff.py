@@ -1,25 +1,31 @@
 """
-/**
- * @project   CodeCortex
- * @package   Core/Utils
- * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
- * @stack     Python
- * * Utility for generating unified diffs.
- */
-"""
-import difflib
+Unified diff generation — wraps ``difflib.unified_diff``.
 
-def generate_unified_diff(old_content: str, new_content: str, file_path: str) -> str:
-    """Generate a git-style unified diff between two versions of a file."""
-    old_lines = old_content.splitlines(keepends=True)
-    new_lines = new_content.splitlines(keepends=True)
-    
-    diff = difflib.unified_diff(
-        old_lines, new_lines,
-        fromfile=f"a/{file_path}",
-        tofile=f"b/{file_path}",
-        lineterm=""
-    )
-    return "".join(diff)
+:project: CodeCortex
+:package: Core.Utils.Diff
+:author: Steeven Andrian
+:copyright: (c) 2026 Aegis Codework
+:standard: Aegis-Core-v1.0
+"""
+
+import difflib
+from typing import List, Optional
+
+def generate_unified_diff(
+    original,
+    modified,
+    fromfile: str = '',
+    tofile: str = '',
+    lineterm: str = '\n'
+) -> str:
+    """Generate a unified diff string.
+
+    Accepts either a list of lines or a raw string for *original* and *modified*.
+    """
+    if isinstance(original, str):
+        original = original.splitlines(keepends=True)
+    if isinstance(modified, str):
+        modified = modified.splitlines(keepends=True)
+    return '\n'.join(difflib.unified_diff(
+        original, modified, fromfile=fromfile, tofile=tofile, lineterm=lineterm
+    ))

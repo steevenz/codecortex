@@ -1,0 +1,21 @@
+{
+  "request": {
+    "tool": "scaffold_generate",
+    "file_type": "gitignore",
+    "project_category": "standard",
+    "project_name": "My Project",
+    "author": "John Doe",
+    "email": "john@example.com"
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Generated gitignore",
+    "data": {
+      "filename": ".gitignore",
+      "content": "# Python byte-compiled\n__pycache__/\n*.py[cod]\n*$py.class\n\n# Virtual environments\nvenv/\n.venv/\nenv/\n\n# IDEs\n.vscode/\n.idea/\n",
+      "content_length": 1234
+    },
+    "request_id": "req_jkl012"
+  }
+}

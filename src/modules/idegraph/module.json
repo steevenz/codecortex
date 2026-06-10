@@ -1,0 +1,16 @@
+{
+  "name": "idegraph",
+  "version": "1.0.0",
+  "description": "Cross-IDE memory harvesting and graph — ingests AI interaction data from 16+ IDEs, groups by project, and provides unified search/export.",
+  "author": "Steeven Andrian",
+  "copyright": "(c) 2026 Aegis Codework",
+  "standard": "Aegis-IdeGraph-v1.0",
+  "supported_ides": [
+    "trae", "cursor", "windsurf", "gemini", "antigravity",
+    "claude", "codex", "continue", "opencode", "copilot",
+    "kilo", "kiro", "verdent", "codebuddy", "qwen", "kimi"
+  ],
+  "dependencies": ["src.core", "src.modules.codeanalysis"],
+  "mcp_tool": "codecortex:idegraph",
+  "actions": ["search", "get", "list", "ingest", "refresh", "health", "stats", "compact", "workspace", "harvest"]
+}

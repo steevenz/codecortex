@@ -4,11 +4,11 @@
     "codecortex_mcp": {
       "command": "node",
       "args": [
-        "c:/Users/steevenz/.aicoders/scripts/pythons/codecortex/scripts/server/js/index.js"
+        "scripts/server/js/index.cjs"
       ],
+      "cwd": "C:\\Users\\steevenz\\MCP\\mcp-codecortex",
       "env": {
-        "CODECORTEX_TRANSPORT": "stdio",
-        "CODECORTEX_DASHBOARD_API_KEY": "replace-with-your-key"
+        "CODECORTEX_CLIENT_API_KEY": "REPLACE_WITH_YOUR_API_KEY"
       }
     }
   }

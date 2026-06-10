@@ -1,0 +1,33 @@
+stack:
+  name: css-scss
+  display_name: "CSS/SCSS"
+  version: ""
+  file_conventions:
+    directories: kebab-case
+    modules: "kebab-case.scss"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "CSS/SCSS Stylesheet"
+    description: "Minimal, standard-compliant CSS/SCSS scaffold"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "styles"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

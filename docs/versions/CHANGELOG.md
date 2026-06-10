@@ -86,6 +86,6 @@
 
 ### Documentation
 
-- `docs/ARCHITECTURE.md` — DI wiring, pipeline flow, backend abstraction.
-- `docs/SECURITY.md` — SSRF guards, path validation, label sanitization reference.
-- `docs/CHANGELOG.md` — this file.
+- `docs/architecture/architecture.md` — DI wiring, pipeline flow, backend abstraction.
+- `docs/architecture/security.md` — SSRF guards, path validation, label sanitization reference.
+- `docs/versions/changelog.md` — this file.

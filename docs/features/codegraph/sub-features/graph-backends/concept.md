@@ -44,3 +44,23 @@ If the env var is unset and `kuzu` is installed, Kuzu is used. Otherwise, SQLite
 ```bash
 docker-compose up -d     # Starts Neo4j + FalkorDB
 ```
+
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| GB_001 | graph_build (graph_backends) | Backend connection failed |
+| GB_002 | graph_query (graph_backends) | Backend query failed |
+| GB_003 | graph_build (graph_backends) | Backend schema migration failed |
+
+---
+
+## Performance
+
+- **Latency:** Kuzu (embedded) ~5-10ms, Neo4j (client-server) ~20-50ms, FalkorDB (in-memory) ~1-5ms
+- **Scalability:** Kuzu handles single-machine workloads, Neo4j scales horizontally, FalkorDB best for low-latency
+- **Memory Usage:** Backend-specific; Neo4j requires more RAM than Kuzu
+- **Optimization:** Fallback to SQLite if backend unavailable

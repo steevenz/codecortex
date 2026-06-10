@@ -1,40 +1,26 @@
 # Semantic Search
 
-> **Source:** `src/domain/codeindex/infrastructure/embeddings.py`
+> **Not implemented in CodeIndex domain.**
+> Semantic search belongs to the **CodeAnalysis** domain via `code_search(search_type="semantic")`.
 
-## Concept
+## Clarification
 
-Semantic search uses vector embeddings to find code by meaning rather than by exact keyword match. A query like "handle user login" can find functions named `authenticate_user`, `login_handler`, or `sign_in` — even though none contain the exact query words.
+CodeIndex focuses on **AST-based symbol indexing** -- functions, classes, variables, imports, and call edges. It does NOT generate or store vector embeddings.
 
-## How It Works
+Semantic search (natural language -> code matching via vector embeddings) is handled by:
 
-```
-Query: "payment retry logic"
-         │
-         ▼
-  sentence-transformers ──────> embedding [384-dim vector]
-         │
-         ▼
-  Cosine similarity against ───> Top-K results
-  all indexed code chunks
-         │
-         ▼
-  Rank by score ──────────────> Response
-```
+| Component | Domain | Tool |
+|-----------|--------|------|
+| Semantic search execution | CodeAnalysis | `code_search(search_type="semantic")` |
+| Embedding generation | CodeAnalysis | Internal embedding service |
+| Symbol index (source of truth) | **CodeIndex** | `code_index(action="status")` |
 
-## Architecture
+CodeIndex provides the **symbol registry** that semantic search queries against. Without CodeIndex indexing a repo first, semantic search has no data to search.
 
-- **Model:** `all-MiniLM-L6-v2` (384-dim embeddings, 80MB)
-- **Loading:** Lazy singleton — model loads on first query, not on server start
-- **Chunking:** Code is split by function/class boundaries (not arbitrary token windows)
-- **Storage:** Embeddings stored as numpy `.npy` files alongside SQLite
-- **Fallback:** If model unavailable (no GPU/RAM), gracefully returns empty results
-- **Speed:** ~50ms per query after model loaded
+## If You Need
 
-## Impact
-
-| Aspect | Without Semantic Search | With Semantic Search |
-|--------|------------------------|---------------------|
-| Find login code | Must search for "login", "auth", "signin" separately | One query: "user authentication" |
-| Find config loading | Must know exact function name | Query: "load configuration from file" |
-| Cross-language | Language-specific queries | Concept-based, works across languages |
+- **Exact name search** -> `code_search(search_type="symbol")` (CodeAnalysis)
+- **Regex pattern search** -> `code_search(search_type="regex")` (CodeAnalysis)
+- **Natural language query** -> `code_search(search_type="semantic")` (CodeAnalysis)
+- **Graph relationship query** -> `graph_query` (CodeGraph)
+- **Index management** -> `code_index` (CodeIndex)

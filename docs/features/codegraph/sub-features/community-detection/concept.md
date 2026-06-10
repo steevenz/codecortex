@@ -45,3 +45,21 @@ Leiden is the primary algorithm with Louvain as automatic fallback.
 - **Low cohesion (<0.5):** The community may need restructuring
 - **Small communities (2-5):** Likely utility groups
 - **Large communities (20+):** May indicate a god module
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| CD_001 | graph_audit (communities) | Leiden algorithm failed to converge |
+| CD_002 | graph_audit (communities) | Graph too small for community detection |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(V log V) for Leiden, O(V log V) for Louvain
+- **Scalability:** Handles graphs up to ~100k nodes comfortably
+- **Memory Usage:** Requires full graph in memory; O(V+E) space
+- **Optimization:** Falls back to Louvain if Leiden fails

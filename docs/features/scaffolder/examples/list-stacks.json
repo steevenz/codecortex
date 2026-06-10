@@ -1,0 +1,37 @@
+{
+  "request": {
+    "tool": "scaffold_list_stacks"
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Found 3 stacks",
+    "data": {
+      "stacks": [
+        {
+          "name": "python",
+          "display_name": "Python",
+          "version": "3.12",
+          "file_conventions": {
+            "directories": "snake_case",
+            "modules": "snake_case.py",
+            "classes": "PascalCase"
+          },
+          "project_types": ["standard", "web_api", "cli_tool"]
+        },
+        {
+          "name": "typescript",
+          "display_name": "TypeScript",
+          "version": "5.0",
+          "file_conventions": {
+            "directories": "kebab-case",
+            "modules": "kebab-case.ts",
+            "classes": "PascalCase"
+          },
+          "project_types": ["standard", "web_api"]
+        }
+      ]
+    },
+    "request_id": "req_abc123"
+  }
+}

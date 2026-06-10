@@ -1,0 +1,41 @@
+{
+  "repo_id": "uuid-1234-5678",
+  "action": "impact",
+  "refactor_type": "split_module",
+  "target_node": "LargeService",
+  "options": {
+    "new_module_name": "CoreService"
+  },
+  "dry_run": false,
+  "result": {
+    "action": "impact",
+    "refactor_type": "split_module",
+    "target_node": "LargeService",
+    "impact": {
+      "affected_files": [
+        "src/services/large_service.py",
+        "src/api/endpoints.py",
+        "src/tests/test_large_service.py"
+      ],
+      "estimated_changes": 15,
+      "risk_score": 0.3,
+      "dependencies": [
+        "src/utils/helpers.py",
+        "src/core/base.py"
+      ]
+    },
+    "preview": {
+      "new_module_path": "src/services/core_service.py",
+      "refactored_methods": [
+        "process_payment",
+        "validate_order",
+        "send_notification"
+      ],
+      "remaining_methods": [
+        "legacy_helper"
+      ]
+    },
+    "undo_id": "abc12345def6789",
+    "undo_hint": "Use graph_refactor action='undo' with undo_id='abc12345def6789' to revert these changes."
+  }
+}

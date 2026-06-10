@@ -47,9 +47,39 @@
 
 | Tool | Method | Description |
 |------|--------|-------------|
-| `graph_build` | `CodeGraphService.build_repository_graph()` | Build/rebuild the graph |
-| `graph_query` | `CodeGraphService.analyze_code_relationships()` | Type-specific query |
-| `graph_find_symbols` | Symbol search (fuzzy or exact) | Locate code by name |
-| `graph_trace_flow` | BFS execution flow tracing | Happy path analysis |
-| `arch_analyze` | Full architecture + report | Comprehensive analysis |
-| `arch_audit` | Specific audit type | Targeted smell detection |
+| `graph_build` | `AEGIS.build()` | Build/rebuild the graph with modular detection |
+| `graph_search` | `AEGISGraphSearch.search()` | Unified search (symbols, relations, semantic, modular) |
+| `graph_query` | `CodeGraphService.analyze_code_relationships()` + `AEGISGraphTrace.trace()` | Type-specific query + trace |
+| `graph_audit` | `AEGISGraphAudit.audit()` + `CodeGraphService` methods | Full architectural audit |
+| `graph_relationship` | `AEGISGraphRelationship.explore()` | Explore relationships with community detection |
+| `graph_refactor` | `AEGISGraphRefactor.refactor()` | Architectural-scale code transformation |
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| GRPH_001 | graph_build | Repository path does not exist or invalid |
+| GRPH_002 | graph_query | Node not found in graph |
+| GRPH_003 | graph_search | Invalid action parameter |
+| GRPH_004 | graph_audit | Repository ID not found |
+| GRPH_005 | graph_relationship | Target node not found |
+| GRPH_006 | graph_refactor | Invalid refactor_type |
+| GRPH_007 | graph_refactor | Target node not found in graph |
+| GRPH_008 | graph_refactor | Undo log entry not found |
+| GRPH_009 | graph_refactor | Apply operation failed |
+| GRPH_010 | graph_build | Cache write/read error |
+| GRPH_011 | graph_query | Invalid query_type parameter |
+| GRPH_012 | graph_refactor | Validation failed (options, preconditions) |
+
+---
+
+## Performance
+
+- **Graph Build:** Hash-based incremental build (SHA-1 over file mtime+size) enables sub-second cache hits for unchanged repos
+- **Cache Invalidation:** Automatic invalidation on any file change via repo hash comparison
+- **Graph Traversal:** BFS O(V+E) for call chain tracing, depth-limited to prevent runaway
+- **Community Detection:** Leiden algorithm O(n log n) for large graphs
+- **Memory Usage:** In-memory KnowledgeGraph with dual-index for O(1) lookups; scales to ~100k nodes comfortably
+- **Backend Sync:** Optional Kuzu/Neo4j/FalkorDB sync for persistent graph queries

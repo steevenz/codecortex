@@ -1,0 +1,39 @@
+{
+  "name": "codeanalysis",
+  "version": "0.1.0",
+  "description": "Code analysis domain — AI-powered code search, audit, analyze, and status with quality gate enforcement",
+  "type": "module",
+  "dependencies": {
+    "modules": ["coderepository", "codeindex", "codegraph"],
+    "core": ["config", "database", "errors", "logging", "telemetry"]
+  },
+  "providers": {
+    "services": [
+      "analyze_service",
+      "search_service",
+      "audit_service",
+      "status_service"
+    ],
+    "analyzers": [
+      "code_analyzer",
+      "code_searcher",
+      "code_audit",
+      "code_status"
+    ]
+  },
+  "tools": {
+    "prefix": "code_",
+    "entries": [
+      "code_analyze",
+      "code_search",
+      "code_audit",
+      "code_status"
+    ]
+  },
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "copyright": "Copyright (c) 2026 Aegis Codework",
+  "standard": "Aegis-CrossStack-v1.0"
+}

@@ -1,0 +1,35 @@
+stack:
+  name: php
+  display_name: "PHP"
+  version: "8.3"
+  file_conventions:
+    directories: PascalCase
+    modules: "PascalCase.php"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard PHP Project"
+    description: "Minimal, standard-compliant PHP project"
+    pattern: layered
+    dependencies: []
+    extra_directories:
+      - "public"
+      - "src/App"
+      - "src/Services/Parser"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

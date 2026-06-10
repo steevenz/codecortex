@@ -1,0 +1,18 @@
+{
+  "request": {
+    "tool": "scaffold_validate_name",
+    "name": "my-awesome-project"
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Name 'My Awesome Project' is valid",
+    "data": {
+      "display": "My Awesome Project",
+      "slug": "my-awesome-project",
+      "snake": "my_awesome_project",
+      "pascal": "MyAwesomeProject"
+    },
+    "request_id": "req_ghi789"
+  }
+}

@@ -36,3 +36,21 @@ Entry point scoring assigns a 0-100 score to each function indicating how likely
   ]
 }
 ```
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| EPS_001 | graph_audit (entry_point_scoring) | Scoring algorithm failed |
+| EPS_002 | graph_audit (entry_point_scoring) | Insufficient data for scoring |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(V) for scoring all symbols in graph
+- **Scalability:** Linear in graph size; fast for repos up to 100k symbols
+- **Memory Usage:** O(V) for storing scores in memory
+- **Optimization:** Cached scores per graph build

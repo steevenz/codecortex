@@ -1,0 +1,29 @@
+{
+  "request": {
+    "tool": "scaffold_make",
+    "type": "repository",
+    "name": "User",
+    "stack": "python",
+    "module": "users",
+    "project_name": "My Project",
+    "author": "John Doe"
+  },
+  "response": {
+    "success": true,
+    "status_code": 200,
+    "message": "Generated Repository 'UserRepository' (python)",
+    "data": {
+      "type": "repository",
+      "type_display": "Repository",
+      "stack": "python",
+      "class_name": "UserRepository",
+      "file_name": "user_repository.py",
+      "relative_path": "users/repositories/user_repository.py",
+      "absolute_path": "/path/to/users/repositories/user_repository.py",
+      "content": "# @project My Project\n# @package Users.Repositories\n# @author John Doe\n\nclass UserRepository:\n    \"\"\"Data access layer for User entities.\"\"\"\n    pass\n",
+      "content_length": 456,
+      "written": false
+    },
+    "request_id": "req_mno345"
+  }
+}

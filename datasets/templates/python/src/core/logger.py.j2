@@ -1,0 +1,100 @@
+"""
+@project   {{ project_name }}
+@package   src.core
+@author    {{ author }}
+@copyright (c) {{ author }}
+@fileoverview Structured JSON logging per O2System logging-standard.md.
+
+Logs are written to: outputs/logs/{environment}/{YYYY-MM-DD}/application.log
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import sys
+import uuid
+from datetime import datetime
+from pathlib import Path
+
+
+class JsonFormatter(logging.Formatter):
+    """Formats log records as single-line JSON per O2System standard."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        log_entry = {
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+
+        # Add extra fields (request_id, user_id, etc.)
+        for key in ("request_id", "user_id", "status", "error_type"):
+            value = getattr(record, key, None)
+            if value is not None:
+                log_entry[key] = value
+
+        if record.exc_info and record.exc_info[0] is not None:
+            env = os.getenv("APP_ENV", "development")
+            if env == "development":
+                log_entry["exception"] = self.formatException(record.exc_info)
+
+        return json.dumps(log_entry, ensure_ascii=False)
+
+
+def get_logger(
+    name: str,
+    project_root: Path | None = None,
+    log_level: str | None = None,
+    enable_file: bool = True,
+) -> logging.Logger:
+    """Create a logger with structured JSON output.
+
+    Args:
+        name:         Logger name (typically ``__name__``).
+        project_root: Project root path for log file placement.
+        log_level:    Override log level.
+        enable_file:  Whether to write logs to a file.
+
+    Returns:
+        Configured logger instance.
+    """
+    logger = logging.getLogger(name)
+
+    if logger.handlers:
+        return logger
+
+    level = getattr(logging, (log_level or os.getenv("LOG_LEVEL", "INFO")).upper(), logging.INFO)
+    logger.setLevel(level)
+
+    formatter = JsonFormatter()
+
+    # Console handler (always)
+    console = logging.StreamHandler(sys.stdout)
+    console.setFormatter(formatter)
+    logger.addHandler(console)
+
+    # File handler (optional)
+    if enable_file:
+        root = project_root or Path.cwd()
+        env = os.getenv("APP_ENV", "development")
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        log_dir = root / "outputs" / "logs" / env / date_str
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        file_handler = logging.FileHandler(log_dir / "application.log", encoding="utf-8")
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    return logger
+
+
+def set_request_id(logger: logging.Logger | None = None) -> str:
+    """Generate a correlation ID for request tracing.
+
+    Returns:
+        UUID string for the current request.
+    """
+    return str(uuid.uuid4())

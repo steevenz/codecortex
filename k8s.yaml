@@ -30,7 +30,7 @@ spec:
           value: "0.0.0.0"
         - name: CODECORTEX_PORT
           value: "8001"
-        - name: CODECORTEX_DASHBOARD_API_KEY
+        - name: CODECORTEX_CLIENT_API_KEY
           valueFrom:
             secretKeyRef:
               name: codecortex-secret

@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\App;
+
+final class Main
+{
+    public function run(): string
+    {
+        $payload = [
+            'timestamp' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM),
+            'level' => 'INFO',
+            'service' => '{{ project_slug }}',
+            'environment' => getenv('ENVIRONMENT') ?: 'development',
+            'request_id' => getenv('REQUEST_ID') ?: null,
+            'message' => 'Service started',
+            'version' => '{{ project_version }}',
+        ];
+
+        return json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    }
+}
+

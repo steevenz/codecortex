@@ -1,0 +1,8 @@
+@echo off
+setlocal enabledelayedexpansion
+
+echo Installing dependencies...
+call npm install
+if errorlevel 1 exit /b 1
+
+echo Done.

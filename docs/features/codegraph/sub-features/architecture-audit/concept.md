@@ -50,3 +50,22 @@ Functions with excessive branching (if/else, switch, loops).
   "complexity": [{"name": "parse_config", "complexity": 25, "file": "src/utils/parser.py:30", "risk": "high"}]
 }
 ```
+
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| AA_001 | graph_audit (architecture_audit) | Centrality calculation failed |
+| AA_002 | graph_audit (architecture_audit) | Complexity calculation failed |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(V+E) for centrality, O(V) for complexity
+- **Scalability:** Linear in graph size; fast for repos up to 100k nodes
+- **Memory Usage:** O(V+E) for NetworkX graph in memory
+- **Optimization:** Uses NetworkX built-in algorithms (highly optimized)

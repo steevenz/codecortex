@@ -2,7 +2,7 @@
 # Universal MCP Installer for CodeCortex MCP Server
 # Supports: Windsurf, Trae, AntiGravity, Gemini CLI, Cursor, Claude Desktop, OpenCode, Zed, Kiro, iFlow, Qwen
 
-$ProjectRoot = "C:\Users\steevenz\MCP\mcp-codecortex"
+$ProjectRoot = "~\MCP\mcp-codecortex"
 
 # Common configuration for all tools
 $CodecortexConfig = @{
@@ -24,7 +24,7 @@ $Targets = @(
     @{ Name = "Cursor (Home)"; Path = "$env:USERPROFILE\.cursor\mcp.json"; Key = "mcpServers" },
     # Claude Desktop
     @{ Name = "Claude Desktop"; Path = "$env:APPDATA\Claude\claude_desktop_config.json"; Key = "mcpServers" },
-    @{ Name = "Claude Desktop (Store)"; Path = "C:\Users\steevenz\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json"; Key = "mcpServers" },
+    @{ Name = "Claude Desktop (Store)"; Path = "~\AppData\Local\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\claude_desktop_config.json"; Key = "mcpServers" },
     # Claude CLI
     @{ Name = "Claude CLI"; Path = "$env:USERPROFILE\.claude\mcp.json"; Key = "mcpServers" },
     # OpenCode AI Desktop

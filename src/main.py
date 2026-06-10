@@ -1,13 +1,11 @@
 """
-/**
- * @project   CodeCortex
- * @package   Main
- * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
- * @stack     Python
- * * Class CortexOrchestrator – Single Responsibility: Orchestrate the multi-domain intelligence pipeline.
- */
+CodeCortex MCP Server — Main entry point.
+
+:project: CodeCortex
+:package: Main
+:author: Steeven Andrian
+:copyright: (c) 2026 Aegis Codework
+:standard: Aegis-CrossStack-v1.0
 """
 
 import os
@@ -18,22 +16,26 @@ from typing import Dict, Any, Optional, List
 from mcp.server.fastmcp import FastMCP
 
 from src.core import api_response, new_request_id
-from src.core.logging_config import LoggerConfig, get_logger
+from src.core.logging import Logger, get_logger
+from src.core.logging.event_logger import log_event
 from src.core.database import DatabaseManager
-from src.domain.coderepository import CodeRepositoryService, GitService
-from src.domain.coderepository.infrastructure.sqlite_store import SQLiteCodeRepositoryStore
-from src.domain.codeindex import CodeIndexService
-from src.domain.codegraph import CodeGraphService
-from src.domain.filesystem.application.service import FilesystemService
-from src.domain.coderefactor import CodeRefactorService
-from src.domain.codetester.application.qa_service import QAService
-from src.core.telemetry import trace  # OpenTelemetry tracing
+from src.core.utils.validators import validate_path, validate_uuid, validate_max_depth
+from src.core.utils.path import normalize_relpath as _normalize_relpath
+from src.modules.coderepository import Repository, Git, Svn
+from src.modules.coderepository.adapters.filesystem.sqlite_store import SQLiteCodeRepositoryStore
+from src.modules.codeindex import Indexer
+from src.modules.codegraph import Graph
+from src.modules.codeanalysis.core.code_service import CodeService
+from src.modules.filesystem.core.service import Filesystem
+from src.modules.coderefactor import Refactor
+from src.modules.codetester.services.qa import QA
+from src.core.telemetry import get_tracer_provider  # OpenTelemetry tracing (lazy init)
 
 # Initialize FastMCP Server
 mcp = FastMCP("CodeCortex")
 
 # Initialize logging
-LoggerConfig.setup(log_level="INFO")
+Logger.setup(log_level="INFO")
 logger = get_logger(__name__)
 
 class CortexOrchestrator:
@@ -44,36 +46,121 @@ class CortexOrchestrator:
     """
     def __init__(self, db_path: Optional[str] = None):
         self.db = DatabaseManager(db_path)
+        self._ensure_schema()
         self.repo_store = SQLiteCodeRepositoryStore(self.db)
-        self.repo_service = CodeRepositoryService(self.repo_store)
-        self.graph_service = CodeGraphService(self.db)
-        self.index_service = CodeIndexService(self.db, codegraph_service=self.graph_service)
+        self.repo_service = Repository(self.repo_store)
+        self.graph_service = Graph(self.db)
+        self.index_service = Indexer(self.db, codegraph_service=self.graph_service)
         self.graph_service.code_index_service = self.index_service
-        self.fs_service = FilesystemService(self.db, self.repo_store)
-        self.git_service = GitService(self.repo_store)
-        self.refactor_service = CodeRefactorService(self.db, self.fs_service, self.git_service, self.graph_service)
-        self.qa_service = QAService(self.db)
+        self.git_service = Git(self.repo_store)
+        self.svn_service = Svn()
+        self.qa_service = QA(self.db)
+        self.fs_service = Filesystem(
+            self.db, self.repo_store,
+            graph_service=self.graph_service,
+            index_service=self.index_service,
+            git_service=self.git_service,
+            svn_service=self.svn_service,
+            qa_service=self.qa_service,
+        )
+        self.refactor_service = Refactor(self.db, self.fs_service, self.git_service, self.graph_service)
+        self.code_service = CodeService(self)
         self.logger = get_logger(f"{__name__}.Orchestrator")
 
+    def _ensure_schema(self) -> None:
+        """Create database tables if they do not exist (idempotent)."""
+        from src.core.database.orm import BaseModel, SessionManager
+        SessionManager(str(self.db._db_path)).create_tables(BaseModel)
+        # Ensure vcs_url uniqueness index for cross-device identity
+        self.db.conn.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_repositories_vcs_url
+            ON repositories(vcs_url) WHERE vcs_url IS NOT NULL AND vcs_url != ''
+        """)
+        # Ensure deleted_at column exists (ORM model has it, raw SQL create may miss it)
+        try:
+            self.db.conn.execute("ALTER TABLE repositories ADD COLUMN deleted_at DATETIME")
+        except Exception:
+            pass
+        # Ensure missing columns on legacy files table
+        _FILE_MISSING_COLS = {
+            "relative_path": "TEXT",
+            "directory_id": "TEXT",
+            "updated_at": "DATETIME DEFAULT CURRENT_TIMESTAMP",
+            "deleted_at": "DATETIME",
+            "language": "TEXT DEFAULT 'unknown'",
+        }
+        existing = {r[1] for r in self.db.conn.execute("PRAGMA table_info(files)").fetchall()}
+        for col, coltype in _FILE_MISSING_COLS.items():
+            if col not in existing:
+                try:
+                    self.db.conn.execute(f"ALTER TABLE files ADD COLUMN {col} {coltype}")
+                except Exception:
+                    pass
+        _SYMBOL_MISSING_COLS = {
+            "parent_id": "TEXT",
+        }
+        existing = {r[1] for r in self.db.conn.execute("PRAGMA table_info(symbols)").fetchall()}
+        for col, coltype in _SYMBOL_MISSING_COLS.items():
+            if col not in existing:
+                try:
+                    self.db.conn.execute(f"ALTER TABLE symbols ADD COLUMN {col} {coltype}")
+                except Exception:
+                    pass
+        # Ensure missing tables used by raw SQL queries
+        self.db.conn.execute("""
+            CREATE TABLE IF NOT EXISTS insights (
+                id TEXT PRIMARY KEY,
+                repository_id TEXT NOT NULL,
+                target_code TEXT,
+                category TEXT NOT NULL,
+                insight_type TEXT NOT NULL,
+                metadata TEXT NOT NULL DEFAULT '{}',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        self.db.conn.execute("CREATE INDEX IF NOT EXISTS idx_insights_repo ON insights(repository_id)")
+        self.db.conn.execute("CREATE INDEX IF NOT EXISTS idx_insights_category ON insights(category)")
+        # Path mapping tables for remote server cross-device support
+        from src.core.database.path_mapping import PATH_MAPPING_DDL
+        for ddl in PATH_MAPPING_DDL:
+            self.db.conn.execute(ddl)
+        self.db.conn.commit()
+        # SideCortex cross-IDE tables (sc_ prefix)
+        from src.core.database.sidecortex_schema import ensure_sidecortex_tables
+        ensure_sidecortex_tables(self.db.conn)
+
     def get_repo_id(self, path: str) -> Optional[str]:
-        """Resolve a physical path to its repository ID in the database."""
+        """Resolve a physical path to its repo ID. Falls back to remote_url matching for cross-device."""
+        import subprocess, os
         root = Path(path).resolve()
-        cursor = self.db.conn.execute("SELECT id FROM repositories WHERE root_path = ?", (str(root),))
-        row = cursor.fetchone()
-        return row['id'] if row else None
+        row = self.db.conn.execute("SELECT id FROM repositories WHERE root_path = ?", (str(root),)).fetchone()
+        if row:
+            return row['id']
+        remote_url = None
+        try:
+            result = subprocess.run(
+                ["git", "-C", str(root), "config", "--get", "remote.origin.url"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                remote_url = result.stdout.strip()
+        except Exception:
+            pass
+        if remote_url:
+            row = self.db.conn.execute(
+                "SELECT id FROM repositories WHERE vcs_url = ? AND vcs_url IS NOT NULL AND vcs_url != ''",
+                (remote_url,),
+            ).fetchone()
+            return row['id'] if row else None
+        return None
 
     def _log_event(self, level: str, event_code: str, context: Dict, request_id: Optional[str] = None):
-        """Standardized structured logging per Aegis standard."""
-        log_level = getattr(logging, level.upper(), logging.INFO)
-        extra = {"context": context}
-        if request_id:
-            extra["request_id"] = request_id
-        self.logger.log(log_level, f"{event_code}", extra=extra)
+        log_event(level, event_code, context, request_id=request_id, logger=self.logger)
 
     async def analyze(
-        self, 
-        root_path: str, 
-        request_id: Optional[str] = None, 
+        self,
+        root_path: str,
+        request_id: Optional[str] = None,
         dry_run: bool = True,
         max_depth: Optional[int] = None,
         include_codemap: bool = False,
@@ -81,14 +168,18 @@ class CortexOrchestrator:
     ) -> Dict[str, Any]:
         """
         Execute the full intelligence pipeline with production guards.
-        
-        @param root_path: Absolute path to the repository
-        @param request_id: Optional tracing ID
-        @param dry_run: If True (default), skip DB mutations (sync/index) and analyze existing data.
-                        Set False to perform a full refresh of the index before analysis.
-        @param max_depth: Optional recursion limit for file discovery.
-        @param include_codemap: If True, includes a structured symbol map in the response.
-        @param max_repos: Quota limit for concurrent repository analysis.
+
+        Args:
+            root_path: Absolute path to the repository.
+            request_id: Optional tracing ID for observability.
+            dry_run: If True (default), skip DB mutations and analyze existing data.
+                     Set False to perform a full refresh of the index before analysis.
+            max_depth: Optional recursion limit for file discovery.
+            include_codemap: If True, includes a structured symbol map in the response.
+            max_repos: Quota limit for concurrent repository analysis.
+
+        Returns:
+            Dict with repository_id, analysis, codemap, and mode.
         """
         self._log_event("INFO", "ANALYSIS_STARTED", {"root_path": root_path, "dry_run": dry_run, "max_depth": max_depth}, request_id)
         try:
@@ -106,7 +197,7 @@ class CortexOrchestrator:
 
             # 3. Architectural Analysis (Unified CodeGraph - Read-only)
             analysis = await self.graph_service.build_comprehensive_report(repo_id, request_id=request_id)
-            
+
             # 4. Optional Codemap (Read-only)
             codemap = None
             if include_codemap:
@@ -128,7 +219,7 @@ class CortexOrchestrator:
         def _execute():
             # 1. Get all directories
             dirs = self.db.conn.execute(
-                "SELECT id, name, relative_path FROM directories WHERE repository_id = ? ORDER BY relative_path",
+                "SELECT id, relative_path FROM directories WHERE repository_id = ? ORDER BY relative_path",
                 (repo_id,)
             ).fetchall()
 
@@ -172,112 +263,51 @@ class CortexOrchestrator:
 def _ok(message: str, data: Any, request_id: str) -> Dict[str, Any]:
     return api_response(success=True, status_code=200, message=message, data=data, request_id=request_id)
 
-
 def _err(message: str, error_code: str, request_id: str, status_code: int = 400) -> Dict[str, Any]:
     return api_response(success=False, status_code=status_code, message=message, data=None, request_id=request_id, error_code=error_code)
 
-# --- Input Validation ---
-def validate_path(path: str) -> tuple[bool, str]:
-    """
-    Validate that a path is safe and exists.
+# --- Tool Registration ---
+# 5 unified MCP tools — all domain capabilities accessed via action+args dispatch.
+# - codecortex:repository    (13 actions: init, inspect, analyze, sync, audit, ...)
+# - codecortex:filesystem    (11 actions: read, write, delete, copy, move, search, ...)
+# - codecortex:codebase      (8 actions: analyze, search, audit, graph, index, ...)
+# - codecortex:scaffolder    (7 actions: list_stacks, get_stack, validate_name, ...)
+# - codecortex:knowledge     (4 actions: extract, query, status, relationships)
 
-    Returns (is_valid, error_message)
-    """
-    if not path or not isinstance(path, str):
-        return False, "Path must be a non-empty string"
+from src.api.tools import register_tools as register_api_tools
+from src.modules.knowledgegraph.api.tools import register_tools as register_knowledge_tools
+from src.modules.idegraph.api.tools import register_tools as register_idegraph_tools
 
-    if ".." in path:
-        return False, "Path traversal detected"
-
-    try:
-        resolved_path = Path(path).resolve()
-        if not resolved_path.exists():
-            return False, f"Path does not exist: {path}"
-        if not resolved_path.is_dir():
-            return False, f"Path is not a directory: {path}"
-        return True, ""
-    except Exception as e:
-        return False, f"Invalid path: {str(e)}"
-
-def validate_uuid(uuid_str: str) -> tuple[bool, str]:
-    """
-    Validate that a string is a valid UUID.
-
-    Returns (is_valid, error_message)
-    """
-    if not uuid_str or not isinstance(uuid_str, str):
-        return False, "UUID must be a non-empty string"
-
-    try:
-        from uuid import UUID
-        UUID(uuid_str)
-        return True, ""
-    except ValueError:
-        return False, f"Invalid UUID format: {uuid_str}"
-
-def validate_max_depth(depth: int) -> tuple[bool, str]:
-    """
-    Validate max_depth parameter.
-
-    Returns (is_valid, error_message)
-    """
-    if not isinstance(depth, int):
-        return False, "max_depth must be an integer"
-    if depth < 1 or depth > 20:
-        return False, "max_depth must be between 1 and 20"
-    return True, ""
-
-def _normalize_relpath(root: Path, p: str) -> Optional[str]:
-    if not isinstance(p, str) or not p.strip():
-        return None
-    raw = p.strip().replace("\\", "/")
-    if raw.startswith("./"):
-        raw = raw[2:]
-    try:
-        pp = Path(p)
-        if pp.is_absolute():
-            rel = pp.resolve().relative_to(root.resolve())
-            return str(rel).replace("\\", "/")
-        return str(Path(raw)).replace("\\", "/").strip("/")
-    except Exception:
-        return None
-
-# --- MCP Tool Registration ---
-
-# Register Domain Tools
-from src.domain.codegraph.api.tools import register_tools as register_graph_tools
-from src.domain.coderepository.api.tools import register_tools as register_repository_tools
-from src.domain.filesystem.api.tools import register_tools as register_fs_tools
-from src.domain.coderefactor.api.tools import register_tools as register_refactor_tools
-from src.domain.codetester.api.tools import register_tools as register_qa_tools
-from src.domain.codeindex.api.tools import register_tools as register_index_tools
-
-# Orchestrator factory function - no global singleton
 def create_orchestrator(db_path: Optional[str] = None) -> CortexOrchestrator:
     """
     Factory function to create orchestrator instances.
-    
+
     Follows Aegis modular-standard.md requirement for DI and no global state.
     Each tool handler creates its own orchestrator instance, ensuring proper
     lifecycle management and testability.
     """
     return CortexOrchestrator(db_path)
 
-# Initialize Domain Tools
-register_fs_tools(mcp, create_orchestrator)
-register_refactor_tools(mcp, create_orchestrator)
-register_graph_tools(mcp, create_orchestrator)
-register_repository_tools(mcp, create_orchestrator)
-register_qa_tools(mcp, create_orchestrator)
-register_index_tools(mcp, create_orchestrator)
+# Unified API Tools Only (4 tools — action+args dispatch to all capabilities)
+# All domain capabilities are accessed through these 4 tools via ActionRouter.
+# Individual domain tools (code_analyze, graph_search, etc.) are NOT registered
+# as MCP tools — they remain as internal service modules callable by ActionRouter
+# and CLI.
+register_api_tools(mcp, create_orchestrator)
 
-# All tools are now registered via domain-specific modules for better cohesion and performance.
+# Register Knowledge Graph tool (5th tool)
+register_knowledge_tools(mcp, create_orchestrator)
+
+# Register IDE Graph tool (6th tool)
+register_idegraph_tools(mcp, create_orchestrator)
+
+# Total: 6 unified MCP tools
 
 if __name__ == "__main__":
     import sys
-    
+
     transport = os.getenv("CODECORTEX_TRANSPORT", "stdio").strip().lower()
-    
+
     if transport in ("sse", "http"):
         # Launching the FastAPI wrapper (defined in http_server.py)
         # We import it here to avoid circular dependencies

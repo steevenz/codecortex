@@ -1,0 +1,10 @@
+vendor/
+node_modules/
+__pycache__/
+.git/
+outputs/
+storage/
+releases/
+datasets/
+*.pyc
+.env

@@ -1,0 +1,123 @@
+stack:
+  name: python
+  display_name: "Python"
+  version: "3.12"
+  file_conventions:
+    directories: snake_case
+    modules: "snake_case.py"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard Python Project"
+    description: "Clean, professional Python project structure"
+    pattern: layered
+    dependencies:
+      - "pydantic>=2.6"
+      - "pyyaml>=6.0"
+      - "python-dotenv>=1.0"
+    conditional_modules:
+      ai: true
+      trainer: true
+
+  - id: data_science
+    display_name: "Data Science Project"
+    description: "Data science project with pandas, scikit-learn, Jupyter"
+    pattern: layered
+    dependencies:
+      - "pydantic>=2.6"
+      - "python-dotenv>=1.0"
+      - "numpy>=1.26"
+      - "pandas>=2.2"
+      - "matplotlib>=3.9"
+      - "seaborn>=0.13"
+      - "scikit-learn>=1.5"
+      - "jupyter>=1.0"
+      - "ipykernel>=6.0"
+    extra_directories:
+      - "src/features"
+      - "src/visualization"
+    conditional_modules:
+      ai: true
+      trainer: true
+
+  - id: web_api
+    display_name: "Web API Project (FastAPI)"
+    description: "Web API project built with FastAPI and SQLAlchemy"
+    pattern: layered
+    dependencies:
+      - "pydantic>=2.6"
+      - "pydantic-settings>=2.0"
+      - "python-dotenv>=1.0"
+      - "fastapi>=0.115"
+      - "uvicorn[standard]>=0.32"
+      - "sqlalchemy>=2.0"
+      - "alembic>=1.14"
+    extra_directories:
+      - "src/api"
+      - "src/api/v1"
+      - "src/api/dependencies"
+      - "src/api/middlewares"
+      - "src/api/schemas"
+      - "src/domain"
+      - "src/domain/entities"
+      - "src/domain/repositories"
+      - "src/domain/services"
+      - "src/infrastructure"
+      - "src/infrastructure/database"
+      - "src/infrastructure/repositories"
+    conditional_modules:
+      ai: true
+      trainer: false
+
+  - id: cli_tool
+    display_name: "CLI Tool"
+    description: "Command-line interface tool with Click and Rich"
+    pattern: layered
+    dependencies:
+      - "pydantic>=2.6"
+      - "python-dotenv>=1.0"
+      - "click>=8.1"
+      - "rich>=13.0"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+  - id: automation
+    display_name: "Automation Script"
+    description: "Automation script project with scheduling support"
+    pattern: layered
+    dependencies:
+      - "pydantic>=2.6"
+      - "python-dotenv>=1.0"
+      - "schedule>=1.2"
+      - "requests>=2.32"
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base:
+    - "pyproject.toml.j2"
+    - "requirements.txt.j2"
+    - "Dockerfile.j2"
+    - "docker-compose.yml.j2"
+    - "src/__init__.py.j2"
+    - "src/main.py.j2"
+    - "src/core/__init__.py.j2"
+    - "src/core/config.py.j2"
+    - "src/core/logger.py.j2"
+    - "tests/unit/test_main.py.j2"
+  setup_scripts:
+    - "scripts/setup/setup-dev-env.sh.j2"
+    - "scripts/setup/setup-dev-env.bat.j2"
+    - "scripts/setup/setup-dev-env.ps1.j2"
+
+header_format: |
+  """
+  @project   {{ project_name }}
+  @package   {{ package_path }}
+  @author    {{ author }}
+  @copyright (c) {{ author }}
+  @fileoverview {{ description }}
+  """

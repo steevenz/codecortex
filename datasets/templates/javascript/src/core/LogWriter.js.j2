@@ -1,0 +1,17 @@
+export function info(message, fields = {}) {
+  const requestId =
+    (process.env.REQUEST_ID || "").trim() ||
+    (typeof fields.request_id === "string" ? fields.request_id : "") ||
+    null;
+
+  const payload = {
+    level: "INFO",
+    service: "{{ project_slug }}",
+    environment: (process.env.ENVIRONMENT || "development").trim(),
+    request_id: requestId,
+    message,
+    ...fields,
+  };
+
+  process.stdout.write(JSON.stringify(payload) + "\n");
+}

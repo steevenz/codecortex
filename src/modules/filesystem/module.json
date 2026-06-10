@@ -1,0 +1,48 @@
+{
+  "name": "filesystem",
+  "version": "0.1.0",
+  "description": "Filesystem domain — file tree browsing, read, write, search, watch, disk usage, audit, git/SVN operations, archive, and MCP-safe path guards",
+  "type": "module",
+  "dependencies": {
+    "modules": ["coderepository", "codegraph", "codeindex", "codetester"],
+    "core": ["config", "database", "errors", "logging", "telemetry"]
+  },
+  "providers": {
+    "services": [
+      "filesystem_service"
+    ],
+    "adapters": [
+      "fs_reader", "fs_writer", "fs_deleter", "fs_tree",
+      "fs_search", "fs_analyzer", "fs_audit", "fs_df",
+      "fs_watch", "fs_watcher", "fs_walker", "fs_touch",
+      "fs_chmod", "fs_chown", "fs_manager", "fs_git",
+      "fs_svn", "fs_symlink", "fs_xattr", "fs_archiver",
+      "fs_converter"
+    ]
+  },
+  "tools": {
+    "prefix": "fs_",
+    "entries": [
+      "fs_tree",
+      "fs_read",
+      "fs_manage",
+      "fs_search",
+      "fs_watch",
+      "fs_df",
+      "fs_audit",
+      "fs_git",
+      "fs_svn"
+    ]
+  },
+  "security": {
+    "path_traversal_prevention": true,
+    "max_file_size_mb": 10,
+    "blocked_paths": ["/etc", "/proc", "/sys", "/dev", "C:\\Windows", "C:\\System32"]
+  },
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "copyright": "Copyright (c) 2026 Aegis Codework",
+  "standard": "Aegis-CrossStack-v1.0"
+}

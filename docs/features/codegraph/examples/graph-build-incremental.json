@@ -1,0 +1,28 @@
+{
+  "repo_path": "/path/to/project",
+  "repo_id": "uuid-1234-5678",
+  "detect_modular": true,
+  "build_dependency_graph": true,
+  "include_core_contracts": true,
+  "scan_hmvc_p": true,
+  "max_depth": 5,
+  "use_cache": true,
+  "incremental": true,
+  "include_stats": true,
+  "result": {
+    "repo_id": "uuid-1234-5678",
+    "build_mode": "incremental_cache_hit",
+    "repo_hash": "sha1:abc123def456",
+    "stats": {
+      "total_files": 142,
+      "total_symbols": 2847,
+      "total_relationships": 5832,
+      "duration_s": 0.12
+    },
+    "modular_summary": {
+      "total_modules": 8,
+      "total_plugins": 3,
+      "total_widgets": 5
+    }
+  }
+}

@@ -45,3 +45,21 @@ ORM dataflow analysis extracts database models, their fields, relationships, and
   ]
 }
 ```
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| OD_001 | graph_audit (orm_dataflow) | ORM model extraction failed |
+| OD_002 | graph_audit (orm_dataflow) | Query pattern not recognized |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(N) for scanning model files, O(M) for extracting relationships
+- **Regex Cost:** Pattern matching is linear in file size, cached per file
+- **Memory Usage:** O(M) for storing model metadata
+- **Optimization:** Incremental scan based on file modification time

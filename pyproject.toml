@@ -1,13 +1,13 @@
 [project]
 name = "code-analysis-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "CodeCortex MCP Server — Production-grade, multi-IDE shared MCP server for codebase intelligence, knowledge graphs, refactoring, and architecture audit across 22 languages"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.136.1",
     "gitpython>=3.1.49",
-    "httpx==0.28.1",
+    "httpx>=0.28.1,<1.0",
     "jinja2>=3.1.6",
     "mcp[cli]==1.27.0",
     "networkx>=3.6.1",
@@ -15,19 +15,29 @@ dependencies = [
     "pathspec==1.1.1",
     "pypdf>=6.10.2",
     "python-docx>=1.2.0",
+    "python-pptx>=0.6.23",
     "python-louvain>=0.16",
-    "requests>=2.33.1",
+    "requests>=2.32.0",
+    "tenacity>=8.0.0",
     "tree-sitter==0.25.2",
     "tree-sitter-python==0.25.0",
     "tree-sitter-typescript==0.23.2",
     "supabase>=2.6.0",
+    "circuitbreaker>=2.1.3",
+    "sqlalchemy>=2.0.0",
+    "pyyaml>=6.0",
+    "urllib3>=2.0.0,<3.0.0",
 ]
+
+[project.scripts]
+codecortex = "src.cli:main"
 
 [project.optional-dependencies]
 dev = [
     "pytest==9.0.3",
     "pytest-asyncio>=0.25.3",
     "coverage==7.13.5",
+    "pytest-json-report>=1.1.2",
 ]
 notebooks = [
     "nbformat==5.10.4",
@@ -38,3 +48,7 @@ server = [
     "uvicorn==0.46.0",
     "python-dotenv==1.2.2",
 ]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"

@@ -50,3 +50,22 @@ Route extraction allows the LLM to:
 - Understand the API contract (request/response models)
 - Know which middleware applies to which routes
 - Detect undocumented endpoints
+
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| RE_001 | graph_analyze (route_extraction) | Route pattern not recognized |
+| RE_002 | graph_analyze (route_extraction) | Framework-specific extraction failed |
+
+---
+
+## Performance
+
+- **Time Complexity:** O(N) for scanning route files
+- **Regex Cost:** Pattern matching is linear in file size
+- **Memory Usage:** O(R) for storing route metadata
+- **Optimization:** Incremental scan based on file modification time

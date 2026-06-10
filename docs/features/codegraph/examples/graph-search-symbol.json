@@ -1,0 +1,30 @@
+{
+  "action": "symbol",
+  "query": "authenticate",
+  "symbol_type": "function",
+  "fuzzy": false,
+  "edit_distance": 2,
+  "repo_path": "/path/to/project",
+  "limit": 20,
+  "result": {
+    "functions": [
+      {
+        "name": "authenticate",
+        "file": "src/auth/service.py",
+        "line": 15,
+        "signature": "def authenticate(username: str, password: str) -> bool:",
+        "language": "python"
+      },
+      {
+        "name": "authenticate_user",
+        "file": "src/auth/middleware.py",
+        "line": 42,
+        "signature": "def authenticate_user(token: str) -> dict:",
+        "language": "python"
+      }
+    ],
+    "classes": [],
+    "variables": [],
+    "total": 2
+  }
+}

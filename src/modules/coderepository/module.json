@@ -1,0 +1,56 @@
+{
+  "name": "coderepository",
+  "version": "2.0.0",
+  "description": "Code repository domain — physical codebase discovery, file tracking, git/SVN history, VCS diagnostics, and multi-repo management (up to 50 repos)",
+  "type": "module",
+  "dependencies": {
+    "modules": [],
+    "core": ["config", "database", "errors", "logging", "telemetry"]
+  },
+  "providers": {
+    "services": [
+      "repository_service",
+      "git_service",
+      "svn_service"
+    ],
+    "adapters": {
+      "filesystem": ["file_reader", "sqlite_store"],
+      "git": ["adapter", "history", "service"],
+      "svn": ["adapter", "service"]
+    },
+    "models": [
+      "repository", "directory", "file", "symbol", "commit", "manifest_entry"
+    ],
+    "repositories": [
+      "repository_repo", "directory_repo", "file_repo",
+      "symbol_repo", "commit_repo", "manifest_repo"
+    ]
+  },
+  "tools": {
+    "prefix": "repo_",
+    "entries": [
+      "repo_init",
+      "repo_inspect",
+      "repo_analyze",
+      "repo_sync",
+      "repo_audit",
+      "repo_staleness",
+      "repo_history",
+      "repo_git",
+      "repo_svn",
+      "repo_list",
+      "repo_compact",
+      "repo_cleanup",
+      "repo_dump",
+      "repo_restore"
+    ]
+  },
+  "vcs_support": ["git", "svn"],
+  "max_repos": 50,
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "copyright": "Copyright (c) 2026 Aegis Codework",
+  "standard": "Aegis-CrossStack-v1.0"
+}

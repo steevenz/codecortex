@@ -1,0 +1,10 @@
+import { info } from "./core/LogWriter.js";
+
+function main(): void {
+  info("Service started", {
+    request_id: process.env.REQUEST_ID || null,
+    version: "{{ project_version }}",
+  });
+}
+
+main();

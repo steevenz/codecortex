@@ -1,0 +1,31 @@
+stack:
+  name: nodejs-typescript
+  display_name: "Node.js + TypeScript"
+  version: "22"
+  file_conventions:
+    directories: kebab-case
+    modules: "kebab-case.ts"
+    classes: PascalCase
+
+project_types:
+  - id: standard
+    display_name: "Standard Node.js + TypeScript Project"
+    description: "Minimal, standard-compliant TypeScript project for Node.js"
+    pattern: layered
+    dependencies: []
+    conditional_modules:
+      ai: false
+      trainer: false
+
+template_files:
+  base: []
+  setup_scripts: []
+
+header_format: |
+  /**
+   * @project   {{ project_name }}
+   * @package   {{ package_path }}
+   * @author    {{ author }}
+   * @copyright (c) {{ author }}
+   * @fileoverview {{ description }}
+   */

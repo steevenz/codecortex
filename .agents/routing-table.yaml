@@ -1,0 +1,46 @@
+# Routing Table — CodeCortex
+# Maps keywords to skill_id for tiered context loading
+
+version: "1.0.0"
+last_updated: "2026-05-26"
+
+routes:
+  - pattern: ["code", "search", "symbol", "function", "class"]
+    skill_id: "codecortex:codebase"
+    complexity: "SIMPLE"
+
+  - pattern: ["analyze", "audit", "architecture", "dependency"]
+    skill_id: "codecortex:codebase"
+    complexity: "COMPLEX"
+
+  - pattern: ["refactor", "rename", "move", "restructure"]
+    skill_id: "codecortex:codebase"
+    complexity: "CRITICAL"
+
+  - pattern: ["repository", "repo", "init", "sync", "branch"]
+    skill_id: "codecortex:repository"
+    complexity: "SIMPLE"
+
+  - pattern: ["scaffold", "generate", "create", "stack", "template"]
+    skill_id: "codecortex:scaffolder"
+    complexity: "SIMPLE"
+
+  - pattern: ["knowledge", "documentation", "prd", "adr", "spec"]
+    skill_id: "codecortex:knowledge"
+    complexity: "SIMPLE"
+
+  - pattern: ["memory", "history", "conversation", "ide", "cursor", "trae", "claude"]
+    skill_id: "codecortex:idegraph"
+    complexity: "SIMPLE"
+
+  - pattern: ["ingest", "harvest", "compact"]
+    skill_id: "codecortex:idegraph"
+    complexity: "COMPLEX"
+
+  - pattern: ["filesystem", "file", "read", "write", "watch"]
+    skill_id: "codecortex:filesystem"
+    complexity: "SIMPLE"
+
+fallback:
+  skill_id: "codecortex:codebase"
+  complexity: "SIMPLE"

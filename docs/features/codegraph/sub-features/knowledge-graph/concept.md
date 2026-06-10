@@ -49,3 +49,22 @@ KnowledgeGraph
 | IMPORTS | source → target | File A imports module/symbol B |
 | USES | source → target | Symbol A references type B |
 | DEFINES | source → target | File A defines class/function B |
+
+
+---
+
+## Error Codes
+
+| Prefix | Tool | Description |
+|--------|------|-------------|
+| KG_001 | graph_build (knowledge_graph) | Dual-index invariant violated |
+| KG_002 | graph_query (knowledge_graph) | Node lookup failed |
+
+---
+
+## Performance
+
+- **Time Complexity:** All operations O(1) due to dual-index design
+- **Memory Usage:** O(V+E) for storing graph data
+- **Scalability:** Scales to ~100k nodes comfortably with O(1) lookups
+- **Optimization:** Index updates are O(1) per insert

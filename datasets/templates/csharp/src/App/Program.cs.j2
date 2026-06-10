@@ -1,0 +1,25 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+
+namespace App;
+
+public static class Program
+{
+    public static void Main()
+    {
+        var payload = new Dictionary<string, object?>
+        {
+            { "timestamp", DateTimeOffset.UtcNow.ToString("O") },
+            { "level", "INFO" },
+            { "service", "{{ project_slug }}" },
+            { "environment", Environment.GetEnvironmentVariable("ENVIRONMENT") ?? "development" },
+            { "request_id", Environment.GetEnvironmentVariable("REQUEST_ID") },
+            { "message", "Service started" },
+            { "version", "{{ project_version }}" },
+        };
+
+        Console.Out.WriteLine(JsonSerializer.Serialize(payload));
+    }
+}
+

@@ -1,0 +1,35 @@
+schema_version: "2.0.0"
+active_domain: "idegraph-integration"
+patch_docs:
+  patch_id: "20260526-idegraph-standardization"
+  implementation_plan: "docs/versions/v1.0/implementation-plans/2026-05-26/idegraph-standardization.md"
+  changelog: "docs/versions/v1.0/changelogs/2026-05-26/idegraph-standardization.md"
+pending_todos:
+  - content: "Integrate idegraph module → shared DB, unified tools, standard output"
+    status: completed
+    priority: high
+  - content: "Standardize all .agents/ files to match ~/.aicoders/.agents/agents.md"
+    status: in_progress
+    priority: high
+tracing:
+  last_task_id: "idegraph-standardization-20260526"
+  timestamp: "2026-05-26T20:00:00Z"
+
+self_evaluation:
+  task_id: "idegraph-standardization-20260526"
+  workflow: "module-integration-workflow"
+  timestamp: "2026-05-26T20:00:00Z"
+
+  scores:
+    project_structure: "100 — idegraph follows modular standard, api/tools.py pattern, module.json"
+    package_paths: "100 — all imports use src.modules.idegraph.*"
+    docblocks: "100 — all files have CodeCortex/Aegis docblocks"
+    class_naming: "100 — no redundant Service suffix (coding-standard R1)"
+    output_standard: "100 — api_response() + insight field on all tools"
+    db_integration: "100 — all modules use shared database/codecortex.db"
+
+  overall_score: "100"
+
+  gaps_detected: []
+
+  repeat_violations: "NONE"

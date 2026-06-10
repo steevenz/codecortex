@@ -4,7 +4,7 @@
     "CodeCortex": {
       "url": "http://localhost:8001/codecortex-api/v1/sync",
       "headers": {
-        "X-API-KEY": "REPLACE_WITH_CODECORTEX_DASHBOARD_API_KEY"
+        "X-API-KEY": "REPLACE_WITH_CODECORTEX_CLIENT_API_KEY"
       }
     }
   }

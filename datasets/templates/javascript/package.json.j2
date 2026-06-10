@@ -1,0 +1,13 @@
+{
+  "name": "{{ project_slug }}",
+  "version": "{{ project_version }}",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/MainEntry.js",
+    "test": "node --test tests/unit/*.test.js"
+  }
+}

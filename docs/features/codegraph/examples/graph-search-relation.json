@@ -1,0 +1,29 @@
+{
+  "action": "relation",
+  "query": "UserService",
+  "relation_type": "callers",
+  "repo_id": "uuid-1234-5678",
+  "max_depth": 3,
+  "limit": 20,
+  "result": {
+    "target_node": "UserService",
+    "relation_type": "callers",
+    "nodes": [
+      {
+        "symbol_name": "AuthController",
+        "symbol_type": "class",
+        "file": "src/api/auth.py",
+        "line": 25,
+        "language": "python"
+      },
+      {
+        "symbol_name": "UserRepository",
+        "symbol_type": "class",
+        "file": "src/infrastructure/repositories/user.py",
+        "line": 12,
+        "language": "python"
+      }
+    ],
+    "total": 2
+  }
+}

@@ -1,37 +1,27 @@
 """
-/**
- * @project   CodeCortex
- * @package   Core/Utils
- * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
- * @stack     Python
- * * Debug / info / error logging utilities used by Tree-sitter and indexing layers.
- */
+Pre-configured logger instances for debug/diagnostic output.
+
+:project: CodeCortex
+:package: Core.Utils.Debug_log
+:author: Steeven Andrian
+:copyright: (c) 2026 Aegis Codework
+:standard: Aegis-Core-v1.0
 """
 
-from __future__ import annotations
+from src.core.logging import get_logger
 
-from ..logging_config import get_logger
-
-logger = get_logger("CodeCortex.Utils.Debug")
-
-
-def debug_log(msg: str) -> None:
-    logger.debug(msg)
+info_logger = get_logger('info')
+error_logger = get_logger('error')
+warning_logger = get_logger('warning')
 
 
-def info_logger(msg: str) -> None:
-    logger.info(msg)
+def log_info(msg: str):
+    info_logger.info(msg)
 
 
-def warning_logger(msg: str) -> None:
-    logger.warning(msg)
+def log_error(msg: str):
+    error_logger.error(msg)
 
 
-def error_logger(msg: str) -> None:
-    logger.error(msg)
-
-
-def debug_logger(msg: str) -> None:
-    logger.debug(msg)
+def log_warning(msg: str):
+    warning_logger.warning(msg)

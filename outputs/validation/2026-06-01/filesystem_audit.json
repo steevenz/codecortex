@@ -1,0 +1,213 @@
+{
+  "directories": {
+    "src/modules/filesystem": {
+      "exists": true,
+      "files": [
+        {
+          "name": "module.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 1380
+        },
+        {
+          "name": "README.md",
+          "permissions": "-rw-rw-rw-",
+          "size": 2900
+        },
+        {
+          "name": "__init__.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 207
+        }
+      ],
+      "subdirs": [
+        "adapters",
+        "api",
+        "core",
+        "__pycache__"
+      ]
+    },
+    "src/modules/codeindex": {
+      "exists": true,
+      "files": [
+        {
+          "name": "module.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 1451
+        },
+        {
+          "name": "README.md",
+          "permissions": "-rw-rw-rw-",
+          "size": 2151
+        },
+        {
+          "name": "__init__.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 291
+        }
+      ],
+      "subdirs": [
+        "api",
+        "core",
+        "parsers",
+        "services",
+        "__pycache__"
+      ]
+    },
+    "src/modules/codegraph": {
+      "exists": true,
+      "files": [
+        {
+          "name": "module.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 1493
+        },
+        {
+          "name": "README.md",
+          "permissions": "-rw-rw-rw-",
+          "size": 2068
+        },
+        {
+          "name": "__init__.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 293
+        }
+      ],
+      "subdirs": [
+        "api",
+        "core",
+        "graph_builders",
+        "services",
+        "__pycache__"
+      ]
+    },
+    "database": {
+      "exists": true,
+      "files": [
+        {
+          "name": "codecortex.db",
+          "permissions": "-rw-rw-rw-",
+          "size": 10391552
+        },
+        {
+          "name": "codecortex.db-shm",
+          "permissions": "-rw-rw-rw-",
+          "size": 32768
+        },
+        {
+          "name": "codecortex.db-wal",
+          "permissions": "-rw-rw-rw-",
+          "size": 49472
+        },
+        {
+          "name": "codecortex.db.backup",
+          "permissions": "-rw-rw-rw-",
+          "size": 9854976
+        },
+        {
+          "name": "codecortex.db.backup_20260528",
+          "permissions": "-rw-rw-rw-",
+          "size": 9854976
+        },
+        {
+          "name": "codecortex_server_state.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 160
+        }
+      ],
+      "subdirs": [
+        "config"
+      ]
+    },
+    "logs": {
+      "exists": false
+    },
+    "outputs": {
+      "exists": true,
+      "files": [
+        {
+          "name": "temp_output.txt",
+          "permissions": "-rw-rw-rw-",
+          "size": 2426
+        },
+        {
+          "name": "tree_output.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 2548
+        }
+      ],
+      "subdirs": [
+        "analysis",
+        "logs",
+        "temp",
+        "validation"
+      ]
+    },
+    ".config": {
+      "exists": true,
+      "files": [
+        {
+          "name": "mcp_client_sse.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 260
+        },
+        {
+          "name": "mcp_client_stdio.json",
+          "permissions": "-rw-rw-rw-",
+          "size": 335
+        }
+      ],
+      "subdirs": []
+    },
+    "scripts": {
+      "exists": true,
+      "files": [
+        {
+          "name": "check_schema.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 214
+        },
+        {
+          "name": "check_tables.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 179
+        },
+        {
+          "name": "cli.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 864
+        },
+        {
+          "name": "cli_link.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 3784
+        },
+        {
+          "name": "_e2e_bridge.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 684
+        },
+        {
+          "name": "__init__.py",
+          "permissions": "-rw-rw-rw-",
+          "size": 0
+        }
+      ],
+      "subdirs": [
+        "dev",
+        "server",
+        "setup",
+        "__pycache__"
+      ]
+    }
+  },
+  "sensitive_files_found": [],
+  "issues": [
+    "Directory missing: logs"
+  ],
+  "summary": {
+    "total_dirs_checked": 8,
+    "dirs_exist": 7,
+    "sensitive_files": 0,
+    "issues_count": 1
+  }
+}
