@@ -1,0 +1,27 @@
+{
+  "name": "codecortex",
+  "version": "1.2.0",
+  "displayName": "CodeCortex",
+  "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory",
+  "author": {
+    "name": "Steeven Andrian",
+    "url": "https://github.com/steevenz"
+  },
+  "homepage": "https://github.com/steevenz/mcp-codecortex",
+  "repository": "https://github.com/steevenz/mcp-codecortex",
+  "license": "MIT",
+  "keywords": [
+    "code-intelligence",
+    "code-analysis",
+    "refactoring",
+    "architecture",
+    "mcp",
+    "knowledge-graph",
+    "ide-memory",
+    "skills"
+  ],
+  "skills": "./.skills/",
+  "agents": "./.agents/",
+  "commands": "./.commands/",
+  "hooks": "./hooks/hooks-cursor.json"
+}

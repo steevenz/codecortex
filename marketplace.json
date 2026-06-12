@@ -1,0 +1,20 @@
+{
+  "name": "codecortex-marketplace",
+  "description": "Local marketplace for CodeCortex — code intelligence skills for AI coding agents",
+  "owner": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "codecortex",
+      "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory",
+      "version": "1.2.0",
+      "source": "./",
+      "author": {
+        "name": "Steeven Andrian",
+        "email": "steevenz@users.noreply.github.com"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "codecortex",
+  "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory, and project scaffolding",
+  "version": "1.2.0",
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/steevenz/mcp-codecortex",
+  "repository": "https://github.com/steevenz/mcp-codecortex",
+  "license": "MIT",
+  "keywords": [
+    "code-intelligence",
+    "code-analysis",
+    "refactoring",
+    "architecture",
+    "mcp",
+    "knowledge-graph",
+    "ide-memory",
+    "skills",
+    "claude-cli"
+  ],
+  "skills": "./.skills/",
+  "hooks": {
+    "session-start": "SOUL.md"
+  },
+  "marketplace": {
+    "name": "codecortex",
+    "description": "Core code intelligence skills for Claude Code: codebase analysis, graph queries, safe refactoring, architecture audit, knowledge graph, cross-IDE memory, and project scaffolding via CodeCortex MCP server",
+    "version": "1.2.0",
+    "source": "./"
+  }
+}

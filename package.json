@@ -1,39 +1,7 @@
 {
-  "name": "codecortex-mcp",
+  "name": "codecortex",
   "version": "1.2.0",
-  "description": "Production-grade MCP server for advanced codebase intelligence, indexing, refactoring, and architecture audit",
-  "keywords": [
-    "mcp",
-    "code-intelligence",
-    "code-analysis",
-    "refactoring",
-    "architecture"
-  ],
-  "author": "steevenz",
-  "license": "MIT",
   "type": "module",
-  "bin": {
-    "codecortex": "scripts/server/run_cli.js",
-    "codecortex-mcp": "scripts/server/run_server.js"
-  },
-  "main": "scripts/server/run_server.js",
-  "scripts": {
-    "start": "node scripts/server/run_server.js",
-    "dev": "uv run python -m src.main",
-    "cli": "uv run python -m src.cli.unified",
-    "setup": "bash scripts/setup/setup.sh"
-  },
-  "dependencies": {},
-  "optionalDependencies": {},
-  "config": {
-    "codeCortex": {
-      "dbPath": "./database/codecortex.db",
-      "graphBackend": "kuzu",
-      "maxRepos": 50,
-      "transport": "stdio"
-    }
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory",
+  "main": ".opencode/plugins/codecortex.js"
 }

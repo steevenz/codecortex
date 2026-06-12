@@ -1,0 +1,42 @@
+{
+  "name": "codecortex",
+  "version": "1.2.0",
+  "description": "Code intelligence skills via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory, and project scaffolding",
+  "author": {
+    "name": "Steeven Andrian",
+    "url": "https://github.com/steevenz"
+  },
+  "homepage": "https://github.com/steevenz/mcp-codecortex",
+  "repository": "https://github.com/steevenz/mcp-codecortex",
+  "license": "MIT",
+  "keywords": [
+    "code-intelligence",
+    "code-analysis",
+    "refactoring",
+    "architecture",
+    "mcp",
+    "knowledge-graph",
+    "ide-memory",
+    "skills"
+  ],
+  "interface": {
+    "displayName": "CodeCortex",
+    "shortDescription": "Code intelligence via MCP: analysis, graph, refactor, audit, knowledge graph, cross-IDE memory",
+    "longDescription": "CodeCortex is a production-grade MCP server for code intelligence. This plugin gives AI agents structured skills for codebase analysis, semantic search, graph queries, safe refactoring, architecture audit, knowledge extraction from docs, cross-IDE memory search, and project scaffolding. 6 unified MCP tools, 39+ actions, 35 languages.",
+    "developerName": "Steeven Andrian",
+    "category": "Coding",
+    "capabilities": ["Read", "Write", "Interactive", "Networking", "FileSystem"],
+    "defaultPrompt": [
+      "Analyze this codebase.",
+      "Trace this function's callers.",
+      "Check the architecture health.",
+      "Find security issues."
+    ],
+    "websiteURL": "https://github.com/steevenz/mcp-codecortex",
+    "privacyPolicyURL": "https://github.com/steevenz/mcp-codecortex/blob/main/LICENSE",
+    "termsOfServiceURL": "https://github.com/steevenz/mcp-codecortex/blob/main/LICENSE",
+    "brandColor": "#6C5CE7",
+    "composerIcon": "../assets/icon.svg",
+    "logo": "../assets/icon.svg"
+  }
+}

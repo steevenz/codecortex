@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="40" fill="#6C5CE7"/>
+  <text x="128" y="148" font-family="monospace" font-size="120" font-weight="bold" fill="white" text-anchor="middle">C</text>
+  <text x="128" y="200" font-family="monospace" font-size="36" font-weight="bold" fill="rgba(255,255,255,0.6)" text-anchor="middle">Cortex</text>
+</svg>
