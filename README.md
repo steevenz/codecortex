@@ -279,6 +279,7 @@ uv sync
 
 Add to your MCP client config:
 
+**Option A — Python (uv):**
 ```json
 {
   "mcpServers": {
@@ -289,6 +290,39 @@ Add to your MCP client config:
   }
 }
 ```
+
+**Option B — Node.js (shared proxy, multi-IDE safe):**
+```json
+{
+  "mcpServers": {
+    "codecortex": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\scripts\\server\\js\\index.cjs",
+        "--ide",
+        "antigravity",
+        "--transport",
+        "stdio"
+      ]
+    }
+  }
+}
+```
+
+> Node.js proxy provides atomic file-lock concurrency control, auto Python venv discovery, bidirectional stdio↔HTTP/SSE forwarding, and multi-port fallback. Recommended for multi-IDE setups.
+
+### MCP Resources
+
+CodeCortex exposes read-only resources via `codecortex://` URIs:
+
+| URI | Description |
+|-----|-------------|
+| `codecortex://repos/{repo_id}/status` | Repo health snapshot |
+| `codecortex://repos/{repo_id}/symbols` | All indexed symbols |
+| `codecortex://repos/{repo_id}/graph` | Graph statistics |
+| `codecortex://repos/{repo_id}/metrics` | Code metrics |
+
+These are auto-discovered by MCP clients via `resources/list`. LLMs can reference them directly.
 
 ### Use
 
