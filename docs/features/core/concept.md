@@ -15,8 +15,9 @@ Core provides shared infrastructure used by all domains: database management, to
 | **Token Economy** | `token_economy.py` | Token estimation, smart summarize, budget enforcement |
 | **Database Cleanup** | `database_cleanup.py` | VACUUM, REINDEX, project data removal |
 | **Takeout/Import** | `takeout.py` | Portable project export/import |
-| **API Response** | `__init__.py` | Standardized response formatting + token economy |
-| **Logging** | `logging_config.py` | Structured JSON logging |
+| **API Response** | `errors.py` | Standardized `{success, data, meta}` envelope |
+| **MCP Compliance** | `mcp-compliance.md` | Annotations, progress, resources, logging, duration |
+| **Logging** | `logging_config.py` | Structured JSON logging + MCP logging notifications |
 | **Telemetry** | `telemetry.py` | OpenTelemetry tracing |
 
 ## Sub-Features

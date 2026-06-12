@@ -1,0 +1,19 @@
+# CodeCortex Rules for Cline
+
+**ALL codebase operations MUST use CodeCortex MCP Server. No exceptions.**
+
+## MCP Tools
+- `codecortex:repository` — repo init, inspect, analyze, sync, audit
+- `codecortex:codebase` — analyze, search, audit, graph, test, refactor
+- `codecortex:filesystem` — read, write, delete, search
+- `codecortex:scaffolder` — generate, create projects
+- `codecortex:knowledge` — query engineering knowledge
+- `codecortex:idegraph` — search cross-IDE memories
+
+## Workflow
+1. `codecortex:codebase(action=search)` — locate code
+2. `codecortex:codebase(action=graph, args={sub_action:"build"})` — build graph
+3. `codecortex:codebase(action=refactor, args={sub_action:"impact"})` — impact analysis
+4. Modify code
+5. `codecortex:codebase(action=audit)` — verify
+6. `codecortex:codebase(action=test, args={sub_action:"run"})` — run tests

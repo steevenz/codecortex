@@ -17,8 +17,11 @@ scaffolder  : project scaffolding (list_stacks, get_stack, validate_name,
 :standard: Aegis-API-v1.0
 """
 from __future__ import annotations
+import time
 from typing import Any, Callable, Dict, Optional
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 
 from src.api.orchestration import ActionRouter
 
@@ -52,8 +55,17 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                 pass
         return response
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Repository",
+            readOnlyHint=False,
+            destructiveHint=True,
+            idempotentHint=False,
+            openWorldHint=False,
+        )
+    )
     async def repository(
+        ctx: Context,
         action: str,
         repo_path: Optional[str] = None,
         repo_id: Optional[str] = None,
@@ -93,15 +105,33 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         @param args: Action-specific parameters dict (see action list above).
         @return: Dict with success, data, meta.
         """
+        t0 = time.monotonic()
+        if hasattr(ctx, "info"):
+            await ctx.info(f"repository.{action} started")
+        if action in ("analyze", "sync", "audit") and hasattr(ctx, "report_progress"):
+            await ctx.report_progress(0, 6, "Starting...")
         result = await _router().dispatch_repository(
             action, repo_path, repo_id, args or {},
         )
+        if action in ("analyze", "sync", "audit") and hasattr(ctx, "report_progress"):
+            await ctx.report_progress(6, 6, "Complete")
+        if hasattr(ctx, "info"):
+            await ctx.info(f"repository.{action} finished")
+        result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_repository", action)
 
     # ══════════════════════════════════════════════════════════
     # TOOL 2: codecortex:filesystem
     # ══════════════════════════════════════════════════════════
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Filesystem",
+            readOnlyHint=False,
+            destructiveHint=True,
+            idempotentHint=False,
+            openWorldHint=False,
+        )
+    )
     async def filesystem(
         action: str,
         path: Optional[str] = None,
@@ -133,16 +163,27 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         @param args: Action-specific parameters dict (see action list above).
         @return: Dict with success, data, meta.
         """
+        t0 = time.monotonic()
         result = await _router().dispatch_filesystem(
             action, path, repo_id, args or {},
         )
+        result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_filesystem", action)
 
     # ══════════════════════════════════════════════════════════
     # TOOL 3: codecortex:codebase
     # ══════════════════════════════════════════════════════════
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Codebase",
+            readOnlyHint=False,
+            destructiveHint=True,
+            idempotentHint=False,
+            openWorldHint=False,
+        )
+    )
     async def codebase(
+        ctx: Context,
         action: str,
         repo_id: Optional[str] = None,
         repo_path: Optional[str] = None,
@@ -182,15 +223,35 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         @param args: Action-specific parameters dict (see action list above).
         @return: Dict with success, data, meta.
         """
+        t0 = time.monotonic()
+        if hasattr(ctx, "info"):
+            await ctx.info(f"codebase.{action} started")
+        _long_actions = {"analyze", "audit", "test", "graph_build"}
+        _is_long = action in _long_actions or (action == "graph" and (args or {}).get("sub_action") == "build")
+        if _is_long and hasattr(ctx, "report_progress"):
+            await ctx.report_progress(0, 5, f"Starting {action}...")
         result = await _router().dispatch_codebase(
             action, repo_id, repo_path, args or {},
         )
+        if _is_long and hasattr(ctx, "report_progress"):
+            await ctx.report_progress(5, 5, f"{action} complete")
+        if hasattr(ctx, "info"):
+            await ctx.info(f"codebase.{action} finished")
+        result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_codebase", action)
 
     # ══════════════════════════════════════════════════════════
     # TOOL 4: codecortex:scaffolder
     # ══════════════════════════════════════════════════════════
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Scaffolder",
+            readOnlyHint=True,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        )
+    )
     async def scaffolder(
         action: str,
         args: Optional[Dict[str, Any]] = None,
@@ -224,7 +285,9 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
 
         @return: Dict with success, data.
         """
+        t0 = time.monotonic()
         result = await _router().dispatch_scaffolder(
             action, args or {},
         )
+        result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_scaffolder", action)

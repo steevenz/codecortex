@@ -27,15 +27,25 @@ import json
 from typing import Any, Callable, Dict, List, Optional
 
 from mcp.server.fastmcp import FastMCP
-
+from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from src.core import api_response, new_request_id
 from src.core.insight import generate_insight
 
 
 def _build_tools(mcp: FastMCP, orchestrator_factory: Callable) -> None:
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex IDE Graph",
+            readOnlyHint=True,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        )
+    )
     async def idegraph(
+        ctx: Context,
         action: str,
         query: Optional[str] = None,
         memory_id: Optional[str] = None,
@@ -102,6 +112,7 @@ def _build_tools(mcp: FastMCP, orchestrator_factory: Callable) -> None:
         """
         request_id = new_request_id()
         orchestrator = orchestrator_factory()
+        if hasattr(ctx, "info"): await ctx.info(f"idegraph.{action} started")
         from src.modules.idegraph.services.sidecortex import SideCortex
         from src.modules.idegraph.services.storage import Storage
         from src.modules.idegraph.services.search import Search

@@ -51,10 +51,11 @@ class ActionRouter:
         return self._orch
 
     def _ok(self, message: str, data: Any, meta: Optional[Dict] = None,
-            request_id: Optional[str] = None, insight: Any = None) -> Dict[str, Any]:
+            request_id: Optional[str] = None, insight: Any = None,
+            duration_ms: Optional[int] = None) -> Dict[str, Any]:
         result = api_response(success=True, status_code=200, message=message,
                               data=data, request_id=request_id or new_request_id(),
-                              insight=insight)
+                              insight=insight, duration_ms=duration_ms)
         if meta:
             result.setdefault("meta", {}).update(meta)
         return result

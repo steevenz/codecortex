@@ -275,6 +275,7 @@ def _err(message: str, error_code: str, request_id: str, status_code: int = 400)
 # - codecortex:knowledge     (4 actions: extract, query, status, relationships)
 
 from src.api.tools import register_tools as register_api_tools
+from src.api.resources import register_resources as register_api_resources
 from src.modules.knowledgegraph.api.tools import register_tools as register_knowledge_tools
 from src.modules.idegraph.api.tools import register_tools as register_idegraph_tools
 
@@ -301,7 +302,10 @@ register_knowledge_tools(mcp, create_orchestrator)
 # Register IDE Graph tool (6th tool)
 register_idegraph_tools(mcp, create_orchestrator)
 
-# Total: 6 unified MCP tools
+# Register MCP Resources (codecortex:// URIs)
+register_api_resources(mcp, create_orchestrator)
+
+# Total: 6 unified MCP tools + 4 resources
 
 if __name__ == "__main__":
     import sys

@@ -118,6 +118,11 @@ src/
 **v0.1.0** (Development) - Initial implementation with:
 - ✅ Core DDD structure with 6 bounded contexts
 - ✅ MCP tool registration framework (stdio, SSE, HTTP)
+- ✅ **MCP Tool Annotations** — readOnlyHint, destructiveHint, idempotentHint
+- ✅ **MCP Progress Notifications** — progress on long-running ops
+- ✅ **MCP Resources** — codecortex:// repo URIs
+- ✅ **MCP Logging** — start/finish via ctx.info/warning/error
+- ✅ **Duration in meta** — all responses include meta.duration_ms
 - ✅ Tree-Sitter-based code indexing (20+ languages)
 - ✅ Code graph construction and analysis
 - ✅ Semantic search capabilities

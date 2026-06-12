@@ -304,6 +304,36 @@ The agent calls `repo_init` -> `index_repo` -> `graph_build` -> `graph_trace_flo
 docker-compose up -d    # Neo4j + FalkorDB for advanced graph queries
 ```
 
+## Supported Agents
+
+CodeCortex works as a **plugin** for these AI coding agents:
+
+| Agent | Plugin Dir | Type |
+|-------|-----------|------|
+| [Claude Code](docs/plugins/claude-code.md) | `.claude-plugin/` | Plugin + Hooks |
+| [Codex CLI](docs/plugins/codex-cli.md) | `.codex-plugin/` | Plugin |
+| [Cursor](docs/plugins/cursor.md) | `.cursor-plugin/` | Plugin + Hooks |
+| [OpenCode](docs/plugins/opencode.md) | `.opencode/` | Plugin + JS |
+| [Trae / SOLO Trae](docs/plugins/trae.md) | `.trae/` | MCP + Rules |
+| [Gemini CLI](docs/plugins/gemini-cli.md) | `.gemini-cli/` | Extension |
+| [Antigravity CLI / IDE / Agent](docs/plugins/antigravity-cli.md) | `.antigravity/` | MCP + Config |
+| [Cline](docs/plugins/cline.md) | `.cline/` | MCP + Rules |
+| [Windsurf](docs/plugins/windsurf.md) | `.windsurf/` | MCP + Rules |
+| [Goose CLI](docs/plugins/goose-cli.md) | `.goose/` | MCP + Config |
+| [GitHub Copilot](docs/plugins/github-copilot-cli.md) | `.github/` | Instructions |
+| [KILO](docs/plugins/kilo.md) | `.kilo/` | Plugin |
+| [Continue.dev](docs/plugins/continue.md) | `.continue/` | Agents + MCP |
+| [Qoder / Qwen CLI](docs/plugins/qoder.md) | `.qoder/` | MCP + Config |
+| [Kiro IDE](docs/plugins/kiro.md) | `.kiro/` | Agent + Skills |
+| [Codebuddy](docs/plugins/codebuddy.md) | (MCP config) | MCP |
+| [Zed Editor](docs/plugins/zed.md) | `.zed/` | MCP + Instructions |
+| [OpenClaude](docs/plugins/openclaude.md) | `.claude-plugin/` | Plugin (compat) |
+| [Verdent AI](docs/plugins/verdent.md) | `.verdent/` | Agent + MCP |
+
+> **Shared skills**: All agents use the same `.skills/` directory. Skills are auto-discovered via plugin.json (Claude/Codex/Cursor/OpenCode) or system prompt/agent config (others).
+
+See [Plugin Index](docs/plugins/INDEX.md) for install guides.
+
 ## Tech Stack
 
 | Layer | Technology |

@@ -1,0 +1,31 @@
+{
+  "name": "codecortex",
+  "version": "1.2.0",
+  "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory, and project scaffolding",
+  "author": "Steeven Andrian",
+  "homepage": "https://github.com/steevenz/mcp-codecortex",
+  "license": "MIT",
+  "keywords": [
+    "code-intelligence",
+    "code-analysis",
+    "refactoring",
+    "architecture",
+    "mcp",
+    "knowledge-graph",
+    "ide-memory",
+    "skills"
+  ],
+  "systemPrompt": "system_prompt.md",
+  "rules": "rules.md",
+  "mcpServers": "../mcp.json",
+  "capabilities": [
+    "codebase-analysis",
+    "architecture-audit",
+    "code-search",
+    "dependency-graph",
+    "refactoring",
+    "code-quality",
+    "project-scaffolding",
+    "knowledge-management"
+  ]
+}

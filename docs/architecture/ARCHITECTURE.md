@@ -164,6 +164,33 @@ Each domain catches its own exceptions, logs structured events, and returns part
 - `CodeRefactorService` — transformation failures are rolled back with Git history preservation.
 - `QAService` — test execution failures are logged, partial results returned for successful tests.
 
+## MCP Compliance Layer
+
+CodeCortex implements 5 MCP enhancement layers beyond basic JSON-RPC compliance:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MCP Transport (stdio/SSE/HTTP)          │
+├─────────────────────────────────────────────────────────────┤
+│  Layer 5: Logging Notifications — ctx.info/warning/error   │
+│  Layer 4: MCP Resources — codecortex:// URIs               │
+│  Layer 3: Duration in meta — meta.duration_ms              │
+│  Layer 2: Progress — ctx.report_progress()                 │
+│  Layer 1: Tool Annotations — readOnlyHint/destructiveHint  │
+├─────────────────────────────────────────────────────────────┤
+│          6 Unified MCP Tools (action+args dispatch)         │
+│          FastMCP + JSON-RPC 2.0 Base Protocol                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+See [MCP Compliance](../features/core/mcp-compliance.md) for full details.
+
+## Related Documentation
+
+- [MCP Compliance](../features/core/mcp-compliance.md) — annotations, progress, resources, logging
+- [API Response Format](./api/specs.md) — envelope shape
+- [CLI Commands](../features/core/sub-features/cli/commands.md) — CLI equivalents
+
 ## Technology Stack Rationale
 
 ### Domain-Driven Design (DDD)

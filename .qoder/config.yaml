@@ -1,0 +1,12 @@
+# CodeCortex MCP Config for Qoder CLI
+
+mcp_servers:
+  codecortex:
+    command: uv
+    args:
+      - --directory
+      - /path/to/mcp-codecortex
+      - run
+      - python
+      - -m
+      - src.main

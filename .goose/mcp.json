@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "codecortex": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+    }
+  }
+}

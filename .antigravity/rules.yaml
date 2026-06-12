@@ -1,0 +1,44 @@
+# CodeCortex Rules for Antigravity CLI
+# Copy this file to your Antigravity rules directory or reference in config
+
+rules:
+  - id: "cc-001"
+    description: "ALL codebase operations MUST use CodeCortex MCP Server"
+    severity: "error"
+
+  - id: "cc-002"
+    description: "Run graph build before architecture queries"
+    severity: "warning"
+
+  - id: "cc-003"
+    description: "Analyze impact before any modification"
+    severity: "error"
+
+  - id: "cc-004"
+    description: "Verify changes with audit post-modification"
+    severity: "error"
+
+tools:
+  codecortex:repository:
+    description: "Repository lifecycle management"
+    actions: [init, inspect, analyze, sync, audit, git]
+
+  codecortex:codebase:
+    description: "Code intelligence — search, analyze, audit, graph, test, refactor"
+    actions: [analyze, search, audit, graph, status, index, test, refactor]
+
+  codecortex:knowledge:
+    description: "Knowledge graph extraction and querying"
+    actions: [extract, query, status, relationships]
+
+  codecortex:idegraph:
+    description: "Cross-IDE memory search and harvest"
+    actions: [search, ingest, refresh, compact, harvest]
+
+  codecortex:scaffolder:
+    description: "Project scaffolding"
+    actions: [list_stacks, validate_name, generate, create]
+
+  codecortex:filesystem:
+    description: "File operations"
+    actions: [read, write, delete, copy, move, search, watch]

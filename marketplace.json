@@ -1,6 +1,6 @@
 {
   "name": "codecortex-marketplace",
-  "description": "Local marketplace for CodeCortex — code intelligence skills for AI coding agents",
+  "description": "Local marketplace for CodeCortex — code intelligence skills for 20+ AI coding agents",
   "owner": {
     "name": "Steeven Andrian",
     "email": "steevenz@users.noreply.github.com"
@@ -14,7 +14,34 @@
       "author": {
         "name": "Steeven Andrian",
         "email": "steevenz@users.noreply.github.com"
-      }
+      },
+      "compatibility": [
+        "claude-code",
+        "codex-cli",
+        "cursor",
+        "opencode",
+        "trae",
+        "gemini-cli",
+        "antigravity-cli",
+        "antigravity-ide",
+        "antigravity-agent",
+        "cline",
+        "windsurf",
+        "goose-cli",
+        "github-copilot",
+        "kilo",
+        "continue",
+        "qoder",
+        "qwen-cli",
+        "kiro-ide",
+        "codebuddy",
+        "zed-editor",
+        "openclaude",
+        "verdent-ai",
+        "solo-trae"
+      ],
+      "skills": "./.skills/",
+      "agents": "./.agents/"
     }
   ]
 }

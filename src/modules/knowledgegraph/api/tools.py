@@ -9,10 +9,12 @@ codecortex:knowledge
 """
 
 from __future__ import annotations
-
+import time
 from typing import Any, Callable, Dict, List, Optional
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.server import Context
+from mcp.types import ToolAnnotations
 from src.core import api_response, new_request_id
 
 
@@ -20,8 +22,17 @@ from src.core import api_response, new_request_id
 
 def _build_tools(mcp: FastMCP, orchestrator_factory: Callable) -> None:
 
-    @mcp.tool()
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Knowledge Graph",
+            readOnlyHint=True,
+            destructiveHint=False,
+            idempotentHint=True,
+            openWorldHint=False,
+        )
+    )
     async def knowledge_graph(
+        ctx: Context,
         action: str,
         repo_path: Optional[str] = None,
         task: Optional[str] = None,
@@ -107,6 +118,8 @@ def _build_tools(mcp: FastMCP, orchestrator_factory: Callable) -> None:
         orchestrator = orchestrator_factory()
         store = KnowledgeStore(orchestrator.db)
         limit = min(limit, 200)
+        if hasattr(ctx, "info"):
+            await ctx.info(f"knowledge.{action} started")
 
         try:
             if action == "extract":
@@ -258,7 +271,6 @@ def _build_tools(mcp: FastMCP, orchestrator_factory: Callable) -> None:
                 orchestrator.db.close()
             except Exception:
                 pass
-
 
 def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> None:
     _build_tools(mcp, orchestrator_factory)

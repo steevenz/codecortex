@@ -10,6 +10,7 @@ Error classes for CodeCortex.
 
 from __future__ import annotations
 
+import time
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
@@ -66,14 +67,19 @@ def api_response(
     meta: Optional[Dict[str, Any]] = None,
     details: Optional[Dict[str, Any]] = None,
     insight: Any = None,
+    duration_ms: Optional[int] = None,
+    start_time: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """Build a standardized API response with optional AI insight field.
+    """Build a standardized API response.
 
     ``insight`` can be:
     - ``None``: No insight field in response.
     - A ``dict``: Used directly as the insight value.
     - A ``str`` (tool name): Auto-generates insight from ``data`` using the
       registered generator in ``src.core.insight``.
+
+    ``duration_ms``: Explicit duration in milliseconds. Overrides ``start_time``.
+    ``start_time``: ``time.monotonic()`` timestamp — computes duration automatically.
 
     See ``src.core.insight.AIInsight`` for the canonical schema.
     """
@@ -84,6 +90,10 @@ def api_response(
         _meta["request_id"] = request_id
     if not success and error_code is not None:
         _meta["error_code"] = error_code
+    if duration_ms is not None:
+        _meta["duration_ms"] = duration_ms
+    elif start_time is not None:
+        _meta["duration_ms"] = int((time.monotonic() - start_time) * 1000)
     if details is not None:
         _meta.update(details)
     if meta is not None:

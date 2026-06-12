@@ -281,9 +281,9 @@ LLM: "Move akan transfer 500MB .tar.gz file dari /tmp ke /backup.
 - `size_bytes` (for file nodes)
 
 **AI Use Cases:**
-1. **Folder Structure Understanding:** LLM bisa traverse `children` array dan paham hierarchy
-2. **Size Distribution:** LLM bisa identifikasi folder terbesar (e.g., `node_modules` 500MB) untuk cleanup
-3. **File Count Distribution:** LLM bisa infer project scale (e.g., "ini project besar dengan 1000+ files")
+1. **Folder Structure Understanding:** LLM traverses `children` array to understand hierarchy
+2. **Size Distribution:** LLM identifies largest folders (e.g., `node_modules` 500MB) for cleanup
+3. **File Count Distribution:** LLM infers project scale (e.g., "large project with 1000+ files")
 
 **Example AI Reasoning:**
 ```

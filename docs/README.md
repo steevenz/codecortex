@@ -67,6 +67,7 @@ All documentation must:
 
 - **features/index.md** - Feature map with documentation by domain (6 domains + Core)
 - **features/support-matrix.md** - Languages, frameworks, MCP, LLMs, OS, databases, backends, QA tools
+- **features/core/mcp-compliance.md** - MCP spec compliance (annotations, progress, resources, logging, duration)
 - **features/codeindex/concept.md** - Code indexing docs (TreeSitter, semantic search, etc.)
 - **features/codegraph/concept.md** - Code graph & architecture analysis docs
 - **features/coderepository/concept.md** - Repository management docs

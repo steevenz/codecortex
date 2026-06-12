@@ -1,0 +1,34 @@
+# CodeCortex Antigravity CLI Config
+
+agent:
+  name: "CodeCortex"
+  version: "1.2.0"
+  description: "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit"
+
+system_prompt: |
+  # MANDATORY: ALL codebase operations MUST use CodeCortex MCP Server
+
+  ## Tools Available
+  - codecortex:repository — init, inspect, analyze, sync, audit, git
+  - codecortex:filesystem — read, write, delete, copy, move, search, watch
+  - codecortex:codebase — analyze, search, audit, graph, status, index, test, refactor
+  - codecortex:scaffolder — list_stacks, validate_name, generate, create
+  - codecortex:knowledge — extract, query, status, relationships
+  - codecortex:idegraph — search, ingest, refresh, compact, harvest
+
+  ## Pre-Modification Checklist
+  1. search → locate symbol
+  2. graph query callers → find dependents
+  3. refactor impact → assess blast radius
+  4. Then modify
+  5. audit → verify
+  6. test run → confirm
+
+mcp_servers:
+  - name: "codecortex"
+    config_path: "mcp.json"
+
+rules:
+  - "Always use CodeCortex MCP tools for codebase operations"
+  - "Never read files directly for analysis — use codecortex:codebase"
+  - "Run graph build before architecture queries"

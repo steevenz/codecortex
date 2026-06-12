@@ -1,0 +1,33 @@
+# CodeCortex Goose CLI Extension Config
+
+name: "codecortex"
+version: "1.2.0"
+description: "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit"
+
+mcp_servers:
+  - path: "mcp.json"
+
+system_prompt: |
+  # MANDATORY: ALL codebase operations MUST use CodeCortex MCP Server
+
+  ## Tools
+  - codecortex:repository — repo management
+  - codecortex:codebase — code analysis, search, graph, audit, test, refactor
+  - codecortex:filesystem — file operations
+  - codecortex:knowledge — engineering knowledge
+  - codecortex:idegraph — cross-IDE memory
+
+  ## Workflow
+  1. Search → 2. Graph build → 3. Impact analysis → 4. Modify → 5. Audit → 6. Test
+
+extensions:
+  - name: "codecortex-codebase"
+    description: "Code intelligence — search, analyze, audit, graph, test, refactor"
+  - name: "codecortex-knowledge"
+    description: "Knowledge graph extraction and querying"
+  - name: "codecortex-idegraph"
+    description: "Cross-IDE memory search and harvest"
+  - name: "codecortex-project"
+    description: "Project scaffolding"
+  - name: "codecortex-refactor"
+    description: "Safe refactoring with impact analysis"
