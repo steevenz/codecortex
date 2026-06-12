@@ -50,7 +50,7 @@
   "graph_backends": ["kuzu", "neo4j", "falkordb", "supabase"],
   "author": {
     "name": "Steeven Andrian",
-    "email": "steevenz@users.noreply.github.com"
+    "email": "steevenz@steevenz.com"
   },
   "copyright": "Copyright (c) 2026 Aegis Codework",
   "standard": "Aegis-CrossStack-v1.0"

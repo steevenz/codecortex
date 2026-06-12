@@ -270,7 +270,7 @@ Every response returns `{success, status_code, message, data, meta}` via `api_re
 ### Install
 
 ```bash
-git clone https://github.com/steevenz/mcp-codecortex.git
+git clone https://github.com/steevenz/codecortex.git
 cd mcp-codecortex
 uv sync
 ```
@@ -366,6 +366,6 @@ MIT -- see [LICENSE](LICENSE).
 
 **Developed with passion by [Steeven Andrian](https://github.com/steevenz)** -- Founder & Principal Engineer, Aegis Codework
 
-**Support the project: [PayPal](https://paypal.me/steevenz)**
+**Support the project: [PayPal](https://paypal.me/steevenlim)**
 
 *CodeCortex v0.1.0 -- Scale code intelligence without friction.*

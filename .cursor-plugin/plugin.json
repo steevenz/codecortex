@@ -5,10 +5,10 @@
   "description": "Code intelligence via MCP — codebase analysis, graph queries, refactoring, architecture audit, cross-IDE memory",
   "author": {
     "name": "Steeven Andrian",
-    "url": "https://github.com/steevenz"
+    "url": "https://www.steevenz.com"
   },
-  "homepage": "https://github.com/steevenz/mcp-codecortex",
-  "repository": "https://github.com/steevenz/mcp-codecortex",
+  "homepage": "https://www.steevenz.com",
+  "repository": "https://github.com/steevenz/codecortex",
   "license": "MIT",
   "keywords": [
     "code-intelligence",

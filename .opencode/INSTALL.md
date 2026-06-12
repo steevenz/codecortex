@@ -10,7 +10,7 @@ Add CodeCortex to the `plugin` array in your `opencode.json` (global or project-
 
 ```json
 {
-  "plugin": ["codecortex@git+https://github.com/steevenz/mcp-codecortex.git"]
+  "plugin": ["codecortex@git+https://github.com/steevenz/codecortex.git"]
 }
 ```
 
@@ -19,7 +19,7 @@ Restart OpenCode. The plugin installs through OpenCode's plugin manager and regi
 ## Manual Installation
 
 ```bash
-git clone https://github.com/steevenz/mcp-codecortex.git
+git clone https://github.com/steevenz/codecortex.git
 ```
 
 Then in `opencode.json`:

@@ -3,7 +3,7 @@
   "description": "Local marketplace for CodeCortex — code intelligence skills for 20+ AI coding agents",
   "owner": {
     "name": "Steeven Andrian",
-    "email": "steevenz@users.noreply.github.com"
+    "email": "steevenz@steevenz.com"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "source": "./",
       "author": {
         "name": "Steeven Andrian",
-        "email": "steevenz@users.noreply.github.com"
+        "email": "steevenz@steevenz.com"
       },
       "compatibility": [
         "claude-code",

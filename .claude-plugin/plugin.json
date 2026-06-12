@@ -4,10 +4,10 @@
   "version": "1.2.0",
   "author": {
     "name": "Steeven Andrian",
-    "email": "steevenz@users.noreply.github.com"
+    "email": "steevenz@steevenz.com"
   },
-  "homepage": "https://github.com/steevenz/mcp-codecortex",
-  "repository": "https://github.com/steevenz/mcp-codecortex",
+  "homepage": "https://www.steevenz.com",
+  "repository": "https://github.com/steevenz/codecortex",
   "license": "MIT",
   "keywords": [
     "code-intelligence",
