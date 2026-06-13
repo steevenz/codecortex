@@ -137,7 +137,7 @@ _API_KEY_ENV_VARS = [
     "CODECORTEX_BRIDGE_NEOCORTEX_API_KEY",
 ]
 
-_neocortex_CONFIG_PATH = Path.home() / ".codecortex" / "neocortex.json"
+_neocortex_CONFIG_PATH = Path.home() / ".coddy" / "codecortex" / "neocortex.json"
 
 # ---------------------------------------------------------------------------
 # Domain-specific prompt builders — one per tool:action context

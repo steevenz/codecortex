@@ -60,7 +60,7 @@ Write-Host '    "codecortex": {' -ForegroundColor Gray
 Write-Host '      "command": "npx",' -ForegroundColor Gray
 Write-Host '      "args": ["codecortex-mcp"],' -ForegroundColor Gray
 Write-Host '      "env": {' -ForegroundColor Gray
-Write-Host '        "CODECORTEX_DB_PATH": "${HOME}/.codecortex/db.sqlite",' -ForegroundColor Gray
+Write-Host '        "CODECORTEX_DB_PATH": "${HOME}/.coddy/codecortex/db.sqlite",' -ForegroundColor Gray
 Write-Host '        "CODECORTEX_GRAPH_BACKEND": "kuzu",' -ForegroundColor Gray
 Write-Host '        "CODECORTEX_MAX_REPOS": "50"' -ForegroundColor Gray
 Write-Host '      }' -ForegroundColor Gray

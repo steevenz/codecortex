@@ -194,7 +194,7 @@ class KuzuBackend(GraphBackend):
         self.name = "kuzudb"
         self.db_path = db_path or os.getenv(
             "CODECORTEX_KUZU_PATH",
-            str(Path.home() / ".codecortex" / "global" / "kuzudb"),
+            str(Path.home() / ".coddy" / "codecortex" / "global" / "kuzudb"),
         )
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
 

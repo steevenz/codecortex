@@ -42,7 +42,7 @@ Add to your MCP configuration:
       "command": "npx",
       "args": ["codecortex-mcp"],
       "env": {
-        "CODECORTEX_DB_PATH": "${HOME}/.codecortex/db.sqlite",
+        "CODECORTEX_DB_PATH": "${HOME}/.coddy/codecortex/db.sqlite",
         "CODECORTEX_GRAPH_BACKEND": "kuzu",
         "CODECORTEX_MAX_REPOS": "50"
       }
@@ -72,7 +72,7 @@ Add to your MCP configuration:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CODECORTEX_DB_PATH` | `~/.codecortex/db.sqlite` | Path to SQLite database |
+| `CODECORTEX_DB_PATH` | `~/.coddy/codecortex/db.sqlite` | Path to SQLite database |
 | `CODECORTEX_GRAPH_BACKEND` | `kuzu` | Graph database backend (kuzu/neo4j/falkordb) |
 | `CODECORTEX_MAX_REPOS` | `50` | Maximum repositories to track |
 | `CODECORTEX_TRANSPORT` | `stdio` | Transport mode (stdio/http) |

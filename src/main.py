@@ -27,7 +27,7 @@ def _get_lockfile_dir() -> Path:
     """Return path to project data directory.
 
     Uses the shared get_data_dir() from core.config.database to ensure
-    a single source of truth for ~/.codecortex path resolution.
+    a single source of truth for ~/.coddy/codecortex path resolution.
     """
     from src.core.config.database import get_data_dir
     return get_data_dir()
@@ -426,6 +426,8 @@ def _safe_kill_and_wait(killed_any: bool) -> bool:
 def _safeguard_instance() -> None:
     """Self-kill safeguard that prevents multi-IDE process conflicts.
 
+    Runs synchronously at module load time.
+
     MODES:
       - stdio mode (default): Full kill-loop for stale Python PIDs.
         Used when running standalone (e.g., run_server.js).
@@ -434,17 +436,19 @@ def _safeguard_instance() -> None:
         Lifecycle managed by index.cjs's file-lock + reference counting.
 
     Strategy (shared mode):
-    1. Write JSON lockfile with full instance identity
-    2. Register atexit cleanup
-    3. DO NOT kill other Python PIDs — index.cjs manages lifecycle
+    1. Init logging (console→stderr + file→~/.coddy/codecortex/logs/)
+    2. Write JSON lockfile with full instance identity
+    3. Register atexit cleanup
+    4. DO NOT kill other Python PIDs — index.cjs manages lifecycle
 
     Strategy (stdio mode):
-    1. Load killed-PID cache to prevent cascade loops
-    2. Find ALL local python.exe processes running `src.main`
-    3. Kill stale/orphan instances (graceful → forced escalation)
-    4. Check lockfile for any missed PID
-    5. Write JSON lockfile with full instance identity
-    6. Register atexit cleanup
+    1. Init logging
+    2. Load killed-PID cache to prevent cascade loops
+    3. Find ALL local python.exe processes running `src.main`
+    4. Kill stale/orphan instances (graceful → forced escalation)
+    5. Check lockfile for any missed PID
+    6. Write JSON lockfile with full instance identity
+    7. Register atexit cleanup
 
     Instance identity fields (shared with Node in lockfile):
       pid, signature, source, instance_id, ide, pid_timestamp, version,
@@ -453,6 +457,14 @@ def _safeguard_instance() -> None:
     import time as _time
     import json as _json
 
+    # ── Phase 0: Init logging (safe: console→stderr, file→~/.coddy/codecortex/logs/) ──
+    try:
+        from src.core.logging import Logger as _LogSetup
+        _LogSetup.setup(os.getenv("CODECORTEX_LOG_LEVEL", "INFO"))
+    except Exception:
+        pass
+    _log = logging.getLogger("CodeCortex.Main.Safeguard")
+
     pid_file = _get_lockfile_path()
     current_pid = os.getpid()
     identity = _build_instance_identity()
@@ -460,31 +472,28 @@ def _safeguard_instance() -> None:
 
     killed_any = False
 
-    print(
-        f"[CodeCortex] Instance starting: PID={current_pid} "
-        f"ID={identity['instance_id']} IDE={identity['ide']} "
-        f"mode={'shared' if shared_mode else 'stdio'}"
-        f"{' node_parent=' + str(identity['node_parent_pid']) if identity.get('node_parent_pid') else ''}",
-        file=sys.stderr,
+    _log.info(
+        "Instance starting: PID=%s ID=%s IDE=%s mode=%s%s",
+        current_pid,
+        identity["instance_id"],
+        identity["ide"],
+        "shared" if shared_mode else "stdio",
+        f" node_parent={identity['node_parent_pid']}" if identity.get("node_parent_pid") else "",
     )
 
     # ────────────────────────────────────────────────────────────
     # SHARED MODE: Skip kill-loop, let index.cjs manage lifecycle
     # ────────────────────────────────────────────────────────────
     if shared_mode:
-        # Write lockfile with identity
         try:
             pid_file.write_text(_json.dumps(identity, indent=2))
-            print(
-                f"[CodeCortex] Service lock (shared): PID={current_pid} "
-                f"instance={identity['instance_id']} IDE={identity['ide']} "
-                f"file={pid_file}",
-                file=sys.stderr,
+            _log.info(
+                "Service lock (shared): PID=%s instance=%s IDE=%s file=%s",
+                current_pid, identity["instance_id"], identity["ide"], pid_file,
             )
         except OSError as e:
-            print(f"[CodeCortex] Warning: cannot write lockfile: {e}", file=sys.stderr)
+            _log.warning("Cannot write lockfile: %s", e)
 
-        # Register atexit cleanup
         def _shared_cleanup():
             try:
                 if pid_file.exists():
@@ -506,11 +515,8 @@ def _safeguard_instance() -> None:
     # STDIO MODE: Full safeguard with kill-loop
     # ────────────────────────────────────────────────────────────
 
-    # Load killed-PID cache (prevents cascade)
     killed_cache = _read_killed_cache()
     newly_killed: Dict[int, float] = {}
-
-    # Identify OUR Node parent PID (if any) — never kill this process
     node_parent_pid = identity.get("node_parent_pid")
 
     # PHASE 1: Scan for ALL codecortex python PIDs
@@ -519,44 +525,35 @@ def _safeguard_instance() -> None:
         if pid == current_pid:
             continue
 
-        # GUARD: Killed-PID cache — skip if already killed recently
         if pid in killed_cache:
-            print(
-                f"[CodeCortex] Skipping PID={pid} — already killed recently "
-                f"({_time.time() - killed_cache[pid]:.1f}s ago)",
-                file=sys.stderr,
+            _log.info(
+                "Skipping PID=%s — already killed recently (%.1fs ago)",
+                pid, _time.time() - killed_cache[pid],
             )
             continue
-
-        # GUARD: Don't kill our own Node parent
         if node_parent_pid and pid == node_parent_pid:
-            print(f"[CodeCortex] Skipping PID={pid} — our Node parent", file=sys.stderr)
+            _log.info("Skipping PID=%s — our Node parent", pid)
             continue
-
-        # GUARD: Skip if too young (prevents candidate cascade)
         if _is_process_younger_than(pid, seconds=3.0):
-            print(f"[CodeCortex] Skipping PID={pid} — too young (<3s)", file=sys.stderr)
+            _log.info("Skipping PID=%s — too young (<3s)", pid)
             continue
-
-        # GUARD: Skip node-spawned processes (they're legitimate)
         if _is_spawned_by_node(pid):
-            print(f"[CodeCortex] Skipping PID={pid} — child of node.exe", file=sys.stderr)
+            _log.info("Skipping PID=%s — child of node.exe", pid)
             continue
 
-        print(f"[CodeCortex] Killing stale instance PID={pid}", file=sys.stderr)
+        _log.info("Killing stale instance PID=%s", pid)
         if _kill_process_graceful(pid):
             killed_any = True
             newly_killed[pid] = _time.time()
-            print(f"[CodeCortex] Killed stale PID={pid}", file=sys.stderr)
+            _log.info("Killed stale PID=%s", pid)
 
-    # Save killed-PID cache
     if newly_killed:
         killed_cache.update(newly_killed)
         _write_killed_cache(killed_cache)
 
     _safe_kill_and_wait(killed_any)
 
-    # PHASE 2: Check lockfile for any PID we might have missed
+    # PHASE 2: Check lockfile for any missed PID
     if pid_file.exists() and not killed_any:
         try:
             old_content = pid_file.read_text().strip()
@@ -570,15 +567,15 @@ def _safeguard_instance() -> None:
 
         if old_pid and old_pid != current_pid:
             if old_pid in killed_cache:
-                print(f"[CodeCortex] Lockfile PID={old_pid} — already killed, skipping", file=sys.stderr)
+                _log.info("Lockfile PID=%s — already killed, skipping", old_pid)
             elif node_parent_pid and old_pid == node_parent_pid:
-                print(f"[CodeCortex] Lockfile PID={old_pid} — our Node parent, skipping", file=sys.stderr)
+                _log.info("Lockfile PID=%s — our Node parent, skipping", old_pid)
             elif _is_process_younger_than(old_pid, seconds=3.0):
-                print(f"[CodeCortex] Lockfile PID={old_pid} — too young, skipping", file=sys.stderr)
+                _log.info("Lockfile PID=%s — too young, skipping", old_pid)
             elif _is_spawned_by_node(old_pid):
-                print(f"[CodeCortex] Lockfile PID={old_pid} — child of node.exe, skipping", file=sys.stderr)
+                _log.info("Lockfile PID=%s — child of node.exe, skipping", old_pid)
             elif _is_process_alive(old_pid):
-                print(f"[CodeCortex] Lockfile stale PID={old_pid} still alive — killing", file=sys.stderr)
+                _log.info("Lockfile stale PID=%s still alive — killing", old_pid)
                 _kill_process_graceful(old_pid)
                 killed_any = True
                 newly_killed[old_pid] = _time.time()
@@ -589,14 +586,12 @@ def _safeguard_instance() -> None:
     # PHASE 3: Write lockfile
     try:
         pid_file.write_text(_json.dumps(identity, indent=2))
-        print(
-            f"[CodeCortex] Service lock: PID={current_pid} "
-            f"instance={identity['instance_id']} IDE={identity['ide']} "
-            f"file={pid_file}",
-            file=sys.stderr,
+        _log.info(
+            "Service lock: PID=%s instance=%s IDE=%s file=%s",
+            current_pid, identity["instance_id"], identity["ide"], pid_file,
         )
     except OSError as e:
-        print(f"[CodeCortex] Warning: cannot write lockfile: {e}", file=sys.stderr)
+        _log.warning("Cannot write lockfile: %s", e)
 
     # PHASE 4: Register atexit cleanup
     def _cleanup():
@@ -669,6 +664,13 @@ class CortexOrchestrator:
         )
         self.refactor_service = Refactor(self.db, self.fs_service, self.git_service, self.graph_service)
         self.code_service = CodeService(self)
+        # Auto-update service: background version checker (daemon thread)
+        try:
+            from src.core.update import CodeCortexUpdater
+            self.update_service = CodeCortexUpdater(auto_start=True)
+        except Exception as e:
+            self.logger.warning("Auto-update service failed to start: %s", e)
+            self.update_service = None
         self.logger = get_logger(f"{__name__}.Orchestrator")
 
     def _ensure_schema(self) -> None:
@@ -913,6 +915,13 @@ register_api_resources(mcp, create_orchestrator)
 
 if __name__ == "__main__":
     import sys
+
+    # Initialize logging: console (stdout, JSON) + rotating file (~/.coddy/codecortex/logs/codecortex.log)
+    try:
+        from src.core.logging import Logger
+        Logger.setup(os.getenv("CODECORTEX_LOG_LEVEL", "INFO"))
+    except Exception:
+        pass  # best-effort
 
     transport = os.getenv("CODECORTEX_TRANSPORT", "stdio").strip().lower()
 

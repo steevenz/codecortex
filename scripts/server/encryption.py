@@ -22,7 +22,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-KEY_DIR = Path.home() / ".codecortex" / "keys"
+KEY_DIR = Path.home() / ".coddy" / "codecortex" / "keys"
 
 
 def _ensure_key_dir() -> None:

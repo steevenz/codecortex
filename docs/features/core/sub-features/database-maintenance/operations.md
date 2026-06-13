@@ -33,7 +33,7 @@ What it deletes:
   - files, directories, symbols, edges, insights
   - commits, file_commits, manifest_entries
   - repository record
-  - global registry entry (~/.codecortex/registry.json)
+  - global registry entry (~/.coddy/codecortex/registry.json)
 
 IRREVERSIBLE: Use with caution. Re-run repo_init to re-index.
 ```

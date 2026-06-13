@@ -43,7 +43,7 @@ PHASE 3: Execute deletion
   • DELETE extra tables if they exist
   • DELETE repository row
   • COMMIT transaction
-  • Remove entry from global registry (~/.codecortex/registry.json)
+  • Remove entry from global registry (~/.coddy/codecortex/registry.json)
 
 PHASE 4: Delete snapshot (if delete_snapshot=true)
   • Unlink .agents/codecortex.yaml or .json at repo root
@@ -167,7 +167,7 @@ PHASE 5: Return response
 | Tool | Role |
 |------|------|
 | SQLite | Primary data source for deletion |
-| RegistryManager | Global registry cleanup (~/.codecortex/registry.json) |
+| RegistryManager | Global registry cleanup (~/.coddy/codecortex/registry.json) |
 | `repo_list` | Discover stale/orphaned repos to clean up |
 | `repo_compact` | Take snapshot backup before deletion |
 | `repo_dump` | Export data before deletion |

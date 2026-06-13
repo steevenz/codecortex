@@ -8,7 +8,7 @@ Logging module exports.
 :standard: CODDY-Core-v1.0
 """
 
-from .config import get_logger, setup_logging, StructuredFormatter, Logger
+from .config import get_logger, setup_logging, StructuredFormatter, Logger, get_log_dir
 from .event_logger import log_event
 
 __all__ = [
@@ -17,4 +17,5 @@ __all__ = [
     "StructuredFormatter",
     "Logger",
     "log_event",
+    "get_log_dir",
 ]

@@ -24,7 +24,7 @@ const projectRoot = join(__dirname, '..', '..');
 //
 // Also supports legacy v1 format (plain text: PID + sig lines).
 // Killed-PID cache: codecortex.killed (JSON object: {pid_str: kill_timestamp})
-const LOCKFILE_DIR = join(homedir(), '.codecortex');
+const LOCKFILE_DIR = join(homedir(), '.coddy', 'codecortex');
 const LOCKFILE_PATH = join(LOCKFILE_DIR, 'codecortex.pid');
 const KILLED_CACHE_PATH = join(LOCKFILE_DIR, 'codecortex.killed');
 

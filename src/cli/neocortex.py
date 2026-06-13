@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from src.cli.common import ok, err
 
-_neocortex_CACHE_PATH = Path.home() / ".codecortex" / "neocortex_endpoint.json"
+_neocortex_CACHE_PATH = Path.home() / ".coddy" / "codecortex" / "neocortex_endpoint.json"
 
 
 def _neocortex_url(args_ns: argparse.Namespace) -> str:

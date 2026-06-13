@@ -72,7 +72,7 @@ def _get_device_id() -> str:
     global _LOCAL_DEVICE_ID
     if _LOCAL_DEVICE_ID:
         return _LOCAL_DEVICE_ID
-    cfg_dir = Path.home() / ".codecortex"
+    cfg_dir = Path.home() / ".coddy" / "codecortex"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_file = cfg_dir / "device.json"
     if cfg_file.exists():

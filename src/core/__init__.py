@@ -43,7 +43,7 @@ from .graph import (
 )
 from .parser import TreeSitterManager, AstCache
 from .templating import Engine, TemplateNotFoundError, TemplateRenderError
-from .logging import get_logger, setup_logging, StructuredFormatter, log_event, Logger
+from .logging import get_logger, setup_logging, StructuredFormatter, log_event, Logger, get_log_dir
 from .telemetry import get_tracer_provider, record_metric, start_span
 from .token import estimate_tokens, get_token_budget, optimize_response, TokenOptimization
 from .errors import (
@@ -148,6 +148,7 @@ __all__ = [
     "TemplateRenderError",
     # Logging
     "get_logger",
+    "get_log_dir",
     "setup_logging",
     "StructuredFormatter",
     "Logger",

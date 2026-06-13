@@ -296,8 +296,8 @@ Set `CODECORTEX_TRANSPORT=sse` in `.env` to force HTTP/SSE transport. Node spawn
 - Verify no stale Python process on port 8001: `taskkill /F /IM python.exe /FI "WINDOWTITLE eq codecortex"`
 
 ### PID cascade kill loop
-- Clear killed-PID cache: `del %USERPROFILE%\.codecortex\codecortex.killed`
-- Clear lockfile: `del %USERPROFILE%\.codecortex\codecortex.pid`
+- Clear killed-PID cache: `del %USERPROFILE%\.coddy\codecortex\codecortex.killed`
+- Clear lockfile: `del %USERPROFILE%\.coddy\codecortex\codecortex.pid`
 - Verify all configs use `node index.cjs --ide <name>` (not direct Python)
 
 ### "ModuleNotFoundError: CODDY"

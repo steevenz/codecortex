@@ -1,6 +1,6 @@
 """
 Global registry for indexed repositories.
-Stores repo metadata in ~/.codecortex/registry.json for cross-session discovery.
+Stores repo metadata in ~/.coddy/codecortex/registry.json for cross-session discovery.
 
 :project: CodeCortex
 :package: Modules.Coderepository.Core.Registry
@@ -10,20 +10,18 @@ Stores repo metadata in ~/.codecortex/registry.json for cross-session discovery.
 """
 
 import json
-import os
-import subprocess
 import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
 logger = logging.getLogger("CodeCortex.CodeRepository.Registry")
 
-REGISTRY_DIR_NAME = ".codecortex"
+REGISTRY_DIR_NAME = ".coddy/codecortex"
 REGISTRY_FILE_NAME = "registry.json"
 
 def _get_registry_dir() -> Path:
-    """Get the global registry directory (~/.codecortex)."""
-    return Path(os.path.expanduser("~")) / REGISTRY_DIR_NAME
+    """Get the global registry directory (~/.coddy/codecortex/)."""
+    return Path.home() / REGISTRY_DIR_NAME
 
 def _get_registry_path() -> Path:
     """Get the global registry file path."""

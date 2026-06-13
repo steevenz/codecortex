@@ -52,7 +52,7 @@ CodeCortex supports two deployment modes, each with a distinct Node ↔ Python r
 
 ### 2.1 Lockfile Format (JSON v2)
 
-Kunci komunikasi 2 arah: `~/.codecortex/codecortex.pid`
+Kunci komunikasi 2 arah: `~/.coddy/codecortex/codecortex.pid`
 
 Python dan Node sama-sama nulis lockfile dengan format yang sama. Siapa pun yang start duluan bisa baca status instance lain.
 
@@ -89,8 +89,7 @@ Python dan Node sama-sama nulis lockfile dengan format yang sama. Siapa pun yang
 ```python
 # src/main.py — Lockfile written with full identity
 pid_file.write_text(json.dumps(identity, indent=2))
-# → ~/.codecortex/codecortex.pid
-```
+# → ~/.coddy/codecortex/codecortex.pid
 
 ### 2.3 Node → Python Handshake
 
@@ -100,7 +99,7 @@ pid_file.write_text(json.dumps(identity, indent=2))
 // scripts/server/run_server.js
 // Node records the Python child PID + its own identity
 writeNodeLockfile(child.pid);
-// → ~/.codecortex/codecortex.pid (overwrites with Node's view)
+// → ~/.coddy/codecortex/codecortex.pid (overwrites with Node's view)
 ```
 
 ### 2.4 Mutual Recognition
@@ -177,7 +176,7 @@ File: `database/config/codecortex_shared_server.json`
 ### 4.1 Three Guards in `_safeguard_instance()`
 
 #### Guard 0: Killed-PID Cache
-File: `~/.codecortex/codecortex.killed`
+File: `~/.coddy/codecortex/codecortex.killed`
 
 ```json
 {"12345": 1718000000.0, "67890": 1718000001.5}
@@ -313,8 +312,8 @@ IDE                          run_server.js              Python
 | `src/main.py` | Python MCP server entry. `_safeguard_instance()` untuk single-instance enforcement |
 | `scripts/server/js/index.cjs` | Multi-IDE HTTP/SSE proxy. File lock + refCount + candidate spawning |
 | `scripts/server/run_server.js` | Single-IDE stdio wrapper. PID handshake + lockfile cleanup |
-| `~/.codecortex/codecortex.pid` | JSON lockfile (instance identity, shared by Node & Python) |
-| `~/.codecortex/codecortex.killed` | JSON killed-PID cache (cascade prevention) |
+| `~/.coddy/codecortex/codecortex.pid` | JSON lockfile (instance identity, shared by Node & Python) |
+| `~/.coddy/codecortex/codecortex.killed` | JSON killed-PID cache (cascade prevention) |
 | `database/config/codecortex_shared_server.json` | Shared server state (refCount, baseUrl, pid) |
 | `database/config/codecortex_shared_server.lock` | Atomic file lock for concurrency |
 

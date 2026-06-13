@@ -73,7 +73,7 @@ def test_staleness_no_commit():
 
 def test_ensure_dir():
     RegistryManager.ensure_dir()
-    assert Path.home().joinpath(".codecortex").exists()
+    assert Path.home().joinpath(".coddy", "codecortex").exists()
 
 
 if __name__ == "__main__":

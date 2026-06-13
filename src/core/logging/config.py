@@ -72,30 +72,70 @@ class StructuredFormatter(logging.Formatter):
 
         return json.dumps(log_entry)
 
+def get_log_dir() -> Path:
+    """Module-level alias for Logger.get_log_dir()."""
+    return Logger.get_log_dir()
+
 class Logger:
     _configured = False
+
+    @classmethod
+    def get_log_dir(cls) -> Path:
+        """Get the log directory (~/.coddy/codecortex/logs/), with env var override.
+
+        Priority:
+          1. CODECORTEX_LOG_DIR env var
+          2. Default: ~/.coddy/codecortex/logs/ (sibling of data dir)
+        """
+        from src.core.config.database import get_data_dir
+        env_log_dir = os.getenv("CODECORTEX_LOG_DIR")
+        if env_log_dir:
+            log_dir = Path(env_log_dir)
+        else:
+            log_dir = get_data_dir() / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        return log_dir
 
     @classmethod
     def setup(cls, log_level: str = "INFO"):
         if cls._configured:
             return
 
-        project_root = Path(__file__).resolve().parents[3]
-        env = os.getenv("ENV", "development").strip().lower()
-        date_str = datetime.now().strftime("%Y-%m-%d")
-
-        standard_log_path = project_root / "outputs" / "logs" / env / date_str
-        standard_log_path.mkdir(parents=True, exist_ok=True)
-
         root_logger = logging.getLogger()
         root_logger.setLevel(getattr(logging, log_level.upper()))
-
         root_logger.handlers.clear()
 
+        # ── Handler 1: Console (stderr) — stdout is reserved for MCP stdio JSON-RPC protocol ──
+        # NEVER write log output to sys.stdout — it will corrupt MCP JSON-RPC messages.
         console_format = os.getenv("CODECORTEX_LOG_CONSOLE_FORMAT", "json").strip().lower()
-        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler = logging.StreamHandler(sys.stderr)
         console_handler.setLevel(getattr(logging, log_level.upper()))
-        console_handler.setFormatter(StructuredFormatter() if console_format == "json" else logging.Formatter("%(message)s"))
+        console_handler.setFormatter(
+            StructuredFormatter() if console_format == "json"
+            else logging.Formatter("%(message)s")
+        )
         root_logger.addHandler(console_handler)
+
+        # ── Handler 2: Rotating file → ~/.coddy/codecortex/logs/codecortex.log ──
+        # Background services (auto-updater, watchers) route here.
+        # AI/developer reads this file for diagnostics.
+        try:
+            log_dir = cls.get_log_dir()
+            log_file = log_dir / "codecortex.log"
+            file_handler = RotatingFileHandler(
+                str(log_file),
+                maxBytes=10 * 1024 * 1024,  # 10 MB
+                backupCount=5,
+                encoding="utf-8",
+            )
+            file_handler.setLevel(getattr(logging, log_level.upper()))
+            file_handler.setFormatter(
+                StructuredFormatter() if console_format == "json"
+                else logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+            )
+            root_logger.addHandler(file_handler)
+        except Exception:
+            # Non-critical: file logging is best-effort
+            pass
 
         cls._configured = True

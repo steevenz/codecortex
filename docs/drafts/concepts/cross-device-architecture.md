@@ -1,9 +1,9 @@
 # CodeCortex Architecture: Cross-Device, Remote Server & Cloud Sync
 
-> **Status:** Draft / Concept  
-> **Version:** 0.1.0  
-> **Last Updated:** 2026-05-27  
-> **Author:** Steeven Andrian  
+> **Status:** Draft / Concept
+> **Version:** 0.1.0
+> **Last Updated:** 2026-05-27
+> **Author:** Steeven Andrian
 
 ---
 
@@ -34,7 +34,7 @@ CodeCortex runs as a local MCP server (stdio) on each developer's machine. When 
 │   ├── DEVICES + PATH MAPPINGS                    │ ← SYNCED
 │   └── REPO METADATA (by remote_url)              │ ← SYNCED
 │                                                    │
-│   ~/.codecortex/                                   │
+│   ~/.coddy/codecortex/                                   │
 │   ├── device.json (device_id)                      │
 │   ├── cloud.json (sync config)                     │
 │   └── keys/ (E2E encryption keypair)               │
@@ -185,7 +185,7 @@ codecortex remote path-map D:\Work\project /data/repos/project --remote http://s
 
 ### Device Identity
 
-Auto-generated on first use, stored in `~/.codecortex/device.json`:
+Auto-generated on first use, stored in `~/.coddy/codecortex/device.json`:
 
 ```json
 {
@@ -348,7 +348,7 @@ Only **portable data** (KB-scale) is synced:
 Data is encrypted client-side before leaving the device:
 
 ```
-cloud init → generate X25519 keypair → ~/.codecortex/keys/
+cloud init → generate X25519 keypair → ~/.coddy/codecortex/keys/
 cloud push → encrypt(AES-256-GCM) → send ciphertext to relay
 cloud pull → receive ciphertext → decrypt locally → merge into DB
 ```
@@ -357,7 +357,7 @@ The relay server never sees plaintext data.
 
 ### Change Tracking
 
-`~/.codecortex/cloud.json`:
+`~/.coddy/codecortex/cloud.json`:
 
 ```json
 {

@@ -10,7 +10,7 @@ from src.cli.common import ok, err, _remote_headers, _get_device_id, _remote_url
 
 
 def _cloud_config_dir() -> Path:
-    return Path.home() / ".codecortex"
+    return Path.home() / ".coddy" / "codecortex"
 
 
 def cmd_cloud_init(args_ns: argparse.Namespace) -> Dict:
@@ -32,7 +32,7 @@ def cmd_cloud_push(args_ns: argparse.Namespace) -> Dict:
     cfg = load_cloud_config()
     server_url = cfg.get("server_url", "") or _remote_url(args_ns) or ""
     if not server_url:
-        return err("Server URL not configured. Use --remote or set in ~/.codecortex/cloud.json", "CLOUD_NO_URL")
+        return err("Server URL not configured. Use --remote or set in ~/.coddy/codecortex/cloud.json", "CLOUD_NO_URL")
     device_id = cfg.get("device_id", "") or _get_device_id()
 
     orch = create_orchestrator()

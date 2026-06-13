@@ -52,7 +52,7 @@ PHASE 3: Insert data (in transaction)
 
 PHASE 4: Update metadata
   • Set last_indexed_at = now
-  • Register in global registry (~/.codecortex/registry.json)
+  • Register in global registry (~/.coddy/codecortex/registry.json)
   • Commit transaction
 
 PHASE 5: Return response

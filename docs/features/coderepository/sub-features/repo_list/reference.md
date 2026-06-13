@@ -7,7 +7,7 @@
 
 `repo_list` returns all registered repositories from the SQLite database with rich filtering, metadata aggregation, real-time VCS status, pagination, and Markdown table output.
 
-**Difference from `RegistryManager`**: The legacy registry (`~/.codecortex/registry.json`) stores lightweight metadata only. `repo_list` reads from the SQLite `repositories` table (the source of truth) and enriches with counts from `files`, `symbols`, and `edges` tables.
+**Difference from `RegistryManager`**: The legacy registry (`~/.coddy/codecortex/registry.json`) stores lightweight metadata only. `repo_list` reads from the SQLite `repositories` table (the source of truth) and enriches with counts from `files`, `symbols`, and `edges` tables.
 
 ## Parameters
 

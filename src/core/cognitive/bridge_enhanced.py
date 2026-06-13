@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-_neocortex_CONFIG_PATH = Path.home() / ".codecortex" / "neocortex.json"
+_neocortex_CONFIG_PATH = Path.home() / ".coddy" / "codecortex" / "neocortex.json"
 _MAX_PROMPT_ITEMS = 8
 _MAX_STRING_LEN = 120
 _LLM_ERROR_MARKERS = (

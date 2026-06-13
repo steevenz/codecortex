@@ -18,19 +18,22 @@ from pathlib import Path
 
 logger = logging.getLogger("CodeCortex.Core.Config.Database")
 
-_CODECORTEX_DIR = Path.home() / ".codecortex"
+_CODECORTEX_DIR = Path.home() / ".coddy" / "codecortex"
 
 def get_data_dir() -> Path:
     """
-    Get the CodeCortex data directory (~/.codecortex).
+    Get the CodeCortex data directory (~/.coddy/codecortex).
 
     This is the single source of truth for all persisted state:
-      - codecortex.pid      — PID lockfile (Node ↔ Python handshake)
-      - codecortex.killed   — Killed-PID cache (cascade prevention)
-      - data/codecortex.db  — SQLite database
-      - data/               — Data files
-      - global/kuzudb       — KuzuDB graph backend
-      - neocortex.json      — Neocortex cognitive bridge config
+      - codecortex.pid         — PID lockfile (Node ↔ Python handshake)
+      - codecortex.killed      — Killed-PID cache (cascade prevention)
+      - data/codecortex.db     — SQLite database
+      - data/                  — Data files
+      - global/kuzudb          — KuzuDB graph backend
+      - logs/codecortex.log    — Rotating JSON logs
+      - neocortex.json         — Neocortex cognitive bridge config
+      - update_signal.json     — AI update signal
+      - update.json            — Update metadata
 
     Override with CODECORTEX_DATA_DIR env var.
     """
@@ -60,7 +63,7 @@ def get_db_path() -> str:
 
     Priority:
       1. CODECORTEX_DB_PATH env var
-      2. Default: ~/.codecortex/data/codecortex.db
+      2. Default: ~/.coddy/codecortex/data/codecortex.db
 
     Auto-migration: if old path (<project_root>/database/codecortex.db) exists
     and new path does not, the database is automatically copied (not moved)

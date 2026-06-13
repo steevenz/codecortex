@@ -36,6 +36,9 @@ SCAFFOLDER_ACTIONS = {
     "list_stacks", "get_stack", "validate_name", "list_licenses",
     "generate_content", "generate_class", "create_project",
 }
+UPDATE_ACTIONS = {
+    "check", "status", "download", "apply", "signal", "dismiss",
+}
 
 class ActionRouter:
     """Routes action→domain→tool function with lazy import and uniform response."""
@@ -1791,6 +1794,97 @@ class ActionRouter:
         elif action_lower == "generate_class": return await self._scaffold_generate_class(args)
         elif action_lower == "create_project": return await self._scaffold_create_project(args)
         else: return self._err(f"Unknown scaffolder action: {action}", "API_400")
+
+    # ════════════════════════════════════════════════════════
+    # UPDATE dispatcher
+    # ════════════════════════════════════════════════════════
+    def dispatch_update(self, action: str) -> Dict:
+        """Dispatch to CodeCortex Auto-Updater.
+
+        Actions: check, status, download, apply, signal, dismiss.
+        Uses the orchestrator's update_service (CodeCortexUpdater).
+        """
+        action_lower = action.lower()
+        orch = self.orchestrator
+        updater = getattr(orch, "update_service", None)
+        if not updater:
+            return api_response(
+                success=False, status_code=503, message="Auto-update service is not available",
+                data=None, error_code="UPDATE_NA",
+            )
+
+        try:
+            if action_lower == "check":
+                result = updater.check()
+                return api_response(
+                    success=True, data={
+                        "local_version": result.local_version,
+                        "latest_version": result.latest_version,
+                        "update_available": result.update_available,
+                        "release_url": result.release_url,
+                        "error": result.error,
+                        "checked_at": result.checked_at,
+                    },
+                )
+
+            elif action_lower == "status":
+                result = updater.latest_check
+                if not result:
+                    return api_response(
+                        success=True, data={"message": "No version check performed yet. Run 'check' first."},
+                    )
+                return api_response(
+                    success=True, data={
+                        "local_version": result.local_version,
+                        "latest_version": result.latest_version,
+                        "update_available": result.update_available,
+                        "release_url": result.release_url,
+                        "error": result.error,
+                        "checked_at": result.checked_at,
+                        "status": updater.status.value,
+                    },
+                )
+
+            elif action_lower == "download":
+                ok = updater.download()
+                return api_response(
+                    success=ok, data={"downloaded": ok},
+                    message="Update downloaded" if ok else "Download failed",
+                    status_code=200 if ok else 500,
+                )
+
+            elif action_lower == "apply":
+                ok = updater.apply()
+                return api_response(
+                    success=ok, data={"applied": ok},
+                    message="Update applied" if ok else "Apply failed",
+                    status_code=200 if ok else 500,
+                )
+
+            elif action_lower == "signal":
+                signal = updater.get_signal()
+                if not signal:
+                    return api_response(
+                        success=True, data={"message": "No update signal file found."},
+                    )
+                return api_response(
+                    success=True, data=signal.to_dict(),
+                )
+
+            elif action_lower == "dismiss":
+                signal = updater.get_signal()
+                if signal:
+                    signal.dismiss()
+                return api_response(success=True, data={"dismissed": True})
+
+            else:
+                return self._err(f"Unknown update action: {action}", "API_400")
+        except Exception as e:
+            logger.exception("Update action '%s' failed", action)
+            return api_response(
+                success=False, status_code=500, message=str(e),
+                data=None, error_code="UPDATE_ERR",
+            )
 
     # ── scaffolder handlers ────────────────────────────────
 

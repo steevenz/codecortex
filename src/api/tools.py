@@ -27,7 +27,9 @@ from src.api.orchestration import ActionRouter
 
 def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> None:
     """
-    Register 4 consolidated MCP tools that dispatch to all 38 domain tools.
+    Register 5 consolidated MCP tools that dispatch to all domain services.
+
+    Tools: repository, filesystem, codebase, scaffolder, update.
 
     Each tool uses action + args pattern:
       - action: string (which operation to perform)
@@ -349,3 +351,37 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         )
         result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_scaffolder", action)
+
+    # ══════════════════════════════════════════════════════════
+    # TOOL 5: codecortex:update (synchronous — no await needed)
+    # ══════════════════════════════════════════════════════════
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            title="CodeCortex Auto-Update",
+            readOnlyHint=False,
+            destructiveHint=True,
+            idempotentHint=False,
+            openWorldHint=False,
+        )
+    )
+    async def update(
+        action: str,
+    ) -> Dict[str, Any]:
+        """
+        Auto-update management — check, download, and apply CodeCortex updates.
+
+        @param action: Operation to perform. One of:
+          - check:   One-shot version check against GitHub Releases API.
+                     Writes signal file at ~/.coddy/codecortex/update_signal.json for AI consumption.
+          - status:  Show last check result and current update status.
+          - signal:  Read the current AI-visible update signal file.
+          - dismiss: Dismiss the update signal (mark as read).
+          - download: Fetch the latest version via git pull (requires check first).
+          - apply:   Merge fetched changes + sync dependencies (requires download first).
+
+        @return: Dict with success, data, meta.
+        """
+        t0 = time.monotonic()
+        result = _router().dispatch_update(action)
+        result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
+        return _inject_insight(result, "codecortex_update", action)
