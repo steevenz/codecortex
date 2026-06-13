@@ -1,12 +1,12 @@
 """
-AEGIS Graph Refactor – Architectural-Scale Code Transformation
+CODDY Graph Refactor – Architectural-Scale Code Transformation
 Graph-first, LLM-second approach for safe, surgical code transformations.
 
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Refactor
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from datetime import datetime
@@ -47,7 +47,7 @@ class Recommendation:
     message: str
     affected_node: Optional[str] = None
 
-class AEGISGraphRefactor:
+class CODDYGraphRefactor:
     """
     Architectural-scale code transformation tool.
     Uses graph-first approach for impact analysis and safe transformations.

@@ -5,8 +5,8 @@ Supports: Linux, macOS, Windows, Android (Termux).
 :project: CodeCortex
 :package: Modules.Filesystem.Adapters.Reader
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 from __future__ import annotations

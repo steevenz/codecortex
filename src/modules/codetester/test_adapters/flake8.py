@@ -4,8 +4,8 @@ Flake8.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Flake8
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class Flake8(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "flake8", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Using --format=default for easier parsing if needed, but for now we'll return stdout
         cmd = ["flake8", "--max-line-length=120"]
         if target_path:
@@ -42,7 +42,7 @@ class Flake8(BaseQA):
                 text=True,
                 timeout=60
             )
-            
+
             # Flake8 returns 0 if no errors, 1 if errors found
             return {
                 "tool": "flake8",

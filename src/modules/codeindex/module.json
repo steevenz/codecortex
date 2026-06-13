@@ -4,8 +4,19 @@
   "description": "Code index domain — tree-sitter AST parsing, symbol extraction, scope resolution, import resolution, embeddings, and semantic search across 22 languages and 11 framework parsers",
   "type": "module",
   "dependencies": {
-    "modules": ["coderepository", "codegraph"],
-    "core": ["config", "database", "errors", "logging", "parser", "telemetry", "token"]
+    "modules": [
+      "coderepository",
+      "codegraph"
+    ],
+    "core": [
+      "config",
+      "database",
+      "errors",
+      "logging",
+      "parser",
+      "telemetry",
+      "token"
+    ]
   },
   "providers": {
     "services": [
@@ -14,14 +25,43 @@
     ],
     "parsers": {
       "languages": [
-        "python", "typescript", "typescriptjsx", "javascript",
-        "c", "cpp", "csharp", "go", "rust", "java", "kotlin",
-        "scala", "swift", "ruby", "php", "elixir", "dart",
-        "haskell", "perl", "cobol", "css", "vue", "generic_ts"
+        "python",
+        "typescript",
+        "typescriptjsx",
+        "javascript",
+        "c",
+        "cpp",
+        "csharp",
+        "go",
+        "rust",
+        "java",
+        "kotlin",
+        "scala",
+        "swift",
+        "ruby",
+        "php",
+        "elixir",
+        "dart",
+        "haskell",
+        "perl",
+        "cobol",
+        "css",
+        "vue",
+        "generic_ts"
       ],
       "frameworks": [
-        "angular", "aspnet", "django", "express", "flutter",
-        "laravel", "nestjs", "nextjs", "rails", "react", "symfony", "vue"
+        "angular",
+        "aspnet",
+        "django",
+        "express",
+        "flutter",
+        "laravel",
+        "nestjs",
+        "nextjs",
+        "rails",
+        "react",
+        "symfony",
+        "vue"
       ]
     }
   },
@@ -43,6 +83,6 @@
     "name": "Steeven Andrian",
     "email": "steevenz@steevenz.com"
   },
-  "copyright": "Copyright (c) 2026 Aegis Codework",
-  "standard": "Aegis-CrossStack-v1.0"
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v1.0"
 }

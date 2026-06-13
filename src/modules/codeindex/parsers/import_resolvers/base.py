@@ -4,8 +4,8 @@ Base import resolver interface.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Import_resolvers.Base
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 from typing import List, Set

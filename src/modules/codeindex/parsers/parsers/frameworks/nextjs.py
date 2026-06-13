@@ -4,8 +4,8 @@ Next.js framework detection and symbol enrichment.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Frameworks.Nextjs
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from typing import Dict, List, Any, Optional
 
@@ -17,7 +17,7 @@ def detect_nextjs(
     repo_configs: Dict[str, Any] = None,
 ) -> bool:
     """Detect Next.js usage with maximum coverage.
-    
+
     Requires at least ONE of the following signals:
     1. Next.js file patterns (page.tsx, layout.tsx, etc.)
     2. Next.js imports (next/*)
@@ -25,9 +25,9 @@ def detect_nextjs(
     """
     if repo_configs is None:
         repo_configs = {}
-    
+
     signals = []
-    
+
     # Signal 1: Next.js file patterns
     nextjs_file_patterns = [
         "page.tsx", "page.ts", "page.jsx", "page.js",
@@ -38,19 +38,19 @@ def detect_nextjs(
     ]
     if any(rel_path.endswith(p) for p in nextjs_file_patterns):
         signals.append("nextjs_file_pattern")
-    
+
     # Signal 2: Next.js imports
     for imp in imports:
         mod = (imp.get("module") or "").lower()
         if mod.startswith("next/"):
             signals.append("nextjs_import")
             break
-    
+
     # Signal 3: Next.js in package.json
     pkg_deps = repo_configs.get("package.json", {}).get("dependencies", {})
     if "next" in pkg_deps:
         signals.append("nextjs_dependency")
-    
+
     # Maximum coverage: require at least 1 signal
     return len(signals) >= 1
 
@@ -62,16 +62,16 @@ def detect_react(
     repo_configs: Dict[str, Any] = None,
 ) -> bool:
     """Next.js framework detection module.
-    
+
     This function is kept for backward compatibility but should not be used.
     New code should import from react.py.
     """
     if repo_configs is None:
         repo_configs = {}
-    
+
     # Import the new detector
     from . import react as react_fw
-    
+
     return react_fw.detect_react(rel_path, source, imports, classes, [], repo_configs)
 
 def enrich_class(cls: Dict[str, Any], rel_path: str) -> Optional[Dict[str, Any]]:

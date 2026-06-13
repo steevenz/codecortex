@@ -1,12 +1,12 @@
 """
-AEGIS Graph Relationship – Architecture Exploration with Community Detection
+CODDY Graph Relationship – Architecture Exploration with Community Detection
 High-level exploration of relationships between modules, classes, and components.
 
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Relationship
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from datetime import datetime
@@ -53,7 +53,7 @@ class RelationshipInfo:
     confidence: str
     cross_community: bool
 
-class AEGISGraphRelationship:
+class CODDYGraphRelationship:
     """
     Architecture exploration with community detection.
     Explores relationships between modules, classes, and components.

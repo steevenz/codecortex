@@ -144,7 +144,7 @@ src/
 - **Python 3.12** | **UV** package manager | **Pytest** with coverage
 - **DDD + Hexagonal Architecture** per module
 - **Tree-Sitter 0.25.x** for parsing
-- **Docblocks**: `@project CodeCortex`, `@author Steeven Andrian`, `@copyright (c) 2026 Aegis Codework`
+- **Docblocks**: `@project CodeCortex`, `@author Steeven Andrian`, `@copyright (c) 2026 CODDY Codework`
 - **Class naming**: No `Service`/`Repository` suffix when folder already declares role (coding-standard R1)
 
 ## 6. COMPLIANCE AUDIT

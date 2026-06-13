@@ -4,8 +4,8 @@ Security guards — SSRF prevention, path traversal, label sanitisation.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Security
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from src.core.security import (  # noqa: F401

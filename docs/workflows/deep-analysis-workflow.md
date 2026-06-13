@@ -4,8 +4,8 @@ title: WFK_ANA_001 — Deep Code Analysis
 workflow_id: WFK_ANA_001
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
-codification: Aegis-Architecture-v1.0 §5
+standard: CODDY-Workflow-v2.0
+codification: CODDY-Architecture-v1.0 §5
 ---
 
 # WFK_ANA_001: Deep Code Analysis

@@ -4,8 +4,8 @@ CodeIndex parsers — AST parsing, embeddings, scope resolution, import resoluti
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 from .parsers.tree_sitter import TreeSitterParser

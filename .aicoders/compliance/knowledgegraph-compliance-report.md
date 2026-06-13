@@ -2,7 +2,7 @@
 
 > **Date:** 2026-05-29
 > **Auditor:** Cascade (AI Architect)
-> **Standards:** Aegis-Architecture-v1.0, Aegis-Documentation-v1.0, Aegis-ProjectStructure-v1.0, Aegis-API-v1.0
+> **Standards:** CODDY-Architecture-v1.0, CODDY-Documentation-v1.0, CODDY-ProjectStructure-v1.0, CODDY-API-v1.0
 
 ---
 
@@ -18,7 +18,7 @@
 
 ---
 
-## 1. Architecture Standard (Aegis-Architecture-v1.0)
+## 1. Architecture Standard (CODDY-Architecture-v1.0)
 
 ### 1.1 Lego Principle (Modular Monolith)
 
@@ -76,7 +76,7 @@ models/     → ✅ chunk.py, relationship.py
 
 ---
 
-## 2. Documentation Standard (Aegis-Documentation-v1.0)
+## 2. Documentation Standard (CODDY-Documentation-v1.0)
 
 ### 2.1 File Structure
 
@@ -132,7 +132,7 @@ All 5 sub-features have: Purpose, Why It Exists, Parameters table, Output Format
 
 ---
 
-## 3. Project Structure Standard (Aegis-ProjectStructure-v1.0)
+## 3. Project Structure Standard (CODDY-ProjectStructure-v1.0)
 
 ### 3.1 Directory Structure
 
@@ -217,7 +217,7 @@ src/modules/knowledgegraph/
 
 ---
 
-## 4. API Standard (Aegis-API-v1.0)
+## 4. API Standard (CODDY-API-v1.0)
 
 ### 4.1 Tool Registration
 
@@ -276,7 +276,7 @@ Added to `docs/features/knowledgegraph/concept.md`:
 ```markdown
 ## ~/.aicoders/ Compliance
 
-This domain follows the Aegis Codework Sovereign Cognitive Infrastructure standards:
+This domain follows the CODDY Codework Sovereign Cognitive Infrastructure standards:
 
 - **Architecture:** Modular monolith with clean separation (api/core/adapters/models)
 - **DI/IoC:** Constructor injection via `KnowledgeStore(db)`; stateless core classes
@@ -301,7 +301,7 @@ This domain follows the Aegis Codework Sovereign Cognitive Infrastructure standa
 
 ## Conclusion
 
-**KnowledgeGraph is FULLY COMPLIANT** with all Aegis standards:
+**KnowledgeGraph is FULLY COMPLIANT** with all CODDY standards:
 
 - ✅ Architecture: 95% (Lego Principle, DI, DTOs, Adapters, Clean Architecture)
 - ✅ Documentation: 100% (All sections, sub-features, versioning, scoring)

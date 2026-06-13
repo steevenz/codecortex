@@ -4,8 +4,8 @@ Pre-configured logger instances for debug/diagnostic output.
 :project: CodeCortex
 :package: Core.Utils.Debug_log
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from src.core.logging import get_logger

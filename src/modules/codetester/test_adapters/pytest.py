@@ -4,8 +4,8 @@ Pytest - pytest test framework support with discover, coverage, and result parsi
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Pytest
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess

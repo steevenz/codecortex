@@ -53,7 +53,7 @@ The CLI domain is named `knowledge` (aliases: `kg`) as an intentional UX decisio
 
 ## ~/.aicoders/ Compliance
 
-This domain follows the [Aegis Codework Sovereign Cognitive Infrastructure](https://github.com/aegis-codework) standards:
+This domain follows the [CODDY Codework Sovereign Cognitive Infrastructure](https://github.com/CODDY-codework) standards:
 
 ### Architecture (`.aicoders/rules/architecture.md`)
 - **Lego Principle:** Self-contained domain with `api/` + `core/` + `adapters/` + `models/` separation

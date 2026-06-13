@@ -1,6 +1,6 @@
 # Documentation Standard
 
-> **Standard:** Aegis-Documentation-v1.0
+> **Standard:** CODDY-Documentation-v1.0
 > **Applies to:** All domain documentation in `docs/features/{domain}/`
 
 ## 1. File Structure

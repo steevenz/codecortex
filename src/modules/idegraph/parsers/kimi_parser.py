@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.parsers
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.parsers
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 @fileoverview KimiParser - Parser for Kimi Code CLI chat data.
 """
 

@@ -3,7 +3,7 @@
 ## [2026-05-05] Documentation Restructuring & Architecture Update
 
 ### Documentation
-- **Restructured docs/** to align with Aegis Codeworks standards
+- **Restructured docs/** to align with CODDY Codeworks standards
   - Moved deprecated docs to `docs/drafts/archives/`
   - Rewrote `ARCHITECTURE.md` to reflect 6-domain architecture (CodeRepository, CodeIndex, CodeGraph, Filesystem, CodeRefactor, CodeTester)
   - Created new `docs/README.md` as module overview

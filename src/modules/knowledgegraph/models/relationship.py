@@ -5,8 +5,8 @@ Represents relationships between knowledge chunks or between chunks and code mod
 Follows DTO Boundary standard with to_dict() serialization.
 
 Standards:
-    - Aegis-Architecture-v1.0    → DTO Boundaries
-    - Aegis-ProjectStructure-v1.0 → models/ requirements
+    - CODDY-Architecture-v1.0    → DTO Boundaries
+    - CODDY-ProjectStructure-v1.0 → models/ requirements
 """
 
 from __future__ import annotations

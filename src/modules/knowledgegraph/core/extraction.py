@@ -22,8 +22,8 @@ Extracted knowledge types:
 Extraction strategy: regex pattern-based (no LLM dependency).
 
 Standards:
-    - Aegis-Architecture-v1.0    → Pattern-based extraction (no LLM)
-    - Aegis-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
+    - CODDY-Architecture-v1.0    → Pattern-based extraction (no LLM)
+    - CODDY-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
 """
 
 from __future__ import annotations

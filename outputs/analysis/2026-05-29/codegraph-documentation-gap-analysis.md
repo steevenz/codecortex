@@ -1,8 +1,8 @@
 # CodeGraph Documentation Gap Analysis
 
-**Date:** 2026-05-29  
-**Domain:** CodeGraph  
-**Reference:** `docs/features/codeanalysis` (template)  
+**Date:** 2026-05-29
+**Domain:** CodeGraph
+**Reference:** `docs/features/codeanalysis` (template)
 **Analysis Type:** Documentation Structure & Completeness Audit
 
 ---
@@ -333,12 +333,12 @@ src/modules/codeanalysis/
 src/modules/codegraph/
 ├── api/              → tools.py: 6 MCP tools, cli.py: CLI commands
 ├── services/         → Service classes: DI via constructor
-│   ├── aegis.py      → Graph build (AEGIS)
-│   ├── search.py     → Unified search (AEGISGraphSearch)
-│   ├── trace.py      → Execution flow tracing (AEGISGraphTrace)
-│   ├── relationship.py → Relationship exploration (AEGISGraphRelationship)
-│   ├── audit.py      → Architectural audit (AEGISGraphAudit)
-│   ├── refactor.py   → Refactoring (AEGISGraphRefactor)
+│   ├── CODDY.py      → Graph build (CODDY)
+│   ├── search.py     → Unified search (CODDYGraphSearch)
+│   ├── trace.py      → Execution flow tracing (CODDYGraphTrace)
+│   ├── relationship.py → Relationship exploration (CODDYGraphRelationship)
+│   ├── audit.py      → Architectural audit (CODDYGraphAudit)
+│   ├── refactor.py   → Refactoring (CODDYGraphRefactor)
 │   └── graph.py      → Graph operations (CodeGraphService)
 ├── core/            → dtos.py: typed DTOs
 └── mixins/           → Reusable graph operations

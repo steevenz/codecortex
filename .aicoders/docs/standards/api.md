@@ -1,6 +1,6 @@
 # API Standard (MCP Tools)
 
-> **Standard:** Aegis-API-v1.0
+> **Standard:** CODDY-API-v1.0
 > **Applies to:** All MCP tools in CodeCortex
 
 ## 1. Tool Registration

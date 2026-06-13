@@ -4,8 +4,8 @@ Global constants and enumerations for the PyScaffold generator engine.
 :project: CodeCortex
 :package: Modules.Scaffolder.Core.Constants
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations

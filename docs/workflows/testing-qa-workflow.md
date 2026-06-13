@@ -4,8 +4,8 @@ title: WFK_TST_001 — Testing & QA Automation
 workflow_id: WFK_TST_001
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
-codification: Aegis-Architecture-v1.0 §5
+standard: CODDY-Workflow-v2.0
+codification: CODDY-Architecture-v1.0 §5
 ---
 
 # WFK_TST_001: Testing & QA Automation

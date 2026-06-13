@@ -1,6 +1,6 @@
 # Project Structure Standard
 
-> **Standard:** Aegis-ProjectStructure-v1.0
+> **Standard:** CODDY-ProjectStructure-v1.0
 > **Applies to:** All domains in CodeCortex
 
 ## 1. Domain Directory Structure

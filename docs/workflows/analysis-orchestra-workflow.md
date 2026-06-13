@@ -1,9 +1,9 @@
 ---
-description: Analysis Orchestra Hub — entry point for all AI-driven code analysis workflows — Aegis Codification Edition
+description: Analysis Orchestra Hub — entry point for all AI-driven code analysis workflows — CODDY Codification Edition
 title: Workflow Analysis Orchestra (Hub)
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 codification: WFK_ANA_001, WFK_BUG_001, WFK_PRD_001, WFK_TST_001, WFK_SEC_001, WFK_ARC_001, WFK_RFC_001
 ---
 
@@ -11,7 +11,7 @@ codification: WFK_ANA_001, WFK_BUG_001, WFK_PRD_001, WFK_TST_001, WFK_SEC_001, W
 
 > **Purpose**: Entry point and decision router for all AI-driven analysis workflows. Each workflow is now documented in its own detailed file.
 > **Audience**: AI coding agents using CodeCortex MCP Server.
-> **Codification Standard**: Aegis-Architecture-v1.0 §5 — `WFK_{CATEGORY}_{NNN}`
+> **Codification Standard**: CODDY-Architecture-v1.0 §5 — `WFK_{CATEGORY}_{NNN}`
 > **How to Use**: Match user intent to a WFK_* codification below, then open the linked file and follow its pipeline exactly.
 
 ---
@@ -96,7 +96,7 @@ User Request
 - **Goal**: Multi-layer security — code secrets, Git history leaks, file permissions, architecture security.
 - **Trigger**: *"Security audit"*, *"Find secrets"*, *"OWASP scan"*, *"Compliance check"*
 - **Pipeline**: `cb:audit` → `repo:audit` → `fs:audit` → `cb:graph:audit`
-- **Standards**: Aegis-Security-v1.0
+- **Standards**: CODDY-Security-v1.0
 
 ### WFK_ARC_001 — Architecture Audit
 📄 **[architecture-audit-workflow.md](architecture-audit-workflow.md)**

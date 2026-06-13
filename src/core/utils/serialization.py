@@ -4,8 +4,8 @@ Serialization utilities — recursive dataclass conversion.
 :project: CodeCortex
 :package: Core.Utils.Serialization
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

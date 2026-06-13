@@ -4,8 +4,8 @@ Class Indexer – Single Responsibility: Manage AST semantic indexing and symbol
 :project: CodeCortex
 :package: Modules.Codeindex.Services.Indexer
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 import asyncio
@@ -150,17 +150,17 @@ class Indexer:
         classes = parsed.get("classes", [])
         functions = parsed.get("functions", [])
         source = parsed.get("source", "")
-        
+
         # Get repository-level detector
         repo_detector = self._get_repo_detector(repo_id, repo_root)
-        
+
         # Use repository detector for file-level enrichment
         enrichment = repo_detector.enrich_file(rel_path, source, imports, classes, functions)
-        
+
         # Merge enrichment results into parsed data
         if enrichment.get("frameworks"):
             parsed["frameworks"] = enrichment["frameworks"]
-        
+
         # Framework metadata is already applied to classes and functions by enrich_file
         return parsed
 
@@ -320,7 +320,7 @@ class Indexer:
             cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
             row = cursor.fetchone()
             return Path(row['root_path']) if row else None
-        
+
         repo_root = await asyncio.to_thread(_get_root)
         if not repo_root:
             self._log_event("ERROR", "REPO_NOT_FOUND", {"repository_id": repo_id})
@@ -378,7 +378,7 @@ class Indexer:
             exists = await asyncio.to_thread(file_path.exists)
             if not exists:
                 return
-            
+
             stats = await asyncio.to_thread(file_path.stat)
             if stats.st_size > self.MAX_FILE_SIZE_BYTES:
                 self._log_event("WARN", "FILE_TOO_LARGE_SKIPPED", {"path": file_rel_path, "size_bytes": stats.st_size}, request_id)
@@ -430,7 +430,7 @@ class Indexer:
                         with open(file_path, "r", encoding="utf-8") as fh:
                             content = fh.read()
                         return self.index_file(repo_id, f['id'], file_rel_path, content)
-                    
+
                     count = await asyncio.to_thread(_read_and_index)
                     if count:
                         indexed_count += 1
@@ -450,7 +450,7 @@ class Indexer:
                 total_bytes += path.stat().st_size
             except OSError:
                 continue
-        
+
         if should_use_worker_pool(len(code_files), total_bytes):
             pool = WorkerPool(max_workers=os.cpu_count() or 4)
             file_data_list = []
@@ -572,7 +572,7 @@ class Indexer:
         def _get_root():
             cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
             return cursor.fetchone()
-        
+
         row = await asyncio.to_thread(_get_root)
         if not row:
             raise ValueError(f"repository_not_found:{repo_id}")
@@ -620,11 +620,11 @@ class Indexer:
             abs_path = (repo_root / rp).resolve()
             if not str(abs_path).startswith(str(repo_root.resolve())):
                 return
-            
+
             exists = await asyncio.to_thread(abs_path.exists)
             if not exists:
                 return
-            
+
             stats = await asyncio.to_thread(abs_path.stat)
             if stats.st_size > self.MAX_FILE_SIZE_BYTES:
                 self._log_event("WARN", "FILE_TOO_LARGE_SKIPPED", {"path": rp, "size_bytes": stats.st_size})
@@ -673,7 +673,7 @@ class Indexer:
                 async with self._index_semaphore:
                     await _process_single(fid, rp)
             process_tasks.append(_guarded())
-        
+
         await asyncio.gather(*process_tasks)
 
         imports_map: Dict[str, Any] = {}
@@ -763,7 +763,7 @@ class Indexer:
             except Exception as e:
                 self._log_event("ERROR", "SQLITE_WRITE_FAILED", {"file_id": file_id, "error": str(e)})
                 return 0
-        
+
         return await asyncio.to_thread(_write)
 
     async def index_file(self, repo_id: str, file_id: str, file_rel_path: str, content: str):
@@ -794,7 +794,7 @@ class Indexer:
 
         if not lang_name:
             return {"error": f"Unsupported file extension: {ext}"}
-        
+
         stats = await asyncio.to_thread(file_path.stat)
         if stats.st_size > self.MAX_FILE_SIZE_BYTES:
             self._log_event("WARN", "FILE_TOO_LARGE_SKIPPED", {"path": str(file_path), "size_bytes": stats.st_size})
@@ -810,7 +810,7 @@ class Indexer:
                 def _get_root():
                     cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
                     return Path(cursor.fetchone()["root_path"])
-                
+
                 repo_root = await asyncio.to_thread(_get_root)
                 parsed_data = await asyncio.to_thread(self._enrich_frameworks, file_path, parsed_data, repo_id, repo_root)
                 file_rel_path = str(file_path.relative_to(repo_root)).replace("\\", "/")
@@ -850,7 +850,7 @@ class Indexer:
             dir_path = (f["dir_path"] or "").replace("\\", "/")
             file_rel = f"{dir_path}/{f['name']}" if dir_path else f["name"]
             file_path = repo_root / file_rel
-            
+
             # Thread check for existence and size
             exists = await asyncio.to_thread(file_path.exists)
             if exists and file_path.suffix.lower() in [".py", ".ipynb"]:
@@ -1168,14 +1168,14 @@ class Indexer:
     def search_symbols(self, repo_id: str, query: str, is_regex: bool = False) -> List[Dict[str, Any]]:
         """
         Search for symbols across the repository with literal or regex filtering.
-        Aegis 4.1 compliant: includes file context and relative paths.
+        CODDY 4.1 compliant: includes file context and relative paths.
         """
         op = "REGEXP" if is_regex else "LIKE"
         search_pattern = query if is_regex else f"%{query}%"
 
         sql = f"""
-            SELECT 
-                s.id, s.name, s.symbol_type, s.start_line, s.end_line, 
+            SELECT
+                s.id, s.name, s.symbol_type, s.start_line, s.end_line,
                 f.name as file_name, d.relative_path
             FROM symbols s
             JOIN files f ON f.id = s.file_id
@@ -1184,7 +1184,7 @@ class Indexer:
             ORDER BY s.name ASC
             LIMIT 100
         """
-        
+
         try:
             cursor = self.db.conn.execute(sql, (repo_id, search_pattern))
             results = [dict(row) for row in cursor.fetchall()]
@@ -1202,19 +1202,19 @@ class Indexer:
                     is_regex: bool = False, limit: int = 100) -> Dict[str, Any]:
         """
         Unified search for code symbols across repository.
-        
+
         Args:
             query: Search term
             repo_id: Repository UUID (optional, searches all if not provided)
             path: File path filter (optional)
             is_regex: Whether to use regex matching
             limit: Max results (default 100, max 1000)
-        
+
         Returns:
             Dict with matches list and count
         """
         effective_limit = min(limit, 1000)
-        
+
         try:
             if repo_id:
                 results = self.search_symbols(repo_id, query, is_regex=is_regex)
@@ -1227,7 +1227,7 @@ class Indexer:
                         results.extend(repo_results)
                     except Exception:
                         continue
-            
+
             return {"matches": results[:effective_limit], "count": len(results)}
         except Exception as e:
             self._log_event("ERROR", "SEARCH_CODE_FAILED", {"query": query, "error": str(e)})

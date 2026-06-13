@@ -1,8 +1,8 @@
 # CodeGraph Domain - AI Coder Impact Analysis
 
-**Date:** 2026-05-29  
-**Domain:** CodeGraph  
-**Perspective:** AI Coder Specialist  
+**Date:** 2026-05-29
+**Domain:** CodeGraph
+**Perspective:** AI Coder Specialist
 **Focus:** How CodeGraph tools enhance AI coding workflows
 
 ---
@@ -39,7 +39,7 @@
 - 5-in-1 consolidation reduces tool call overhead
 - Fuzzy matching handles real-world user errors
 - Semantic search bridges gap between intent and code
-- Modular type filtering understands AEGIS architecture
+- Modular type filtering understands CODDY architecture
 - Pagination handles large codebases efficiently
 
 **Weaknesses:**
@@ -133,14 +133,14 @@
 
 **Rationale:**
 - Prerequisite for all graph-based operations
-- Modular detection understands AEGIS architecture
+- Modular detection understands CODDY architecture
 - Dependency graph reveals module relationships
 - Caching improves performance for repeated builds
 - Graph stats provide quick repository overview
 
 **Strengths:**
 - Tree-sitter parsing for accurate AST extraction
-- Modular detection (AEGIS structure)
+- Modular detection (CODDY structure)
 - Dependency graph construction
 - HMVC-P structure scanning
 - Caching for performance
@@ -170,7 +170,7 @@
 **Rationale:**
 - Relationship exploration with community detection
 - Depth control for multi-hop analysis
-- Modular type filtering for AEGIS architecture
+- Modular type filtering for CODDY architecture
 - Confidence filtering for reliable results
 - Direction filtering for precise analysis
 
@@ -295,19 +295,19 @@
 
 **Impact:** Reduces token consumption by 40%, improves response time by 30%.
 
-### 5. Modular Detection Understands AEGIS Architecture
+### 5. Modular Detection Understands CODDY Architecture
 
 **Before CodeGraph:**
 - AI cannot detect modular structure
-- No understanding of AEGIS patterns
+- No understanding of CODDY patterns
 - Generic recommendations
 
 **After CodeGraph:**
 - AI detects modules, plugins, widgets, components
-- Understands AEGIS architecture
+- Understands CODDY architecture
 - Context-aware recommendations
 
-**Impact:** Improves AEGIS project support by 90%, increases relevance by 65%.
+**Impact:** Improves CODDY project support by 90%, increases relevance by 65%.
 
 ---
 
@@ -343,7 +343,7 @@ CodeGraph is **essential** for AI coding workflows. The 6 consolidated tools pro
 - Comprehensive relationship analysis
 - Architectural awareness enables better decisions
 - Semantic search bridges intent-code gap
-- Modular detection understands AEGIS architecture
+- Modular detection understands CODDY architecture
 
 **Key Weaknesses:**
 - No CLI interface (MCP-only)

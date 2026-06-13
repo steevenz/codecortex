@@ -16,8 +16,8 @@ Graph statistics computed:
   clustering  → Transitivity coefficient
 
 Standards:
-    - Aegis-Architecture-v1.0    → Clean Architecture (no api/ imports)
-    - Aegis-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
+    - CODDY-Architecture-v1.0    → Clean Architecture (no api/ imports)
+    - CODDY-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
 """
 
 from __future__ import annotations

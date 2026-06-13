@@ -1,4 +1,4 @@
-# CodeCortex for OpenClaude
+﻿# CodeCortex for OpenClaude
 
 OpenClaude is an open-source Claude Code alternative with native Claude Code plugin compatibility.
 
@@ -17,8 +17,8 @@ Configure in OpenClaude's MCP settings:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "openclaude"]
     }
   }
 }

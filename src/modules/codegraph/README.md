@@ -12,7 +12,7 @@ DDD + Hexagonal Architecture:
 
 ## Key Components
 - **CodeGraphService**: Primary orchestration service
-- **AegisBuilder**: Graph construction from AST symbols
+- **CODDYBuilder**: Graph construction from AST symbols
 - **GraphTracer**: BFS-based execution flow tracing
 - **HeritageExtractor**: Class inheritance hierarchy extraction
 - **RouteExtractor**: Endpoint discovery (FastAPI, Django, Express, Next.js, etc.)

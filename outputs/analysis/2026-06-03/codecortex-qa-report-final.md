@@ -12,7 +12,7 @@
 
 **Overall Grade:** A
 
-The CodeCortex MCP Server and CLI tool suite underwent a massive end-to-end testing sprint covering 15 unique workflows, mimicking how an AI agent operates natively. The system proves highly resilient, correctly applying "Aegis Codework" strict conventions, default dry-runs, and graceful degradations across complex operations involving AST graph extraction, dependency tracing, semantic search, and structural audits. 
+The CodeCortex MCP Server and CLI tool suite underwent a massive end-to-end testing sprint covering 15 unique workflows, mimicking how an AI agent operates natively. The system proves highly resilient, correctly applying "CODDY Codework" strict conventions, default dry-runs, and graceful degradations across complex operations involving AST graph extraction, dependency tracing, semantic search, and structural audits.
 
 **Key Findings:**
 - Documentation Accuracy: 98% (Found one small alias error where docs cited `cct` instead of `neocortex`).
@@ -33,7 +33,7 @@ The CodeCortex MCP Server and CLI tool suite underwent a massive end-to-end test
 
 ## 2. Test Execution Results
 
-**All 15 Aegis Workflows Successfully Executed & Validated:**
+**All 15 CODDY Workflows Successfully Executed & Validated:**
 1. `WFK_ANA_001` (Deep Analysis) - Validated via `repo analyze` + `cb status`. Multi-threaded AST ingestion handled 500+ files effortlessly.
 2. `WFK_BUG_001` (Bug Hunting) - Validated via `cb search`.
 3. `WFK_PRD_001` (Production Readiness) - Validated via `qa prd`.
@@ -85,4 +85,4 @@ The system exhibits an extraordinary level of strict, safety-first engineering. 
 
 ## 6. Conclusion
 
-CodeCortex MCP is fully Production Ready. The architecture honors the Aegis principles (Modular Monoliths, Loose Coupling, Strict Outputs). Testing confirms all boundaries and workflows are operational. The QA Harness execution is officially closed and signed off.
+CodeCortex MCP is fully Production Ready. The architecture honors the CODDY principles (Modular Monoliths, Loose Coupling, Strict Outputs). Testing confirms all boundaries and workflows are operational. The QA Harness execution is officially closed and signed off.

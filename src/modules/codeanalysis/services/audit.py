@@ -4,8 +4,8 @@ Class Audit – ~/.aicoders/ compliance gate with security scan + coding standar
 :project: CodeCortex
 :package: Modules.Codeanalysis.Services.Audit
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ SEVERITY_LEVELS = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 
 DEFAULT_EXCLUDE_PATTERNS: Set[str] = {
     "node_modules", "dist", "build", "target", ".git", ".svn",
-    "*.min.js", "*.min.css", "*.pyc", "__pycache__", 
+    "*.min.js", "*.min.css", "*.pyc", "__pycache__",
     "tests/fixtures", "test/fixtures", "mock", "stub", "fake",
     ".venv", "venv",
 }

@@ -4,8 +4,8 @@ JavaScript tree-sitter parser — ported from legacy codegraph.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Javascript
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -13,48 +13,48 @@ import re
 
 JS_QUERIES = {
     "functions": """
-        (function_declaration 
+        (function_declaration
             name: (identifier) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
-        (variable_declarator 
-            name: (identifier) @name 
-            value: (function_expression 
+
+        (variable_declarator
+            name: (identifier) @name
+            value: (function_expression
                 parameters: (formal_parameters) @params
             ) @function_node
         )
-        
-        (variable_declarator 
-            name: (identifier) @name 
-            value: (arrow_function 
+
+        (variable_declarator
+            name: (identifier) @name
+            value: (arrow_function
                 parameters: (formal_parameters) @params
             ) @function_node
         )
-        
-        (variable_declarator 
-            name: (identifier) @name 
-            value: (arrow_function 
+
+        (variable_declarator
+            name: (identifier) @name
+            value: (arrow_function
                 parameter: (identifier) @single_param
             ) @function_node
         )
-        
-        (method_definition 
+
+        (method_definition
             name: (property_identifier) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
+
         (assignment_expression
-            left: (member_expression 
+            left: (member_expression
                 property: (property_identifier) @name
             )
             right: (function_expression
                 parameters: (formal_parameters) @params
             ) @function_node
         )
-        
+
         (assignment_expression
-            left: (member_expression 
+            left: (member_expression
                 property: (property_identifier) @name
             )
             right: (arrow_function
@@ -447,13 +447,13 @@ def pre_scan_javascript(files: List[Path], parser_wrapper) -> Dict[str, List[str
         (variable_declarator name: (identifier) @name value: (arrow_function))
         (method_definition name: (property_identifier) @name)
         (assignment_expression
-            left: (member_expression 
+            left: (member_expression
                 property: (property_identifier) @name
             )
             right: (function_expression)
         )
         (assignment_expression
-            left: (member_expression 
+            left: (member_expression
                 property: (property_identifier) @name
             )
             right: (arrow_function)

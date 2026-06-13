@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.services
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.services
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 IdeHarvest — Harvests IDE configurations, settings, MCP configs, and extensions.
 """

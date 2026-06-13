@@ -4,8 +4,8 @@ Kotlin tree-sitter parser — full implementation with coroutines, data classes,
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Kotlin
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,15 +17,15 @@ KOTLIN_QUERIES = {
             name: (simple_identifier) @name
             parameters: (value_parameters) @params
         ) @function_node
-        
+
         (primary_constructor
             parameters: (value_parameters) @params
         ) @function_node
-        
+
         (secondary_constructor
             parameters: (value_parameters) @params
         ) @function_node
-        
+
         (lambda_literal
             parameters: (lambda_parameters) @params
         ) @function_node
@@ -47,7 +47,7 @@ KOTLIN_QUERIES = {
                 name: (simple_identifier) @name
             )
         ) @variable
-        
+
         (variable_declaration
             name: (simple_identifier) @name
         ) @variable
@@ -56,7 +56,7 @@ KOTLIN_QUERIES = {
         (call_expression
             function: (simple_identifier) @name
         ) @call_node
-        
+
         (call_expression
             function: (navigation_expression
                 name: (simple_identifier) @name
@@ -238,7 +238,7 @@ class KotlinTreeSitterParser:
                 import_match = re.search(r'import\s+(.+)', import_text)
                 if import_match:
                     import_path = import_match.group(1).strip()
-                    
+
                     # Extract alias if present
                     alias = None
                     as_match = re.search(r'\bas\s+(\w+)', import_path)

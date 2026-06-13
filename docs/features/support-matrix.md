@@ -265,4 +265,4 @@ When indexing, files are automatically classified:
 
 ---
 
-*This document follows Aegis Codeworks documentation standards. Update when new language, framework, or backend support is added.*
+*This document follows CODDY Codeworks documentation standards. Update when new language, framework, or backend support is added.*

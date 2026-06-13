@@ -4,8 +4,8 @@ title: WFK_BUG_001 — Bug Hunting & Diagnosis
 workflow_id: WFK_BUG_001
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
-codification: Aegis-Architecture-v1.0 §5
+standard: CODDY-Workflow-v2.0
+codification: CODDY-Architecture-v1.0 §5
 ---
 
 # WFK_BUG_001: Bug Hunting & Diagnosis
@@ -192,7 +192,7 @@ MCP: codecortex:codebase
 | `findings[].severity` | Prioritize `critical` and `high`. |
 | `findings[].confidence` | `> 0.9` → high confidence, definitely a problem. |
 | `findings[].remediation` | Suggest to user as fix. |
-| `findings[].standard_ref` | Reference to Aegis standard violated. |
+| `findings[].standard_ref` | Reference to CODDY standard violated. |
 | `compliance_score` | `< 70` → area needs broader cleanup. |
 
 ---

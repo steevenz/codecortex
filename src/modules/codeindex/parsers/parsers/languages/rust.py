@@ -4,8 +4,8 @@ Rust tree-sitter parser — ported from legacy codegraph.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Rust
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional

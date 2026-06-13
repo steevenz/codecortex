@@ -211,4 +211,4 @@ See [MCP Compliance](../features/core/mcp-compliance.md) for full details.
 
 ---
 
-*This document follows Aegis Codeworks documentation standards.*
+*This document follows CODDY Codeworks documentation standards.*

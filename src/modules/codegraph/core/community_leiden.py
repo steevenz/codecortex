@@ -5,8 +5,8 @@ Falls back to Louvain (via NetworkX) if Leiden is unavailable.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Community_leiden
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import logging

@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.core
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.core
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 SideCortexOrchestrator — Orchestrates all 16 IDE parsers to harvest cross-IDE memories.
 """
@@ -59,7 +59,7 @@ class SideCortexOrchestrator:
     def run_all(self) -> List[Engram]:
         """Run all registered parsers and return a combined list of engrams."""
         all_engrams = []
-        
+
         for parser in self.parsers:
             try:
                 logger.info(f"Running parser: {parser.ide_name}")
@@ -68,7 +68,7 @@ class SideCortexOrchestrator:
                 logger.info(f"Parser {parser.ide_name} found {len(engrams)} engrams.")
             except Exception as e:
                 logger.error(f"Error running parser {parser.ide_name}: {e}")
-                
+
         return all_engrams
 
     def get_stats(self, engrams: List[Engram]) -> Dict[str, int]:

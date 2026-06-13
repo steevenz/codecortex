@@ -4,8 +4,8 @@ Built-in ignore patterns for file scanning and traversal.
 :project: CodeCortex
 :package: Core.Config.Ignore_patterns
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

@@ -4,8 +4,8 @@ Framework detection enricher using modular framework detectors.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Frameworks
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -18,7 +18,7 @@ def detect_frameworks(file_path: Path, parsed: Dict[str, Any], repo_configs: Dic
     """Detect frameworks using modular detectors with repository-level config context."""
     if repo_configs is None:
         repo_configs = {}
-    
+
     detected: List[str] = []
     suffix = file_path.suffix.lower()
     rel_path = str(file_path).replace("\\", "/").lower()
@@ -49,7 +49,7 @@ def enrich_parsed_data(file_path: Path, parsed: Dict[str, Any], repo_configs: Di
     """Enrich parsed data with framework metadata using modular enrichers."""
     if repo_configs is None:
         repo_configs = {}
-    
+
     frameworks = detect_frameworks(file_path, parsed, repo_configs)
     if frameworks:
         parsed["frameworks"] = frameworks

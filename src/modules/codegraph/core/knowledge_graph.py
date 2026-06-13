@@ -5,8 +5,8 @@ Ported from GitNexus's graph.ts — multi-index for O(1) lookups.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Knowledge_graph
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from typing import Dict, List, Optional, Set, Tuple, Iterator, Any, Callable

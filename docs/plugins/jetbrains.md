@@ -29,8 +29,8 @@ uv sync
 2. Click `+` to add new server
 3. Fill:
    - **Name**: `codecortex`
-   - **Command**: `uv`
-   - **Arguments**: `--directory /path/to/mcp-codecortex run python -m src.main`
+   - **Command**: `node`
+   - **Arguments**: `/path/to/mcp-codecortex/scripts/server/js/index.cjs --ide jetbrains`
 4. Click OK
 
 **Via file config (`.idea/mcp.json`):**
@@ -38,20 +38,20 @@ uv sync
 {
   "servers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "jetbrains"]
     }
   }
 }
 ```
 
-> On Windows, use `uv.cmd` if `uv` is not recognized:
+> On Windows, use the path to `node.exe` if `node` is not globally available:
 > ```json
 > {
 >   "servers": {
 >     "codecortex": {
->       "command": "uv.cmd",
->       "args": ["--directory", "C:\\path\\to\\mcp-codecortex", "run", "python", "-m", "src.main"]
+>       "command": "C:\\Program Files\\nodejs\\node.exe",
+>       "args": ["C:\\path\\to\\mcp-codecortex\\scripts\\server\\js\\index.cjs", "--ide", "jetbrains"]
 >     }
 >   }
 > }

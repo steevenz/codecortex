@@ -13,8 +13,8 @@ Commands:
 :project: CodeCortex
 :package: Modules.Codegraph.Api.Cli
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from __future__ import annotations
@@ -96,9 +96,9 @@ def _cg_ctx():
 
 def cmd_cg_build(args_ns: argparse.Namespace) -> Dict:
     """Build or rebuild the code relationship graph for a repository."""
-    from src.modules.codegraph.services.aegis import AEGIS
+    from src.modules.codegraph.services.coddy import CODDY
     with _cg_ctx() as orch:
-        builder = AEGIS(orch.db, orch.graph_service.graph_manager)
+        builder = CODDY(orch.db, orch.graph_service.graph_manager)
         result = _run_async(builder.build(
             repo_path=args_ns.repo_path,
             repo_id=getattr(args_ns, "repo_id", None),
@@ -125,7 +125,7 @@ def cmd_cg_build(args_ns: argparse.Namespace) -> Dict:
 
 def cmd_cg_query(args_ns: argparse.Namespace) -> Dict:
     """Query code relationships."""
-    from src.modules.codegraph.services.trace import AEGISGraphTrace
+    from src.modules.codegraph.services.trace import CODDYGraphTrace
     import networkx as nx
 
     query_type: str = args_ns.query_type
@@ -191,8 +191,8 @@ def cmd_cg_query(args_ns: argparse.Namespace) -> Dict:
             repo_id = getattr(args_ns, "repo_id", None)
             if not repo_id:
                 return _err(f"--repo-id required for query_type={query_type}", "CG_CLI_MISSING_ARG")
-            from src.modules.codegraph.services.trace import AEGISGraphTrace
-            tracer = AEGISGraphTrace(orch.db, orch.graph_service.graph_manager)
+            from src.modules.codegraph.services.trace import CODDYGraphTrace
+            tracer = CODDYGraphTrace(orch.db, orch.graph_service.graph_manager)
             qt_mapped = "trace_path" if query_type == "trace_path" else f"find_{query_type}"
             result = _run_async(tracer.trace(
                 repo_id=repo_id,
@@ -226,7 +226,7 @@ def cmd_cg_query(args_ns: argparse.Namespace) -> Dict:
 
 def cmd_cg_search(args_ns: argparse.Namespace) -> Dict:
     """Unified symbol / relation / semantic / modular search."""
-    from src.modules.codegraph.services.search import AEGISGraphSearch
+    from src.modules.codegraph.services.search import CODDYGraphSearch
 
     action: str = args_ns.action
     query: str = getattr(args_ns, "query", "") or ""
@@ -263,7 +263,7 @@ def cmd_cg_search(args_ns: argparse.Namespace) -> Dict:
             repo_id = getattr(args_ns, "repo_id", None)
             if not repo_id:
                 return _err(f"--repo-id required for action={action}", "CG_CLI_MISSING_ARG")
-            searcher = AEGISGraphSearch(orch.db, orch.graph_service.graph_manager)
+            searcher = CODDYGraphSearch(orch.db, orch.graph_service.graph_manager)
             result = _run_async(searcher.search(
                 repo_id=repo_id, action=action, query=query,
                 relation_type=getattr(args_ns, "relation_type", None),
@@ -284,7 +284,7 @@ def cmd_cg_search(args_ns: argparse.Namespace) -> Dict:
 
 def cmd_cg_audit(args_ns: argparse.Namespace) -> Dict:
     """Full architectural audit."""
-    from src.modules.codegraph.services.audit import AEGISGraphAudit
+    from src.modules.codegraph.services.audit import CODDYGraphAudit
 
     repo_id: str = args_ns.repo_id
     audit_types = _parse_list_arg(getattr(args_ns, "types", None))
@@ -346,7 +346,7 @@ def cmd_cg_audit(args_ns: argparse.Namespace) -> Dict:
 
         if all_flag or "circular_deps" in types:
             try:
-                auditor = AEGISGraphAudit(orch.db, orch.graph_service.graph_manager)
+                auditor = CODDYGraphAudit(orch.db, orch.graph_service.graph_manager)
                 audit_result = _run_async(auditor.audit(repo_id=repo_id, max_depth=5, include_suggestions=True))
                 result["circular_deps"] = {
                     "count": len(audit_result.get("circular_dependencies", [])),
@@ -381,10 +381,10 @@ def cmd_cg_audit(args_ns: argparse.Namespace) -> Dict:
 
 def cmd_cg_relationship(args_ns: argparse.Namespace) -> Dict:
     """Explore architecture relationships with community detection."""
-    from src.modules.codegraph.services.relationship import AEGISGraphRelationship
+    from src.modules.codegraph.services.relationship import CODDYGraphRelationship
 
     with _cg_ctx() as orch:
-        rel = AEGISGraphRelationship(orch.db, orch.graph_service.graph_manager)
+        rel = CODDYGraphRelationship(orch.db, orch.graph_service.graph_manager)
         result = _run_async(rel.explore(
             repo_id=args_ns.repo_id,
             target_node=args_ns.target_node,
@@ -405,7 +405,7 @@ def cmd_cg_relationship(args_ns: argparse.Namespace) -> Dict:
 
 def cmd_cg_refactor(args_ns: argparse.Namespace) -> Dict:
     """Architectural-scale code transformation."""
-    from src.modules.codegraph.services.refactor import AEGISGraphRefactor
+    from src.modules.codegraph.services.refactor import CODDYGraphRefactor
 
     action: str = args_ns.refactor_action
     repo_id: str = args_ns.repo_id
@@ -458,7 +458,7 @@ def cmd_cg_refactor(args_ns: argparse.Namespace) -> Dict:
         options = _parse_json_arg(options_raw, "--options") if isinstance(options_raw, str) else (options_raw or {})
         dry_run: bool = getattr(args_ns, "dry_run", False)
 
-        refacter = AEGISGraphRefactor(orch.db, orch.graph_service.graph_manager)
+        refacter = CODDYGraphRefactor(orch.db, orch.graph_service.graph_manager)
         result = _run_async(refacter.refactor(
             repo_id=repo_id, action=action, refactor_type=refactor_type,
             target_node=target_node, options=options, dry_run=dry_run,

@@ -10,8 +10,8 @@ Features:
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Embeddings
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 import logging
@@ -67,7 +67,7 @@ def chunk_code(file_path: str, content: str) -> List[Dict[str, Any]]:
     lines = content.split("\n")
     current_chunk = []
     current_start = 1
-    
+
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
         # Detect function/class definition start
@@ -83,7 +83,7 @@ def chunk_code(file_path: str, content: str) -> List[Dict[str, Any]]:
             current_start = i
         else:
             current_chunk.append(line)
-    
+
     if current_chunk and len("\n".join(current_chunk)) > 20:
         chunks.append({
             "file_path": file_path,
@@ -91,13 +91,13 @@ def chunk_code(file_path: str, content: str) -> List[Dict[str, Any]]:
             "end_line": len(lines),
             "content": "\n".join(current_chunk),
         })
-    
+
     return chunks
 
 class EmbeddingStore:
     """
     Manages embedding storage and retrieval using SQLite.
-    
+
     Table: embeddings
     - id: TEXT PRIMARY KEY
     - file_path: TEXT
@@ -107,11 +107,11 @@ class EmbeddingStore:
     - content: TEXT
     - embedding: BLOB (pickled numpy array)
     """
-    
+
     def __init__(self, db_path: str):
         self.db_path = db_path
         self._init_db()
-    
+
     def _init_db(self):
         conn = None
         try:
@@ -153,19 +153,19 @@ class EmbeddingStore:
             )
         conn.commit()
         conn.close()
-    
+
     def clear_file(self, file_path: str):
         conn = sqlite3.connect(self.db_path)
         conn.execute("DELETE FROM embeddings WHERE file_path = ?", (file_path,))
         conn.commit()
         conn.close()
-    
+
     def clear_repo(self, repo_id: str):
         conn = sqlite3.connect(self.db_path)
         conn.execute("DELETE FROM embeddings WHERE id LIKE ?", (f"{repo_id}_%",))
         conn.commit()
         conn.close()
-    
+
     def search(self, query_embedding: np.ndarray, top_k: int = 10) -> List[Dict]:
         """
         Search for similar chunks using cosine similarity.
@@ -190,17 +190,17 @@ class EmbeddingStore:
                 "similarity": round(float(sim), 4),
             })
         conn.close()
-        
+
         results.sort(key=lambda x: x["similarity"], reverse=True)
         return results[:top_k]
-    
+
     @property
     def count(self) -> int:
         conn = sqlite3.connect(self.db_path)
         row = conn.execute("SELECT COUNT(*) FROM embeddings").fetchone()
         conn.close()
         return row[0] if row else 0
-    
+
     def close(self):
         pass
 
@@ -211,11 +211,11 @@ def index_file_embeddings(file_path: str, content: str, db_path: str, repo_id: s
     chunks = chunk_code(file_path, content)
     if not chunks:
         return 0
-    
+
     for chunk in chunks:
         emb = generate_embedding(chunk["content"])
         chunk["embedding"] = emb
-    
+
     store = EmbeddingStore(db_path)
     store.store(file_path, chunks, repo_id)
     return len(chunks)
@@ -228,6 +228,6 @@ def semantic_search(query: str, db_path: str, top_k: int = 10) -> List[Dict]:
     query_emb = generate_embedding(query)
     if query_emb is None:
         return []
-    
+
     store = EmbeddingStore(db_path)
     return store.search(query_emb, top_k=top_k)

@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.domain
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.domain
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Graph Timeline — Domain model for historical conversation graph,
 project state snapshots, and digital artifact tracking.

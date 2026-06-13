@@ -1,4 +1,4 @@
-# CodeCortex for Zed Editor
+﻿# CodeCortex for Zed Editor
 
 Zed editor supports MCP servers and custom settings via `.zed/settings.json`.
 
@@ -11,8 +11,8 @@ Zed editor supports MCP servers and custom settings via `.zed/settings.json`.
   "mcp_servers": [
     {
       "name": "codecortex",
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "zed"]
     }
   ]
 }

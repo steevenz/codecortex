@@ -1,13 +1,13 @@
 """
-AEGIS Graph Audit – God Nodes & Architecture Smell Detection
+CODDY Graph Audit – God Nodes & Architecture Smell Detection
 Uses graph centrality metrics to detect god classes, modules, components, plugins, widgets, and services.
 Inspired by Graphify and empirical analysis of large codebases.
 
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Audit
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import json
@@ -65,7 +65,7 @@ class Suggestion:
     affected_node: Optional[str] = None
     affected_cycle: Optional[str] = None
 
-class AEGISGraphAudit:
+class CODDYGraphAudit:
     """
     Audit code graph for architecture smells and god nodes.
     Uses NetworkX for centrality calculations.
@@ -139,7 +139,7 @@ class AEGISGraphAudit:
             self._generate_suggestions()
 
         result = self._build_output(repo_id, start_time)
-        
+
         # Request executive summary from Neocortex Cognitive Engine
         try:
             neo_client = NeocortexClient.instance()

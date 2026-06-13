@@ -6,7 +6,7 @@ Core service for repository operations used by CLI, MCP, and API.
 :project: CodeCortex
 :package: Repository.Service
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 from __future__ import annotations
@@ -65,7 +65,7 @@ class RepositoryService:
             "error": None,
             "data": {"analysis": "completed", "metrics": {}}
         }
-    
+
     def search(self, args: Dict) -> Dict[str, Any]:
         """Search repositories."""
         return {
@@ -73,7 +73,7 @@ class RepositoryService:
             "error": None,
             "data": {"results": [], "total": 0}
         }
-    
+
     def sync(self, args: Dict) -> Dict[str, Any]:
         """Sync repository."""
         return {

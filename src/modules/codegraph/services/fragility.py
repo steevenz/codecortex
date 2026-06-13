@@ -11,8 +11,8 @@ Combines multiple signals into a single fragility score (0-100):
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Fragility
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from __future__ import annotations

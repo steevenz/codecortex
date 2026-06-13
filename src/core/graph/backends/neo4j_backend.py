@@ -1,12 +1,12 @@
 """
 Neo4jBackend — Remote graph database (optional alternate backend).
-Ported from legacy codegraph database.py with Aegis-compliant structure.
+Ported from legacy codegraph database.py with CODDY-compliant structure.
 
 :project: CodeCortex
 :package: Core.Graph.Backends.Neo4j_backend
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

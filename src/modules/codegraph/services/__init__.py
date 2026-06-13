@@ -4,24 +4,24 @@ CodeGraph application services — graph intelligence pipeline orchestration.
 :project: CodeCortex
 :package: Modules.Codegraph.Services
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from .graph import Graph
-from .aegis import AEGIS
-from .audit import AEGISGraphAudit
-from .refactor import AEGISGraphRefactor
-from .relationship import AEGISGraphRelationship
-from .search import AEGISGraphSearch
-from .trace import AEGISGraphTrace
+from .coddy import CODDY
+from .audit import CODDYGraphAudit
+from .refactor import CODDYGraphRefactor
+from .relationship import CODDYGraphRelationship
+from .search import CODDYGraphSearch
+from .trace import CODDYGraphTrace
 
 __all__ = [
     "Graph",
-    "AEGIS",
-    "AEGISGraphAudit",
-    "AEGISGraphRefactor",
-    "AEGISGraphRelationship",
-    "AEGISGraphSearch",
-    "AEGISGraphTrace",
+    "CODDY",
+    "CODDYGraphAudit",
+    "CODDYGraphRefactor",
+    "CODDYGraphRelationship",
+    "CODDYGraphSearch",
+    "CODDYGraphTrace",
 ]

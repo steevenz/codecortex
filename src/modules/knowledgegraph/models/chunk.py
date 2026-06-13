@@ -7,8 +7,8 @@ Follows DTO Boundary standard:
 - Machine IDs: uuid.uuid4()[:12]
 
 Standards:
-    - Aegis-Architecture-v1.0    → DTO Boundaries, Codification
-    - Aegis-ProjectStructure-v1.0 → models/ requirements
+    - CODDY-Architecture-v1.0    → DTO Boundaries, Codification
+    - CODDY-ProjectStructure-v1.0 → models/ requirements
 """
 
 from __future__ import annotations

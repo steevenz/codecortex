@@ -10,14 +10,11 @@ Configure MCP in `~/.qoder/config.yaml` or project-level `.qoder/config.yaml`:
 ```yaml
 mcp_servers:
   codecortex:
-    command: uv
+    command: node
     args:
-      - --directory
-      - /path/to/mcp-codecortex
-      - run
-      - python
-      - -m
-      - src.main
+      - /path/to/mcp-codecortex/scripts/server/js/index.cjs
+      - --ide
+      - qoder
 ```
 
 ### VS Code / JetBrains Plugin

@@ -4,7 +4,7 @@ title: WFK_GRN_001-003 — Greenfield Project Creation
 workflow_id: WFK_GRN_001, WFK_GRN_002, WFK_GRN_003
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_GRN_001-003: Greenfield Project Creation
@@ -13,7 +13,7 @@ standard: Aegis-Workflow-v2.0
 > **Trigger**: User asks to create, scaffold, bootstrap, or init a new project.
 > **Time**: 1-5 minutes (scaffold + validation).
 > **Cost**: Low-to-medium (scaffolder + graph validation).
-> **Codification**: Aegis-Architecture-v1.0 §5
+> **Codification**: CODDY-Architecture-v1.0 §5
 
 ---
 

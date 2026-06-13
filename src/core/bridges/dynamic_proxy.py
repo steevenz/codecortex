@@ -5,7 +5,7 @@ Automatically resolves and proxies MCP tool calls.
 :project: Cognitive Server
 :package: Core.Bridges
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 from typing import Any, Dict, List, Optional
@@ -44,7 +44,7 @@ class DynamicToolProxy:
         if tool_name not in self._cached_tools:
             logger.warning(f"Tool {tool_name} not found in remote server schema.")
             # We still attempt to call it, maybe it was added dynamically
-            
+
         try:
             result = await self.session.call_tool(tool_name, arguments)
             if hasattr(result, "content") and result.content:

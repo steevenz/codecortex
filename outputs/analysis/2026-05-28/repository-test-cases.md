@@ -1,8 +1,8 @@
 # Repository Domain - Multi-Scenario Test Cases
 
-**Date:** 2026-05-28  
-**Tester:** QA Expert (Cascade)  
-**Scope:** 13 repository MCP tools with comprehensive scenario coverage  
+**Date:** 2026-05-28
+**Tester:** QA Expert (Cascade)
+**Scope:** 13 repository MCP tools with comprehensive scenario coverage
 **Focus:** Deep testing for AI Coder assistance quality
 
 ---
@@ -1165,4 +1165,4 @@ AI Coder Impact:** ⭐⭐⭐⭐ - Safe preview before destructive SVN commands
 
 ---
 
-*This test plan follows Aegis Codeworks QA standards and focuses on repository domain as requested.*
+*This test plan follows CODDY Codeworks QA standards and focuses on repository domain as requested.*

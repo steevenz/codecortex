@@ -4,8 +4,8 @@ Haskell Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Haskell_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,15 +18,15 @@ class HaskellTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "haskell_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for Haskell project signs: .cabal file or package.yaml or stack.yaml
         has_cabal = any(f.endswith(".cabal") for f in os.listdir(repo_path) if os.path.isfile(os.path.join(repo_path, f)))
         has_package_yaml = os.path.exists(os.path.join(repo_path, "package.yaml"))
         has_stack_yaml = os.path.exists(os.path.join(repo_path, "stack.yaml"))
-        
+
         if not (has_cabal or has_package_yaml or has_stack_yaml):
             return {"tool": "haskell_test", "status": "error", "error": "No Haskell project found (missing .cabal, package.yaml, or stack.yaml)"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -35,7 +35,7 @@ class HaskellTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "haskell_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the haskell test command
         # Prefer stack if stack.yaml exists, otherwise try cabal
         if has_stack_yaml:
@@ -44,13 +44,13 @@ class HaskellTest(BaseQA):
             cmd = ["cabal", "test"]
         else:
             return {"tool": "haskell_test", "status": "error", "error": "Could not determine Haskell test method"}
-            
+
         if target_path:
             # For Haskell testing, target could be a test suite name
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -59,10 +59,10 @@ class HaskellTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # Haskell test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "haskell_test",
                 "status": status,

@@ -6,8 +6,8 @@ Centralized git operations for all fs_* tools and fs_git MCP tool.
 :project: CodeCortex
 :package: Modules.Filesystem.Adapters.Git
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 import os
@@ -96,6 +96,53 @@ class DiskGit:
             return result.returncode == 0
         except Exception:
             return False
+
+    @classmethod
+    def restore_file(cls, root: Path, path: Path) -> Dict[str, Any]:
+        """Restore a corrupted/tracked file from git HEAD.
+
+        Uses 'git checkout HEAD -- <file>' to restore the file to its
+        last committed state. Works even if the working copy is corrupted.
+
+        Returns:
+            {'ok': True} on success.
+            {'ok': False, 'error': str, 'reason': str} on failure.
+        """
+        if not cls.is_git_available():
+            return {'ok': False, 'error': 'git CLI not available', 'reason': 'no_git_cli'}
+        try:
+            rel = path.relative_to(root)
+        except ValueError:
+            return {'ok': False, 'error': f'File {path} is not under repo root {root}',
+                    'reason': 'path_not_in_repo'}
+        if not cls.is_tracked(root, path):
+            return {'ok': False, 'error': f'File {rel} is not tracked in git',
+                    'reason': 'file_not_tracked'}
+        try:
+            # First try git restore (newer git)
+            result = subprocess.run(
+                ["git", "restore", "--source=HEAD", "--staged", "--worktree", "--", str(rel)],
+                cwd=str(root), capture_output=True, text=True, timeout=30,
+            )
+            if result.returncode == 0:
+                return {'ok': True, 'method': 'git_restore'}
+            # Fallback: git checkout HEAD -- <file> (older git)
+            result = subprocess.run(
+                ["git", "checkout", "HEAD", "--", str(rel)],
+                cwd=str(root), capture_output=True, text=True, timeout=30,
+            )
+            if result.returncode == 0:
+                return {'ok': True, 'method': 'git_checkout'}
+            return {
+                'ok': False,
+                'error': f'git restore/checkout failed: {result.stderr.strip()}',
+                'reason': 'git_command_failed',
+            }
+        except subprocess.TimeoutExpired:
+            return {'ok': False, 'error': 'git restore timed out after 30s',
+                    'reason': 'timeout'}
+        except Exception as e:
+            return {'ok': False, 'error': str(e), 'reason': 'exception'}
 
     @classmethod
     def get_insights(cls, path: Path) -> Optional[Dict[str, Any]]:
@@ -227,7 +274,7 @@ class DiskGit:
     @classmethod
     def execute(cls, params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a git subcommand with structured params.
-        
+
         params:
             repo_path (str) - Required. Path to git repo root.
             subcommand (str) - Required. Git subcommand (init, status, add, commit, etc.)

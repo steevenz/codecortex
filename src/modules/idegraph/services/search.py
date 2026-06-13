@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.services
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.services
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Search — Keyword and project-based search for ingested engrams.
 """
@@ -31,7 +31,8 @@ class Search:
         self._cache_lock = threading.Lock()
         self._last_cache_mtime: float = 0.0
         if db is None:
-            self.db_path = Path(os.environ.get("CODECORTEX_DB_PATH", str(Path(".").resolve() / "database" / "codecortex.db"))).resolve()
+            from src.core.config.database import get_db_path
+            self.db_path = Path(os.environ.get("CODECORTEX_DB_PATH", get_db_path())).resolve()
         else:
             self.db_path = Path(db._db_path) if hasattr(db, '_db_path') else Path(":memory:")
 

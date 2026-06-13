@@ -4,8 +4,8 @@ Angular framework detection and symbol enrichment.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Frameworks.Angular
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from typing import Dict, List, Any, Optional
 
@@ -18,7 +18,7 @@ def detect_angular(
     repo_configs: Dict[str, Any],
 ) -> bool:
     """Detect Angular usage with zero false positives.
-    
+
     Requires at least TWO of the following signals:
     1. @angular/* imports
     2. Angular in package.json dependencies
@@ -26,19 +26,19 @@ def detect_angular(
     4. angular.json configuration file
     """
     signals = []
-    
+
     # Signal 1: Angular imports
     for imp in imports:
         mod = (imp.get("module") or "").lower()
         if mod.startswith("@angular/"):
             signals.append("angular_import")
             break
-    
+
     # Signal 2: package.json dependency
     pkg_deps = repo_configs.get("package.json", {}).get("dependencies", {})
     if any(dep.startswith("@angular/") for dep in pkg_deps):
         signals.append("angular_dependency")
-    
+
     # Signal 3: Angular decorators
     for cls in classes:
         decorators = cls.get("decorators", [])
@@ -46,17 +46,17 @@ def detect_angular(
         if any(dec in decorators for dec in angular_decorators):
             signals.append("angular_decorator")
             break
-    
+
     # Signal 4: angular.json (would need to check file existence separately)
     # This is handled at repository level
-    
+
     # Zero false positives: require at least 2 signals
     return len(signals) >= 2
 
 def enrich_class(cls: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Tag Angular-specific class types."""
     decorators = cls.get("decorators", [])
-    
+
     if "@Component" in decorators:
         return {"angular_type": "Component"}
     if "@NgModule" in decorators:
@@ -69,13 +69,13 @@ def enrich_class(cls: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return {"angular_type": "Pipe"}
     if "@Guard" in decorators:
         return {"angular_type": "Guard"}
-    
+
     return None
 
 def enrich_function(fn: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Tag Angular-specific lifecycle hooks."""
     name = fn.get("name", "")
-    
+
     # Angular lifecycle hooks
     angular_hooks = [
         "ngOnInit", "ngOnChanges", "ngDoCheck", "ngAfterContentInit",
@@ -84,5 +84,5 @@ def enrich_function(fn: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     ]
     if name in angular_hooks:
         return {"angular_lifecycle": name}
-    
+
     return None

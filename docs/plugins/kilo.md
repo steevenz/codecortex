@@ -1,4 +1,4 @@
-# CodeCortex for KILO
+﻿# CodeCortex for KILO
 
 KILO is an open source AI coding agent for VS Code, JetBrains, CLI, and Cloud. It supports plugins via `.kilo/` directory.
 
@@ -16,8 +16,8 @@ Add to your `.kilo/config.json`:
   ],
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "kilo"]
     }
   }
 }

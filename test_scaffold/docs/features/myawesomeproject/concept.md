@@ -14,7 +14,7 @@ myawesomeproject is a greenfield project initialized with python stack and Web A
 
 - Rapid project initialization with standard structure
 - AI coder-friendly directory structure
-- Compliance with Aegis Codeworks standards
+- Compliance with CODDY Codeworks standards
 - Ready for immediate development
 
 ## Architecture
@@ -45,7 +45,7 @@ Aliases: mya
 
 ## ~/.aicoders/ Compliance
 
-- Follows Aegis-Architecture-v1.0 standards
+- Follows CODDY-Architecture-v1.0 standards
 - Constructor injection for all services
 - DTOs for all layer crossings
 - Adapters wrap all 3rd-party dependencies

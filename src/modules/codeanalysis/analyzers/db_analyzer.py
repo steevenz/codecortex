@@ -5,8 +5,8 @@ from source code for runtime intelligence.
 :project: CodeCortex
 :package: Modules.Codeanalysis.Analyzers.Db_analyzer
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from __future__ import annotations

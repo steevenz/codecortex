@@ -4,8 +4,8 @@ Sbt Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Sbt_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class SbtTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "sbt_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for build.sbt to ensure we are in an sbt project
         build_sbt_path = os.path.join(repo_path, "build.sbt")
         if not os.path.exists(build_sbt_path):
@@ -27,7 +27,7 @@ class SbtTest(BaseQA):
             build_scala_path = os.path.join(project_dir, "Build.scala") if os.path.exists(project_dir) else None
             if not (os.path.exists(build_sbt_path) or (build_scala_path and os.path.exists(build_scala_path))):
                 return {"tool": "sbt_test", "status": "error", "error": "build.sbt or project/Build.scala not found - Scala test requires an sbt project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -36,7 +36,7 @@ class SbtTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "sbt_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the sbt test command
         cmd = ["sbt", "test"]
         if target_path:
@@ -44,7 +44,7 @@ class SbtTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -53,10 +53,10 @@ class SbtTest(BaseQA):
                 text=True,
                 timeout=180  # Longer timeout for JVM-based builds
             )
-            
+
             # sbt test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "sbt_test",
                 "status": status,

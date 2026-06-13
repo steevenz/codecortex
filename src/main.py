@@ -4,16 +4,620 @@ CodeCortex MCP Server — Main entry point.
 :project: CodeCortex
 :package: Main
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CrossStack-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CrossStack-v1.0
 """
 
 import os
+import sys
+import time
+import atexit
 import asyncio
 import logging
+import subprocess
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from mcp.server.fastmcp import FastMCP
+
+
+# ════════════════════════════════════════════════════════════
+# SINGLE-INSTANCE SAFEGUARD — runs BEFORE any server init
+# ════════════════════════════════════════════════════════════
+def _get_lockfile_dir() -> Path:
+    """Return path to project data directory.
+
+    Uses the shared get_data_dir() from core.config.database to ensure
+    a single source of truth for ~/.codecortex path resolution.
+    """
+    from src.core.config.database import get_data_dir
+    return get_data_dir()
+
+def _get_lockfile_path() -> Path:
+    """Return path to PID lockfile in project data directory."""
+    return _get_lockfile_dir() / "codecortex.pid"
+
+def _get_killedcache_path() -> Path:
+    """Return path to killed-PID cache file (prevents cascade loop)."""
+    return _get_lockfile_dir() / "codecortex.killed"
+
+def _is_shared_mode() -> bool:
+    """Detect if running as shared HTTP/SSE server (multi-IDE).
+
+    In shared mode, multiple index.cjs (from different IDEs) connect
+    to ONE Python backend. Python must NOT kill other Python processes
+    — the index.cjs lifecycle manager handles that.
+
+    Returns True when CODECORTEX_TRANSPORT is 'sse' or 'http'.
+    """
+    transport = os.environ.get("CODECORTEX_TRANSPORT", "stdio").strip().lower()
+    return transport in ("sse", "http")
+
+def _get_node_parent_pid() -> Optional[int]:
+    """Return the PID of the Node.js wrapper that spawned us (if any).
+
+    Traverses up to find the immediate node.exe parent.
+    Used in shared mode to identify which index.cjs is OUR manager.
+    """
+    ppid = _get_process_parent_pid(os.getpid())
+    if ppid is None:
+        return None
+    parent_name = _get_process_name(ppid)
+    if parent_name and 'node' in parent_name:
+        return ppid
+    # Check grandparent
+    gpid = _get_process_parent_pid(ppid)
+    if gpid is None:
+        return None
+    grandparent_name = _get_process_name(gpid)
+    if grandparent_name and 'node' in grandparent_name:
+        return gpid
+    return None
+
+def _get_module_signature() -> str:
+    """Return a signature that identifies THIS specific codecortex instance."""
+    return f"codecortex-src.main-{Path(__file__).resolve().parent}"
+
+_INSTANCE_ID: Optional[str] = None  # populated once at module load
+
+def _get_instance_id() -> str:
+    """Generate a stable instance ID for this process lifetime (SHA-256 of PID + sig + creation time).
+
+    Cached in module global so all callers see the same ID for this process.
+    """
+    global _INSTANCE_ID
+    if _INSTANCE_ID:
+        return _INSTANCE_ID
+    import hashlib, time
+    raw = f"{os.getpid()}:{_get_module_signature()}:{time.time()}"
+    _INSTANCE_ID = hashlib.sha256(raw.encode()).hexdigest()[:12]
+    return _INSTANCE_ID
+
+def _get_ide_name() -> str:
+    """Detect which IDE spawned this process from environment variables."""
+    for var, name in [
+        ("TRAE_ID", "trae"),
+        ("VSCODE_NLS_CONFIG", "vscode"),
+        ("TERM_PROGRAM", None),  # check value below
+    ]:
+        val = os.environ.get(var, "")
+        if var == "TERM_PROGRAM" and val:
+            lower = val.lower()
+            if "cursor" in lower:
+                return "cursor"
+            if "vscode" in lower:
+                return "vscode"
+            if "trae" in lower:
+                return "trae"
+            return lower.split("/")[0].split(" ")[0]  # first word
+        if val:
+            return name
+    return "unknown"
+
+def _build_instance_identity() -> Dict[str, Any]:
+    """Build full instance identity dict for lockfile.
+
+    Structure shared by both Python (src/main.py) and Node (scripts/server/run_server.js).
+    """
+    import time as _time
+    identity = {
+        "pid": os.getpid(),
+        "signature": _get_module_signature(),
+        "source": "python",
+        "instance_id": _get_instance_id(),
+        "ide": _get_ide_name(),
+        "pid_timestamp": _time.time(),
+        "version": 2,  # lockfile format version
+        "shared_mode": _is_shared_mode(),
+        "node_parent_pid": _get_node_parent_pid(),
+    }
+    return identity
+
+
+def _get_python_pids_via_powershell() -> list[int]:
+    """Use PowerShell Get-CimInstance to find PIDs of codecortex python processes.
+
+    Preferred over wmic (deprecated in Win 11 24H2) and tasklist (too verbose).
+    """
+    script = (
+        'Get-CimInstance Win32_Process -Filter "Name=\'python.exe\'" | '
+        'Where-Object { $_.CommandLine -like \'*src.main*\' } | '
+        'Select-Object -ExpandProperty ProcessId'
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", script],
+            capture_output=True, text=True, timeout=10,
+        )
+        pids = []
+        for line in result.stdout.strip().splitlines():
+            line = line.strip()
+            if line.isdigit():
+                pids.append(int(line))
+        return pids
+    except Exception:
+        return []
+
+
+def _get_python_pids_via_tasklist() -> list[int]:
+    """Fallback: use tasklist to find codecortex python PIDs (less reliable)."""
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq python.exe", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=5,
+        )
+        # tasklist CSV: "python.exe","1234","Console","1","xxx K"
+        pids = []
+        for line in result.stdout.strip().splitlines():
+            parts = line.strip().split(",")
+            if len(parts) >= 2 and "python" in parts[0].lower():
+                pid_str = parts[1].strip().strip('"')
+                if pid_str.isdigit():
+                    pids.append(int(pid_str))
+        return pids
+    except Exception:
+        return []
+
+
+def _gather_local_python_pids() -> list[int]:
+    """Collect PIDs of ALL codecortex python processes running `src.main`.
+
+    Tries PowerShell first (fastest, most reliable on modern Windows),
+    falls back to tasklist if PowerShell is unavailable.
+    """
+    pids = _get_python_pids_via_powershell()
+    if not pids:
+        # Fallback for systems without PowerShell or older Windows
+        pids = _get_python_pids_via_tasklist()
+    return pids
+
+
+def _kill_process_graceful(pid: int) -> bool:
+    """Try graceful termination first, then forced kill if needed.
+
+    Graceful: taskkill without /F  →  exit code 0 means process accepted signal
+    Wait 1s → check if process still exists
+    Forced:  taskkill /F /PID
+    """
+    import time as _time
+
+    if sys.platform != "win32":
+        # Unix: SIGTERM first, wait, SIGKILL if still alive
+        try:
+            os.kill(pid, 15)  # SIGTERM
+            _time.sleep(1)
+            # Check if alive
+            try:
+                os.kill(pid, 0)  # Still alive? SIGKILL
+                os.kill(pid, 9)
+                return True
+            except OSError:
+                return True  # Dead after SIGTERM
+        except PermissionError:
+            return False
+        except ProcessLookupError:
+            return True  # Already dead
+        except Exception:
+            return False
+
+    # Windows: graceful kill first
+    try:
+        # Stage 1: graceful (taskkill without /F)
+        subprocess.run(
+            ["taskkill", "/PID", str(pid)],
+            capture_output=True, text=True, timeout=10,
+        )
+        # Give it time to release DB locks
+        _time.sleep(1.5)
+
+        # Stage 2: verify dead
+        check = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if str(pid) not in check.stdout:
+            return True  # Process is gone
+
+        # Stage 3: forced kill
+        subprocess.run(
+            ["taskkill", "/F", "/PID", str(pid)],
+            capture_output=True, text=True, timeout=10,
+        )
+        _time.sleep(0.5)
+        return True
+    except Exception:
+        # Last resort: direct forced kill
+        try:
+            subprocess.run(
+                ["taskkill", "/F", "/PID", str(pid)],
+                capture_output=True, text=True, timeout=10,
+            )
+            _time.sleep(0.5)
+            return True
+        except Exception:
+            return False
+
+
+def _get_process_parent_pid(pid: int) -> Optional[int]:
+    """Get parent process ID via PowerShell Get-CimInstance."""
+    script = (
+        f'$p = Get-CimInstance Win32_Process -Filter "ProcessId={pid}"; '
+        f'if ($p) {{ $p.ParentProcessId }}'
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", script],
+            capture_output=True, text=True, timeout=5,
+        )
+        ppid = result.stdout.strip()
+        if ppid.isdigit():
+            return int(ppid)
+        return None
+    except Exception:
+        return None
+
+
+def _get_process_name(pid: int) -> Optional[str]:
+    """Get process executable name via PowerShell Get-CimInstance."""
+    script = (
+        f'$p = Get-CimInstance Win32_Process -Filter "ProcessId={pid}"; '
+        f'if ($p) {{ $p.Name }}'
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", script],
+            capture_output=True, text=True, timeout=5,
+        )
+        name = result.stdout.strip()
+        return name.lower() if name else None
+    except Exception:
+        return None
+
+
+def _is_process_alive(pid: int) -> bool:
+    """Check if a process is still alive."""
+    try:
+        check = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=5,
+        )
+        return str(pid) in check.stdout
+    except Exception:
+        return False
+
+
+def _get_process_creation_time(pid: int) -> Optional[float]:
+    """Get process creation timestamp (epoch) via PowerShell."""
+    script = (
+        f'$p = Get-CimInstance Win32_Process -Filter "ProcessId={pid}"; '
+        f'if ($p) {{ [Management.ManagementDateTimeConverter]::ToDateTime($p.CreationDate) | '
+        f'Get-Date -UFormat %s }}'
+    )
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", script],
+            capture_output=True, text=True, timeout=5,
+        )
+        ts = result.stdout.strip()
+        if ts:
+            return float(ts)
+        return None
+    except Exception:
+        return None
+
+
+def _is_process_younger_than(pid: int, seconds: float = 3.0) -> bool:
+    """Check if a process started less than `seconds` ago.
+
+    Prevents cascade killing when multiple Python processes
+    start simultaneously (e.g. shared server candidate pool).
+    """
+    import time as _time
+    created = _get_process_creation_time(pid)
+    if created is None:
+        return False  # Can't determine → treat as old
+    return (_time.time() - created) < seconds
+
+
+def _is_spawned_by_node(pid: int) -> bool:
+    """Check if a process was spawned by a Node.js wrapper.
+
+    Traverses up the process tree (max 3 levels) looking for node.exe.
+    A Python process spawned by run_server.js or index.cjs will have
+    node.exe as its direct parent or grandparent.
+
+    Returns True if the process is a legitimate IDE‑spawned instance.
+    """
+    current = pid
+    for _ in range(3):  # Check parent, grandparent, great-grandparent
+        ppid = _get_process_parent_pid(current)
+        if ppid is None or ppid == 0:
+            return False  # Can't trace further
+        if ppid == current:
+            return False  # Self-loop (shouldn't happen)
+        parent_name = _get_process_name(ppid)
+        if parent_name and 'node' in parent_name:
+            # Verify the node parent is still alive
+            if _is_process_alive(ppid):
+                return True
+            else:
+                return False  # Node parent is dead → orphan
+        current = ppid
+    return False
+
+
+# ════════════════════════════════════════════════════════════
+# KILLED-PID CACHE — prevents cascade loop
+# ════════════════════════════════════════════════════════════
+_KILLED_CACHE_MAX_AGE = 30.0  # seconds — PIDs killed more than 30s ago are eligible for re-kill
+
+def _read_killed_cache() -> Dict[int, float]:
+    """Read killed-PID cache file. Returns {pid: kill_timestamp}."""
+    cache_path = _get_killedcache_path()
+    if not cache_path.exists():
+        return {}
+    try:
+        import json
+        data = json.loads(cache_path.read_text())
+        if not isinstance(data, dict):
+            return {}
+        # Convert string keys back to int PIDs, filter expired
+        import time as _time
+        now = _time.time()
+        result = {}
+        for k, v in data.items():
+            try:
+                pid = int(k)
+                age = now - v
+                if age < _KILLED_CACHE_MAX_AGE:
+                    result[pid] = v
+            except (ValueError, TypeError):
+                pass
+        return result
+    except Exception:
+        return {}
+
+def _write_killed_cache(killed: Dict[int, float]) -> None:
+    """Write killed-PID cache file (atomic overwrite)."""
+    cache_path = _get_killedcache_path()
+    try:
+        import json
+        # Prune expired entries before writing
+        import time as _time
+        now = _time.time()
+        pruned = {str(k): v for k, v in killed.items() if (now - v) < _KILLED_CACHE_MAX_AGE}
+        cache_path.write_text(json.dumps(pruned))
+    except Exception:
+        pass
+
+
+def _safe_kill_and_wait(killed_any: bool) -> bool:
+    """Post-kill wait to ensure OS releases resources (file locks, ports, DB WAL).
+
+    Returns True if wait happened, False if nothing to wait for.
+    """
+    import time as _time
+    if not killed_any:
+        return False
+    # SQLite WAL recovery + OS handle cleanup needs a real pause
+    _time.sleep(1.5)
+    return True
+
+
+def _safeguard_instance() -> None:
+    """Self-kill safeguard that prevents multi-IDE process conflicts.
+
+    MODES:
+      - stdio mode (default): Full kill-loop for stale Python PIDs.
+        Used when running standalone (e.g., run_server.js).
+      - shared mode (HTTP/SSE): Skip kill-loop, just write lockfile identity.
+        Used when multiple index.cjs share ONE Python backend.
+        Lifecycle managed by index.cjs's file-lock + reference counting.
+
+    Strategy (shared mode):
+    1. Write JSON lockfile with full instance identity
+    2. Register atexit cleanup
+    3. DO NOT kill other Python PIDs — index.cjs manages lifecycle
+
+    Strategy (stdio mode):
+    1. Load killed-PID cache to prevent cascade loops
+    2. Find ALL local python.exe processes running `src.main`
+    3. Kill stale/orphan instances (graceful → forced escalation)
+    4. Check lockfile for any missed PID
+    5. Write JSON lockfile with full instance identity
+    6. Register atexit cleanup
+
+    Instance identity fields (shared with Node in lockfile):
+      pid, signature, source, instance_id, ide, pid_timestamp, version,
+      shared_mode (bool), node_parent_pid (int | null)
+    """
+    import time as _time
+    import json as _json
+
+    pid_file = _get_lockfile_path()
+    current_pid = os.getpid()
+    identity = _build_instance_identity()
+    shared_mode = identity.get("shared_mode", False)
+
+    killed_any = False
+
+    print(
+        f"[CodeCortex] Instance starting: PID={current_pid} "
+        f"ID={identity['instance_id']} IDE={identity['ide']} "
+        f"mode={'shared' if shared_mode else 'stdio'}"
+        f"{' node_parent=' + str(identity['node_parent_pid']) if identity.get('node_parent_pid') else ''}",
+        file=sys.stderr,
+    )
+
+    # ────────────────────────────────────────────────────────────
+    # SHARED MODE: Skip kill-loop, let index.cjs manage lifecycle
+    # ────────────────────────────────────────────────────────────
+    if shared_mode:
+        # Write lockfile with identity
+        try:
+            pid_file.write_text(_json.dumps(identity, indent=2))
+            print(
+                f"[CodeCortex] Service lock (shared): PID={current_pid} "
+                f"instance={identity['instance_id']} IDE={identity['ide']} "
+                f"file={pid_file}",
+                file=sys.stderr,
+            )
+        except OSError as e:
+            print(f"[CodeCortex] Warning: cannot write lockfile: {e}", file=sys.stderr)
+
+        # Register atexit cleanup
+        def _shared_cleanup():
+            try:
+                if pid_file.exists():
+                    content = pid_file.read_text().strip()
+                    try:
+                        data = _json.loads(content)
+                        if isinstance(data, dict) and data.get("pid") == os.getpid():
+                            pid_file.unlink(missing_ok=True)
+                    except Exception:
+                        if content.startswith(str(os.getpid())):
+                            pid_file.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+        atexit.register(_shared_cleanup)
+        return
+
+    # ────────────────────────────────────────────────────────────
+    # STDIO MODE: Full safeguard with kill-loop
+    # ────────────────────────────────────────────────────────────
+
+    # Load killed-PID cache (prevents cascade)
+    killed_cache = _read_killed_cache()
+    newly_killed: Dict[int, float] = {}
+
+    # Identify OUR Node parent PID (if any) — never kill this process
+    node_parent_pid = identity.get("node_parent_pid")
+
+    # PHASE 1: Scan for ALL codecortex python PIDs
+    all_pids = _gather_local_python_pids()
+    for pid in all_pids:
+        if pid == current_pid:
+            continue
+
+        # GUARD: Killed-PID cache — skip if already killed recently
+        if pid in killed_cache:
+            print(
+                f"[CodeCortex] Skipping PID={pid} — already killed recently "
+                f"({_time.time() - killed_cache[pid]:.1f}s ago)",
+                file=sys.stderr,
+            )
+            continue
+
+        # GUARD: Don't kill our own Node parent
+        if node_parent_pid and pid == node_parent_pid:
+            print(f"[CodeCortex] Skipping PID={pid} — our Node parent", file=sys.stderr)
+            continue
+
+        # GUARD: Skip if too young (prevents candidate cascade)
+        if _is_process_younger_than(pid, seconds=3.0):
+            print(f"[CodeCortex] Skipping PID={pid} — too young (<3s)", file=sys.stderr)
+            continue
+
+        # GUARD: Skip node-spawned processes (they're legitimate)
+        if _is_spawned_by_node(pid):
+            print(f"[CodeCortex] Skipping PID={pid} — child of node.exe", file=sys.stderr)
+            continue
+
+        print(f"[CodeCortex] Killing stale instance PID={pid}", file=sys.stderr)
+        if _kill_process_graceful(pid):
+            killed_any = True
+            newly_killed[pid] = _time.time()
+            print(f"[CodeCortex] Killed stale PID={pid}", file=sys.stderr)
+
+    # Save killed-PID cache
+    if newly_killed:
+        killed_cache.update(newly_killed)
+        _write_killed_cache(killed_cache)
+
+    _safe_kill_and_wait(killed_any)
+
+    # PHASE 2: Check lockfile for any PID we might have missed
+    if pid_file.exists() and not killed_any:
+        try:
+            old_content = pid_file.read_text().strip()
+            old_data = _json.loads(old_content)
+            old_pid = old_data.get("pid") if isinstance(old_data, dict) else None
+        except Exception:
+            try:
+                old_pid = int(old_content.split("\n")[0].strip())
+            except (ValueError, IndexError, OSError):
+                old_pid = None
+
+        if old_pid and old_pid != current_pid:
+            if old_pid in killed_cache:
+                print(f"[CodeCortex] Lockfile PID={old_pid} — already killed, skipping", file=sys.stderr)
+            elif node_parent_pid and old_pid == node_parent_pid:
+                print(f"[CodeCortex] Lockfile PID={old_pid} — our Node parent, skipping", file=sys.stderr)
+            elif _is_process_younger_than(old_pid, seconds=3.0):
+                print(f"[CodeCortex] Lockfile PID={old_pid} — too young, skipping", file=sys.stderr)
+            elif _is_spawned_by_node(old_pid):
+                print(f"[CodeCortex] Lockfile PID={old_pid} — child of node.exe, skipping", file=sys.stderr)
+            elif _is_process_alive(old_pid):
+                print(f"[CodeCortex] Lockfile stale PID={old_pid} still alive — killing", file=sys.stderr)
+                _kill_process_graceful(old_pid)
+                killed_any = True
+                newly_killed[old_pid] = _time.time()
+                killed_cache[old_pid] = _time.time()
+                _write_killed_cache(killed_cache)
+                _safe_kill_and_wait(killed_any)
+
+    # PHASE 3: Write lockfile
+    try:
+        pid_file.write_text(_json.dumps(identity, indent=2))
+        print(
+            f"[CodeCortex] Service lock: PID={current_pid} "
+            f"instance={identity['instance_id']} IDE={identity['ide']} "
+            f"file={pid_file}",
+            file=sys.stderr,
+        )
+    except OSError as e:
+        print(f"[CodeCortex] Warning: cannot write lockfile: {e}", file=sys.stderr)
+
+    # PHASE 4: Register atexit cleanup
+    def _cleanup():
+        try:
+            if pid_file.exists():
+                content = pid_file.read_text().strip()
+                try:
+                    data = _json.loads(content)
+                    if isinstance(data, dict) and data.get("pid") == os.getpid():
+                        pid_file.unlink(missing_ok=True)
+                except Exception:
+                    if content.startswith(str(os.getpid())):
+                        pid_file.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    atexit.register(_cleanup)
+
+
+# Run safeguard BEFORE anything else
+_safeguard_instance()
 
 from src.core import api_response, new_request_id
 from src.core.logging import Logger, get_logger
@@ -283,7 +887,7 @@ def create_orchestrator(db_path: Optional[str] = None) -> CortexOrchestrator:
     """
     Factory function to create orchestrator instances.
 
-    Follows Aegis modular-standard.md requirement for DI and no global state.
+    Follows CODDY modular-standard.md requirement for DI and no global state.
     Each tool handler creates its own orchestrator instance, ensuring proper
     lifecycle management and testability.
     """

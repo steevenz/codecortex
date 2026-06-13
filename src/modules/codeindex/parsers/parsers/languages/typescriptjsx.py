@@ -4,8 +4,8 @@ TSX tree-sitter parser — extends TypeScript with JSX element component detecti
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Typescriptjsx
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -81,14 +81,14 @@ TSX_QUERIES = {
         (call_expression function: (member_expression property: (property_identifier) @name))
         (new_expression constructor: (identifier) @name)
         (new_expression constructor: (member_expression property: (property_identifier) @name))
-        
+
         ; JSX elements as function calls
         (jsx_element
             opening_element: (jsx_opening_element
                 name: (identifier) @name
             )
         ) @jsx_call
-        
+
         (jsx_element
             opening_element: (jsx_opening_element
                 name: (member_expression
@@ -96,11 +96,11 @@ TSX_QUERIES = {
                 )
             )
         ) @jsx_call
-        
+
         (jsx_self_closing_element
             name: (identifier) @name
         ) @jsx_call
-        
+
         (jsx_self_closing_element
             name: (member_expression
                 property: (property_identifier) @name

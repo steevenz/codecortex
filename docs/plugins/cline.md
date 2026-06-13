@@ -1,4 +1,4 @@
-# CodeCortex for Cline
+﻿# CodeCortex for Cline
 
 ## Prerequisites
 - [Cline](https://github.com/cline/cline) VS Code extension installed
@@ -13,8 +13,8 @@ Add to Cline MCP config (`cline_mcp_settings.json`):
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "cline"]
     }
   }
 }

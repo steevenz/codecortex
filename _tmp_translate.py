@@ -40,7 +40,7 @@ translations = {
     "berisi": "contains",
     "saran perbaikan yang bisa langsung dieksekusi": "remediation suggestions that can be executed immediately",
     "merujuk ke": "refers to",
-    "standard Aegis yang dilanggar": "Aegis standard violated",
+    "standard CODDY yang dilanggar": "CODDY standard violated",
     "cocok untuk compliance reporting": "suitable for compliance reporting",
     "dengan ISO timestamp dari audit sebelumnya": "with ISO timestamp from previous audit",
     "Selalu cek": "Always check",

@@ -7,8 +7,8 @@ Added: change_signature, extract_function, inline_function.
 :project: CodeCortex
 :package: Modules.Coderefactor.Services.Refactor
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRefactor-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRefactor-v1.0
 """
 
 import os
@@ -2012,7 +2012,7 @@ class Refactor:
     ) -> RefactorResult:
         """
         Unified entry point for all refactoring actions.
-        
+
         @param repo_id: Repository ID
         @param action: "impact" | "rename" | "move"
         @param target_symbol: Target symbol in "module::name" or "file:line" format

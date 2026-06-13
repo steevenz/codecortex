@@ -20,8 +20,8 @@ Lifecycle:
 :project: CodeCortex
 :package: Modules.Coderepository.Api.Tools
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v2.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v2.0
 """
 
 from __future__ import annotations
@@ -3973,7 +3973,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory) -> None:
         try:
             result = DiskGit.execute(params)
             data = result.get("data", {})
-            
+
             # Add ai_action for dry_run mode
             if dry_run and data:
                 command_parts = ["git", subcommand]
@@ -3993,7 +3993,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory) -> None:
                     "repo_path": repo_path,
                     "estimated_impact": "preview only - no changes"
                 }
-            
+
             return api_response(
                 success=True,
                 status_code=int(result.get("status_code", 200)),
@@ -4066,7 +4066,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory) -> None:
         try:
             result = DiskSvn.execute(params)
             data = result.get("data", {})
-            
+
             # Add ai_action for dry_run mode
             if dry_run and data:
                 command_parts = ["svn", subcommand]
@@ -4086,7 +4086,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory) -> None:
                     "target": target,
                     "estimated_impact": "preview only - no changes"
                 }
-            
+
             return api_response(
                 success=True,
                 status_code=int(result.get("status_code", 200)),

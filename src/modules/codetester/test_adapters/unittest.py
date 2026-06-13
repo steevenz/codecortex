@@ -4,8 +4,8 @@ Unittest.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Unittest
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class Unittest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "unittest", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -27,7 +27,7 @@ class Unittest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "unittest", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # We'll use the unittest module discovery with verbose output
         # unittest doesn't natively output JSON. We'll capture the output and consider a run successful if exit code is 0.
         # We'll run: python -m unittest discover -v [target_path] [extra_args]

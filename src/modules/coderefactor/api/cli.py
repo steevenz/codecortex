@@ -16,8 +16,8 @@ Commands:
 :project: CodeCortex
 :package: Modules.Coderefactor.Api.Cli
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRefactor-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRefactor-v1.0
 """
 
 from __future__ import annotations

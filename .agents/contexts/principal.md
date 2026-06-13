@@ -13,7 +13,7 @@ Every module is a standalone brick with standard interfaces. Modules can be adde
 ## Project Identity
 - **Domain**: Code Intelligence / AI Coding Agent Infrastructure
 - **Stack**: Python 3.12, FastMCP, SQLite (WAL), Kuzu/Neo4j/FalkorDB
-- **Standards**: AEGIS Codework v6.2 (Modular Monolith / DDD / HMVC-P)
+- **Standards**: CODDY Codework v6.2 (Modular Monolith / DDD / HMVC-P)
 
 ## Repository Structure
 ```
@@ -62,6 +62,6 @@ src/
 1. **No separate databases**: ALL modules must use the shared codecortex.db
 2. **DI everywhere**: Constructor injection only — no hardcoded service instantiation
 3. **English code**: Identifiers, comments, docs in English
-4. **Aegis headers**: Every file must have `@project CodeCortex`, `@author Steeven Andrian`, `@copyright (c) 2026 Aegis Codework`
+4. **CODDY headers**: Every file must have `@project CodeCortex`, `@author Steeven Andrian`, `@copyright (c) 2026 CODDY Codework`
 5. **No Service suffix**: Coding-standard R1 — folder declares role, class does not repeat it
 6. **Standard output**: All MCP tools return `api_response()` with `insight` field

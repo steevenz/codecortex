@@ -4,8 +4,8 @@ Manage DB-backed filesystem operations and destructive actions.
 :project: CodeCortex
 :package: Modules.Filesystem.Core.Service
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 import os
@@ -223,14 +223,14 @@ class Filesystem:
                   lines: Optional[Dict[str, int]] = None, args: Optional[Dict] = None) -> Dict[str, Any]:
         """
         Read a file with optional line targeting.
-        
+
         Args:
             file_path_or_id: File path or ID
             repo_id: Repository ID (optional)
             lines: Optional dict with start_line/end_line for line-specific read
                   Example: {"start_line": 100, "end_line": 121}
             args: Additional args (for backward compatibility)
-        
+
         Returns:
             Dict with file content and metadata
         """
@@ -687,14 +687,14 @@ class Filesystem:
                    repo_id: Optional[str] = None, encoding: str = "utf-8") -> Dict[str, Any]:
         """
         Read specific lines from a file.
-        
+
         Args:
             path: File path (relative to repo if repo_id provided)
             start_line: Starting line number (1-indexed)
             end_line: Ending line number (inclusive, default: all lines from start)
             repo_id: Repository ID (optional)
             encoding: File encoding (default: utf-8)
-        
+
         Returns:
             Dict with lines content and metadata
         """
@@ -719,7 +719,7 @@ class Filesystem:
             end_idx = end_line if end_line is None else min(total_lines, end_line)
 
             selected_lines = all_lines[start_idx:end_idx]
-            lines_data = [{"line_number": i + start_line, "content": line.rstrip('\n\r')} 
+            lines_data = [{"line_number": i + start_line, "content": line.rstrip('\n\r')}
                          for i, line in enumerate(selected_lines)]
 
             return {
@@ -739,7 +739,7 @@ class Filesystem:
                     encoding: str = "utf-8", dry_run: bool = True) -> Dict[str, Any]:
         """
         Write/edit specific lines in a file.
-        
+
         Args:
             path: File path (relative to repo if repo_id provided)
             start_line: Starting line number (1-indexed)
@@ -748,7 +748,7 @@ class Filesystem:
             repo_id: Repository ID (optional)
             encoding: File encoding (default: utf-8)
             dry_run: If True, return what would change without modifying
-        
+
         Returns:
             Dict with operation result and metadata
         """

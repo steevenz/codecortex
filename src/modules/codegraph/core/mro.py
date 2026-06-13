@@ -5,8 +5,8 @@ Ported from GitNexus's mro.ts pipeline phase.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Mro
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import logging
@@ -36,7 +36,7 @@ def c3_linearize(class_name: str, heritage_map: Dict[str, List[str]]) -> List[st
             non_empty = [l for l in lists if l]
             if not non_empty:
                 return result
-            
+
             for lst in non_empty:
                 candidate = lst[0]
                 # Check if candidate appears in the tail of any other list
@@ -55,7 +55,7 @@ def c3_linearize(class_name: str, heritage_map: Dict[str, List[str]]) -> List[st
                 # Inconsistent hierarchy
                 logger.warning(f"Inconsistent MRO hierarchy for {class_name}")
                 return result + [item for sublist in non_empty for item in sublist]
-    
+
     def linearize(cname: str, visited: Set[str]) -> List[str]:
         if cname in visited:
             return [cname]
@@ -65,7 +65,7 @@ def c3_linearize(class_name: str, heritage_map: Dict[str, List[str]]) -> List[st
             return [cname]
         parent_linearizations = [linearize(b, visited) for b in bases if b != cname]
         return [cname] + merge(parent_linearizations + [bases])
-    
+
     return linearize(class_name, set())
 
 def compute_mro(heritage_map: Dict[str, List[str]]) -> Dict[str, List[str]]:

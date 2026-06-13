@@ -4,8 +4,18 @@
   "description": "Code analysis domain — AI-powered code search, audit, analyze, and status with quality gate enforcement",
   "type": "module",
   "dependencies": {
-    "modules": ["coderepository", "codeindex", "codegraph"],
-    "core": ["config", "database", "errors", "logging", "telemetry"]
+    "modules": [
+      "coderepository",
+      "codeindex",
+      "codegraph"
+    ],
+    "core": [
+      "config",
+      "database",
+      "errors",
+      "logging",
+      "telemetry"
+    ]
   },
   "providers": {
     "services": [
@@ -34,6 +44,6 @@
     "name": "Steeven Andrian",
     "email": "steevenz@steevenz.com"
   },
-  "copyright": "Copyright (c) 2026 Aegis Codework",
-  "standard": "Aegis-CrossStack-v1.0"
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v1.0"
 }

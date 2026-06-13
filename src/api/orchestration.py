@@ -6,8 +6,8 @@ ActionRouter — Maps top-level MCP tool actions to underlying domain service ca
 :project: CodeCortex
 :package: Api.Orchestration
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-API-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-API-v1.0
 """
 from __future__ import annotations
 import time
@@ -624,8 +624,21 @@ class ActionRouter:
             self.orchestrator.fs_service.resolve_repo_path(repo_id, path) if repo_id else str(Path(path).resolve())
         )
 
-        # Check for corrupted file and force-remove if needed
-        health_check = self._ensure_healthy_path(resolved)
+        # Check for corrupted file and recover if needed
+        health_check = self._ensure_healthy_path(resolved, action="read")
+        if health_check.get('corrupted_file_removed'):
+            return self._fs_error(
+                f"File was corrupted and has been force-removed: {resolved}. "
+                f"It cannot be read — it must be recreated.",
+                "API_410", status_code=410,
+                recommendations=["Use write action to recreate the file with new content",
+                                 "If the file contained important data, check backup or VCS history"],
+                context={"action": "read", "resolved_path": resolved,
+                         "corrupted_file_removed": True},
+            )
+        if health_check.get('restored_from_repo'):
+            # File was corrupted but restored from repo — proceed to read
+            pass
         if not health_check['ok']:
             return self._fs_error(
                 health_check['error'],
@@ -770,12 +783,51 @@ class ActionRouter:
             "missing_parents": missing_parents,
         }
 
-    def _ensure_healthy_path(self, resolved_path: str) -> Dict[str, Any]:
+    def _try_restore_from_repository(self, resolved_path: str) -> Optional[Dict[str, Any]]:
+        """Try to restore a corrupted file from git or SVN repository.
+
+        Returns {'ok': True, 'method': ...} on restore success,
+                None if not in any repository,
+                {'ok': False, ...} if restore attempted but failed.
+        """
+        from pathlib import Path
+        from src.modules.filesystem.adapters.git import DiskGit
+        from src.modules.filesystem.adapters.svn import DiskSvn
+
+        resolved = Path(resolved_path)
+
+        # Try git
+        git_root = DiskGit.find_root(resolved)
+        if git_root:
+            tracked = DiskGit.is_tracked(git_root, resolved)
+            if tracked:
+                result = DiskGit.restore_file(git_root, resolved)
+                if result.get('ok'):
+                    return {'ok': True, 'method': f"git_{result.get('method', 'checkout')}",
+                            'source': git_root}
+            elif not tracked and DiskGit.is_git_available():
+                return None  # In a git repo but not tracked → can't restore
+
+        # Try SVN
+        svn_root = DiskSvn.find_root(resolved)
+        if svn_root:
+            tracked = DiskSvn.is_tracked(svn_root, resolved)
+            if tracked:
+                result = DiskSvn.restore_file(svn_root, resolved)
+                if result.get('ok'):
+                    return {'ok': True, 'method': 'svn_revert', 'source': svn_root}
+
+        return None  # Not in any VCS
+
+    def _ensure_healthy_path(self, resolved_path: str, action: str = "write") -> Dict[str, Any]:
         """Verify path health and handle corrupted files on Windows.
 
         On Windows, corrupted files (WinError 1392) can cause os.path.exists
-        and other stat operations to raise OSError. This method force-removes
-        corrupted files via shell so the operation can proceed.
+        and other stat operations to raise OSError.
+
+        Recovery strategy (in order):
+        1. Detect if file is in git/SVN repository → try restore from VCS
+        2. If restore fails or not in repo → force-remove corrupted file via shell
 
         Returns {'ok': True} or dict with error details.
         """
@@ -796,34 +848,104 @@ class ActionRouter:
                     'context': {'resolved_path': resolved_path, 'error_type': 'permission'}}
         except OSError as e:
             # File exists but is corrupted/unreadable (WinError 1392)
+            # PHASE 1: Try to restore from repository first
+            restore_result = self._try_restore_from_repository(resolved_path)
+            if restore_result:
+                if restore_result.get('ok'):
+                    return {'ok': True, 'restored_from_repo': True,
+                            'method': restore_result['method'],
+                            'source': str(restore_result['source'])}
+                # Repository restore was attempted but failed
+                return {
+                    'ok': False,
+                    'error': (
+                        f"File is corrupted and repository restore failed: {resolved_path}. "
+                        f"Error: {restore_result.get('error', 'unknown')}"
+                    ),
+                    'code': 'API_500', 'status': 500,
+                    'recommendations': [
+                        'File is corrupted and git/SVN restore also failed',
+                        'Run git/svn commands manually to diagnose the repository state',
+                        'If the file is not important, delete it manually via File Explorer',
+                    ],
+                    'context': {
+                        'action': action, 'resolved_path': resolved_path,
+                        'restore_error': restore_result.get('error', ''),
+                        'restore_method': 'git/svn',
+                    },
+                }
+
+            # PHASE 2: Not in any repo or restore failed — force-remove corrupted file
             return self._force_remove_corrupted(resolved_path)
         else:
             return {'ok': True}
 
     def _force_remove_corrupted(self, resolved_path: str) -> Dict[str, Any]:
-        """Force-remove a corrupted file via shell command."""
+        """Force-remove a corrupted file via shell commands.
+
+        Uses multi-strategy approach:
+        1. cmd /c del /f /q — fast, works for most corrupted files
+        2. PowerShell Remove-Item -Force — handles locked/stubborn files (fallback)
+        """
         import subprocess
-        try:
-            shell_cmd = f'cmd /c "del /f /q \"{resolved_path}\""'
-            result = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
-                return {'ok': True, 'corrupted_file_removed': True}
-            else:
-                return {'ok': False,
-                        'error': f"Corrupted file could not be removed: {resolved_path}. "
-                                 f"Shell error: {result.stderr.strip()}",
-                        'code': 'API_500', 'status': 500,
-                        'recommendations': ['Delete the file manually',
-                                            'Run chkdsk on the drive to repair filesystem errors'],
-                        'context': {'resolved_path': resolved_path,
-                                    'shell_error': result.stderr.strip()}}
-        except Exception as shell_err:
-            return {'ok': False,
-                    'error': f"Corrupted file could not be removed via shell: {shell_err}",
-                    'code': 'API_500', 'status': 500,
-                    'recommendations': ['Delete the file manually',
-                                        'Run the IDE/terminal as Administrator to get file access'],
-                    'context': {'resolved_path': resolved_path, 'shell_error': str(shell_err)}}
+        import os
+
+        strategies = [
+            {
+                'name': 'cmd del',
+                'cmd': f'cmd /c "del /f /q \"{resolved_path}\""',
+                'shell': True,
+            },
+            {
+                'name': 'PowerShell Remove-Item',
+                'cmd': [
+                    'powershell', '-Command',
+                    f'Remove-Item -LiteralPath "{resolved_path}" -Force -ErrorAction Stop',
+                ],
+                'shell': False,
+            },
+        ]
+
+        last_error = ""
+        for strategy in strategies:
+            try:
+                result = subprocess.run(
+                    strategy['cmd'],
+                    shell=strategy['shell'],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                # Verify the file is actually gone
+                if result.returncode == 0 and not os.path.exists(resolved_path):
+                    return {'ok': True, 'corrupted_file_removed': True}
+                if result.returncode != 0:
+                    last_error = f"{strategy['name']}: {result.stderr.strip() or result.stdout.strip()}"
+            except subprocess.TimeoutExpired:
+                last_error = f"{strategy['name']}: timeout after 10s"
+            except Exception as e:
+                last_error = f"{strategy['name']}: {e}"
+
+        # All strategies failed
+        return {
+            'ok': False,
+            'error': (
+                f"Corrupted file could not be removed after trying all strategies: "
+                f"{resolved_path}. Last error: {last_error}"
+            ),
+            'code': 'API_500', 'status': 500,
+            'recommendations': [
+                'Delete the file manually via File Explorer or terminal:',
+                f'  del /f /q "{resolved_path}"',
+                'If that fails, run chkdsk on the drive to repair filesystem errors',
+                'Restart your computer — some file locks persist until reboot',
+            ],
+            'context': {
+                'resolved_path': resolved_path,
+                'last_error': last_error,
+                'manual_command': f'del /f /q "{resolved_path}"',
+            },
+        }
 
     async def _fs_write(self, path: Optional[str], repo_id: Optional[str], args: Dict) -> Dict:
         import os
@@ -866,9 +988,15 @@ class ActionRouter:
                 context={"action": "write", "provided_path": path, "error": str(_res_err)},
             )
 
-        # Check for corrupted file and force-remove if needed
-        write_check = self._ensure_healthy_path(resolved)
-        if not write_check['ok']:
+        # Check for corrupted file and recover if needed
+        write_check = self._ensure_healthy_path(resolved, action="write")
+        if write_check.get('restored_from_repo'):
+            # File was corrupted but restored from repo — proceed to overwrite
+            pass
+        elif write_check.get('corrupted_file_removed'):
+            # File was corrupted and force-removed — proceed to create new file
+            pass
+        elif not write_check['ok']:
             return self._fs_error(
                 write_check['error'],
                 write_check['code'], status_code=write_check['status'],
@@ -1100,8 +1228,11 @@ class ActionRouter:
         dry_run = args.get("dry_run", False)
         request_id = new_request_id()
 
-        # Check for corrupted file and force-remove if needed
-        health_check = self._ensure_healthy_path(resolved)
+        # Check for corrupted file and recover if needed
+        health_check = self._ensure_healthy_path(resolved, action="delete")
+        if health_check.get('corrupted_file_removed'):
+            return self._ok("Deleted (corrupted file force-removed)", {"path": resolved},
+                            request_id=request_id)
         if not health_check['ok']:
             return self._fs_error(
                 health_check['error'],
@@ -1109,7 +1240,6 @@ class ActionRouter:
                 recommendations=health_check['recommendations'],
                 context={'action': 'delete', **health_check.get('context', {})},
             )
-        # Note: if corrupted_file_removed is True, the file is already deleted
 
         # Check existence first
         try:
@@ -2129,11 +2259,11 @@ class ActionRouter:
 
     async def _cb_graph(self, repo_id: Optional[str], repo_path: Optional[str],
                         args: Dict) -> Dict:
-        from ..modules.codegraph.services.aegis import AEGIS
-        from ..modules.codegraph.services.search import AEGISGraphSearch
-        from ..modules.codegraph.services.audit import AEGISGraphAudit
-        from ..modules.codegraph.services.trace import AEGISGraphTrace
-        from ..modules.codegraph.services.relationship import AEGISGraphRelationship
+        from ..modules.codegraph.services.coddy import CODDY
+        from ..modules.codegraph.services.search import CODDYGraphSearch
+        from ..modules.codegraph.services.audit import CODDYGraphAudit
+        from ..modules.codegraph.services.trace import CODDYGraphTrace
+        from ..modules.codegraph.services.relationship import CODDYGraphRelationship
 
         sub_action = args.get("sub_action", "build")
         request_id = new_request_id()
@@ -2150,7 +2280,7 @@ class ActionRouter:
             if sub_action == "build":
                 if not rp:
                     return self._err("repo_path required for graph build", "API_400")
-                builder = AEGIS(self.orchestrator.db, graph_mgr)
+                builder = CODDY(self.orchestrator.db, graph_mgr)
                 result = await builder.build(
                     repo_path=rp, repo_id=rid,
                     detect_modular=args.get("detect_modular", True),
@@ -2173,7 +2303,7 @@ class ActionRouter:
                         target, min(args.get("max_depth", 10), 10),
                     )
                 elif query_type == "trace_path":
-                    tracer = AEGISGraphTrace(self.orchestrator.db, graph_mgr)
+                    tracer = CODDYGraphTrace(self.orchestrator.db, graph_mgr)
                     result = await tracer.trace(
                         repo_id=rid, query_type="trace_path",
                         target_node=target,
@@ -2182,7 +2312,7 @@ class ActionRouter:
                         limit=args.get("limit", 20),
                     )
                 else:
-                    tracer = AEGISGraphTrace(self.orchestrator.db, graph_mgr)
+                    tracer = CODDYGraphTrace(self.orchestrator.db, graph_mgr)
                     result = await tracer.trace(
                         repo_id=rid,
                         query_type=f"find_{query_type}",
@@ -2193,7 +2323,7 @@ class ActionRouter:
                 return self._ok("Graph query complete", result, request_id=request_id)
 
             elif sub_action == "audit":
-                auditor = AEGISGraphAudit(self.orchestrator.db, graph_mgr)
+                auditor = CODDYGraphAudit(self.orchestrator.db, graph_mgr)
                 result = await auditor.audit(
                     repo_id=rid,
                     max_depth=5,
@@ -2207,7 +2337,7 @@ class ActionRouter:
                     rid, rp, args.get("limit", 50),
                 ) if rid and rp else []
                 return self._ok("Graph audit complete", {
-                    "aegis_audit": result,
+                    "CODDY_audit": result,
                     "god_nodes": god_nodes,
                     "dead_code": dead_code,
                 }, request_id=request_id)
@@ -2216,7 +2346,7 @@ class ActionRouter:
                 target_node = args.get("target_node")
                 if not target_node:
                     return self._err("args.target_node required for relationships", "API_400")
-                rel = AEGISGraphRelationship(self.orchestrator.db, graph_mgr)
+                rel = CODDYGraphRelationship(self.orchestrator.db, graph_mgr)
                 result = await rel.explore(
                     repo_id=rid, target_node=target_node,
                     relation_type=args.get("relation_type"),

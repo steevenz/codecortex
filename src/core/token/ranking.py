@@ -7,8 +7,8 @@ Enables: context ranking (5.4), relevance scoring, result pruning.
 :project: CodeCortex
 :package: Core.Token.Ranking
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

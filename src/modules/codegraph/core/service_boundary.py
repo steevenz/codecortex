@@ -6,8 +6,8 @@ Ported from GitNexus's group/ system.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Service_boundary
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import re
@@ -63,27 +63,27 @@ class ServiceBoundaryDetector:
     Detects microservice boundaries by analyzing project structure
     and communication patterns (HTTP, gRPC, Thrift, topics).
     """
-    
+
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
         self.services: List[ServiceBoundary] = []
-    
+
     def detect_all(self) -> List[ServiceBoundary]:
         """Detect all service boundaries in the repository."""
         self.services = []
-        
+
         # 1. Detect by project markers
         self._detect_by_markers()
-        
+
         # 2. Detect by HTTP routes
         self._detect_by_routes()
-        
+
         # 3. Score and rank
         for svc in self.services:
             svc.confidence = self._calculate_confidence(svc)
-        
+
         return sorted(self.services, key=lambda s: s.confidence, reverse=True)
-    
+
     def _detect_by_markers(self):
         """Find service boundaries using build config files."""
         for marker in SERVICE_MARKERS:
@@ -92,7 +92,7 @@ class ServiceBoundaryDetector:
                     rel = path.relative_to(self.repo_root)
                     parts = list(rel.parts[:-1]) if len(rel.parts) > 1 else []
                     service_name = parts[-1] if parts else self.repo_root.name
-                    
+
                     existing = [s for s in self.services if s.service_name == service_name]
                     if existing:
                         existing[0].markers.append(str(rel))
@@ -102,7 +102,7 @@ class ServiceBoundaryDetector:
                             service_name=service_name,
                             markers=[str(rel)]
                         ))
-    
+
     def _detect_by_routes(self):
         """Find HTTP routes in source files."""
         import os
@@ -113,7 +113,7 @@ class ServiceBoundaryDetector:
                     try:
                         content = fpath.read_text(encoding="utf-8", errors="ignore")
                         ext = fname.split(".")[-1]
-                        
+
                         # Check HTTP patterns
                         lang = "python" if ext == "py" else "javascript" if ext in ("js", "ts") else "go" if ext == "go" else "java" if ext in ("java", "kt") else None
                         if lang:
@@ -133,7 +133,7 @@ class ServiceBoundaryDetector:
                                         )
                                         self.services.append(new_svc)
                                     break
-                        
+
                         # Check gRPC patterns
                         for pat in GRPC_PATTERNS:
                             if re.search(pat, content):
@@ -153,7 +153,7 @@ class ServiceBoundaryDetector:
                                 break
                     except Exception:
                         pass
-    
+
     def _calculate_confidence(self, svc: ServiceBoundary) -> float:
         score = 0.0
         if len(svc.markers) >= 2:

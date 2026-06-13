@@ -8,8 +8,8 @@ Provides structured context for AI coders: "this project follows DDD",
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Golden_knowledge
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from __future__ import annotations

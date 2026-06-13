@@ -4,8 +4,8 @@ Swift tree-sitter parser — full implementation with protocols, extensions, clo
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Swift
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,17 +17,17 @@ SWIFT_QUERIES = {
             name: (identifier) @name
             parameters: (parameter_clause) @params
         ) @function_node
-        
+
         (method_declaration
             name: (identifier) @name
             parameters: (parameter_clause) @params
         ) @function_node
-        
+
         (initializer_declaration
             name: (identifier) @name
             parameters: (parameter_clause) @params
         ) @function_node
-        
+
         (closure_expression
             parameters: (parameter_clause) @params
         ) @function_node
@@ -51,7 +51,7 @@ SWIFT_QUERIES = {
         (variable_declaration
             pattern: (pattern) @name
         ) @variable
-        
+
         (property_declaration
             name: (pattern) @name
         ) @variable
@@ -60,13 +60,13 @@ SWIFT_QUERIES = {
         (call_expression
             function: (identifier) @name
         ) @call_node
-        
+
         (call_expression
             function: (member_expression
                 name: (field_identifier) @name
             )
         ) @call_node
-        
+
         (call_expression
             function: (member_expression
                 name: (identifier) @name

@@ -4,8 +4,8 @@ Discovery.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Mixins.Discovery
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from __future__ import annotations
@@ -137,7 +137,7 @@ class ArchitecturalDiscoveryMixin:
                         line = line.strip()
                         if line and not line.startswith("#"):
                             patterns.append((current, line))
-            
+
             if (current / ".git").exists():
                 break
             parent = current.parent
@@ -202,7 +202,7 @@ class ArchitecturalDiscoveryMixin:
 
         for dirpath, dirnames, filenames in os.walk(root, followlinks=follow_symlinks):
             dp = Path(dirpath)
-            
+
             # Prune noise dirs in-place
             dirnames[:] = [
                 d for d in dirnames
@@ -210,7 +210,7 @@ class ArchitecturalDiscoveryMixin:
                 and not self._is_noise_dir(d)
                 and not self._is_ignored(dp / d, root, ignore_patterns)
             ]
-            
+
             for fname in filenames:
                 if fname in _SKIP_FILES or fname.startswith("."):
                     continue

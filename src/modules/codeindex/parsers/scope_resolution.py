@@ -12,8 +12,8 @@ Pipeline phases:
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Scope_resolution
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 import logging
@@ -79,11 +79,11 @@ class Reference:
 class ScopeTree:
     """
     Hierarchical scope tree for a single file.
-    
+
     Maintains parent-child relationships between scopes
     and maps symbol names to their definitions within each scope.
     """
-    
+
     def __init__(self, file_path: str):
         self.file_path = file_path
         self.root: Optional[ScopeNode] = None
@@ -93,11 +93,11 @@ class ScopeTree:
         self._node_counter = 0
         self._sym_counter = 0
         self._ref_counter = 0
-    
+
     def _next_id(self, prefix: str) -> str:
         self._node_counter += 1
         return f"{prefix}_{self.file_path}_{self._node_counter}"
-    
+
     def add_scope(self, kind: ScopeKind, name: str, range: SourceRange,
                   parent_id: Optional[str] = None) -> str:
         sid = self._next_id("scope")
@@ -111,7 +111,7 @@ class ScopeTree:
         if self.root is None:
             self.root = node
         return sid
-    
+
     def add_symbol(self, name: str, kind: str, scope_id: str,
                    range: SourceRange, is_exported: bool = False) -> str:
         sid = self._next_id("sym")
@@ -126,7 +126,7 @@ class ScopeTree:
             names = self._nodes[scope_id].symbols.setdefault(name, [])
             names.append(sid)
         return sid
-    
+
     def add_reference(self, name: str, scope_id: str, range: SourceRange) -> str:
         rid = self._next_id("ref")
         ref = Reference(
@@ -135,7 +135,7 @@ class ScopeTree:
         )
         self._references[rid] = ref
         return rid
-    
+
     def _build_full_name(self, name: str, scope_id: str) -> str:
         parts = [name]
         seen = set()
@@ -148,16 +148,16 @@ class ScopeTree:
                 parts.insert(0, current.name)
             current = self._nodes.get(current.parent_id) if current.parent_id else None
         return ".".join(parts)
-    
+
     def get_scope(self, scope_id: str) -> Optional[ScopeNode]:
         return self._nodes.get(scope_id)
-    
+
     def get_symbol(self, sym_id: str) -> Optional[SymbolDef]:
         return self._symbols.get(sym_id)
-    
+
     def get_reference(self, ref_id: str) -> Optional[Reference]:
         return self._references.get(ref_id)
-    
+
     def lookup_in_scope(self, name: str, scope_id: str) -> List[str]:
         """Look up a symbol by name in a scope (walks up parent chain)."""
         current = self._nodes.get(scope_id)
@@ -169,17 +169,17 @@ class ScopeTree:
             else:
                 break
         return []
-    
+
     def all_symbols(self) -> List[SymbolDef]:
         return list(self._symbols.values())
-    
+
     def all_references(self) -> List[Reference]:
         return list(self._references.values())
 
     @property
     def symbol_count(self) -> int:
         return len(self._symbols)
-    
+
     @property
     def reference_count(self) -> int:
         return len(self._references)
@@ -187,19 +187,19 @@ class ScopeTree:
 class WorkspaceIndex:
     """
     Cross-file index of all scopes, symbols, and imports.
-    
+
     Maps:
     - Module name -> ScopeTree
     - Symbol name -> [(file_path, def_id)]
     - Import -> resolved target
     """
-    
+
     def __init__(self):
         self._files: Dict[str, ScopeTree] = {}
         self._global_sym_index: Dict[str, List[Tuple[str, str]]] = {}
         self._import_map: Dict[str, Dict[str, str]] = {}  # file -> {imported_name -> target_file}
         self._export_index: Dict[str, List[Tuple[str, str, str]]] = {}  # file -> [(name, def_id, kind)]
-    
+
     def add_file(self, tree: ScopeTree):
         self._files[tree.file_path] = tree
         for sym in tree.all_symbols():
@@ -208,48 +208,48 @@ class WorkspaceIndex:
                 self._export_index.setdefault(tree.file_path, []).append(
                     (sym.name, sym.id, sym.kind)
                 )
-    
+
     def register_import(self, source_file: str, imported_name: str, target_file: str):
         self._import_map.setdefault(source_file, {})[imported_name] = target_file
-    
+
     def resolve_name(self, name: str, file_path: str) -> List[Tuple[str, str, float]]:
         """
         Resolve a name to (file_path, def_id, confidence) tuples.
         Checks: local scope -> imports -> global index.
         """
         results: List[Tuple[str, str, float]] = []
-        
+
         # 1. Check local scope
         tree = self._files.get(file_path)
         if tree and tree.root:
             ids = tree.lookup_in_scope(name, tree.root.id)
             for sid in ids:
                 results.append((file_path, sid, 1.0))
-        
+
         # 2. Check imports
         if file_path in self._import_map and name in self._import_map[file_path]:
             target = self._import_map[file_path][name]
             results.append((target, "", 0.8))
-        
+
         # 3. Check global index
         if name in self._global_sym_index:
             for fp, sid in self._global_sym_index[name]:
                 if fp != file_path:
                     results.append((fp, sid, 0.6))
-        
+
         return results
-    
+
     def get_exported_symbols(self, file_path: str) -> List[Tuple[str, str, str]]:
         return self._export_index.get(file_path, [])
-    
+
     @property
     def file_count(self) -> int:
         return len(self._files)
-    
+
     @property
     def total_symbols(self) -> int:
         return sum(t.symbol_count for t in self._files.values())
-    
+
     @property
     def total_references(self) -> int:
         return sum(t.reference_count for t in self._files.values())
@@ -257,10 +257,10 @@ class WorkspaceIndex:
 class ScopeExtractor:
     """
     Phase 1: Extract scopes and symbols from parsed files.
-    
+
     Processes TreeSitter parse results and builds ScopeTree for each file.
     """
-    
+
     def _parsed_to_symbols(self, file_path: str, parsed: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Convert tree-sitter flat parsed data to hierarchical symbol list."""
         symbols = parsed.get("symbols", [])
@@ -320,7 +320,7 @@ class ScopeExtractor:
             ScopeKind.MODULE, Path(file_path).stem,
             SourceRange(1, 0, 100, 0)
         )
-        
+
         for sym in symbols:
             scope_id = module_id
             sym_type = sym.get("type", "unknown")
@@ -329,7 +329,7 @@ class ScopeExtractor:
                 sym.get("start_line", 1), 0,
                 sym.get("end_line", 1), 0
             )
-            
+
             if sym_type in ("class", "function", "method"):
                 child_id = tree.add_scope(
                     ScopeKind.CLASS if sym_type == "class" else ScopeKind.FUNCTION,
@@ -342,23 +342,23 @@ class ScopeExtractor:
                     tree.add_symbol(child.get("name", ""), child.get("type", "method"), child_id, crange)
             else:
                 tree.add_symbol(sym_name, sym_type, scope_id, sym_range)
-        
+
         return tree
 
 class ReferenceResolver:
     """
     Multi-pass reference resolver.
-    
+
     Pass 1: Resolve local references (within same file)
     Pass 2: Resolve cross-file references (via imports)
     Pass 3: Resolve by name matching (global index fallback)
     """
-    
+
     def __init__(self, workspace: WorkspaceIndex):
         self.workspace = workspace
         self.resolved_count = 0
         self.unresolved_count = 0
-    
+
     def resolve_all(self) -> Dict[str, int]:
         """Run all resolution passes. Returns stats."""
         total = 0
@@ -370,14 +370,14 @@ class ReferenceResolver:
                 else:
                     self.unresolved_count += 1
                 total += 1
-        
+
         return {
             "total_references": total,
             "resolved": self.resolved_count,
             "unresolved": self.unresolved_count,
             "resolution_rate": round(self.resolved_count / max(total, 1) * 100, 1)
         }
-    
+
     def _resolve_single(self, ref: Reference, file_path: str) -> bool:
         """Attempt to resolve a single reference through multiple passes."""
         # Pass 1: Local scope resolution
@@ -389,7 +389,7 @@ class ReferenceResolver:
                 ref.confidence = 1.0
                 ref.evidence.append("local_scope")
                 return True
-        
+
         # Pass 2: Import resolution
         candidates = self.workspace.resolve_name(ref.name, file_path)
         for fp, sid, confidence in candidates:
@@ -398,18 +398,18 @@ class ReferenceResolver:
                 ref.confidence = confidence
                 ref.evidence.append(f"cross_file:{fp}")
                 return True
-        
+
         return False
 
 def build_workspace_index(files: List[Dict[str, Any]]) -> WorkspaceIndex:
     """
     Build a complete workspace index from parsed files.
-    
+
     Each file dict should have: path, language, parsed (result from TreeSitterParser.parse)
     """
     extractor = ScopeExtractor()
     workspace = WorkspaceIndex()
-    
+
     for f in files:
         file_path = f.get("path", "")
         parsed = f.get("parsed", {})
@@ -417,7 +417,7 @@ def build_workspace_index(files: List[Dict[str, Any]]) -> WorkspaceIndex:
             tree = extractor.build_scope_tree(file_path, parsed)
             workspace.add_file(tree)
             logger.info(f"Scope tree built: {file_path} ({tree.symbol_count} symbols)")
-    
+
     return workspace
 
 def resolve_workspace_references(workspace: WorkspaceIndex) -> Dict[str, int]:

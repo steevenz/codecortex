@@ -1,8 +1,8 @@
 # CodeGraph Domain - Gap Analysis Report
 
-**Date:** 2026-05-29  
-**Domain:** CodeGraph  
-**Scope:** MCP Tools and CLI Commands  
+**Date:** 2026-05-29
+**Domain:** CodeGraph
+**Scope:** MCP Tools and CLI Commands
 **Source of Truth:** Source Code Implementation
 
 ---
@@ -50,7 +50,7 @@ The CodeGraph domain has undergone significant refactoring that consolidated 11 
 
 ### CLI Commands Inventory
 
-**Documented:** None found in documentation  
+**Documented:** None found in documentation
 **Implemented:** None found in CLI - CodeGraph has **no CLI commands** (only MCP tools)
 
 ---
@@ -84,17 +84,17 @@ The CodeGraph domain has undergone significant refactoring that consolidated 11 
 
 | Tool | Parameters | Operations | Response Format | Adapters |
 |------|------------|------------|-----------------|----------|
-| graph_search | 11 parameters | 5 actions (symbol, relation, trace_flow, modular, semantic) | api_response() | AEGISGraphSearch |
-| graph_query | 8 parameters | 12 query types (including trace_path, trace_flow) | api_response() | AEGISGraphTrace |
-| graph_audit | 6 parameters | 7 audit types | api_response() | AEGISGraphAudit |
-| graph_build | 8 parameters | build with modular detection | api_response() | AEGIS |
-| graph_relationship | 9 parameters | explore relationships | api_response() | AEGISGraphRelationship |
-| graph_refactor | 6 parameters | impact/preview/apply | api_response() | AEGISGraphRefactor |
+| graph_search | 11 parameters | 5 actions (symbol, relation, trace_flow, modular, semantic) | api_response() | CODDYGraphSearch |
+| graph_query | 8 parameters | 12 query types (including trace_path, trace_flow) | api_response() | CODDYGraphTrace |
+| graph_audit | 6 parameters | 7 audit types | api_response() | CODDYGraphAudit |
+| graph_build | 8 parameters | build with modular detection | api_response() | CODDY |
+| graph_relationship | 9 parameters | explore relationships | api_response() | CODDYGraphRelationship |
+| graph_refactor | 6 parameters | impact/preview/apply | api_response() | CODDYGraphRefactor |
 
 ### Implementation Quality Check
 
 ✅ **Strengths:**
-- All tools use proper adapter pattern (AEGIS* services)
+- All tools use proper adapter pattern (CODDY* services)
 - Consistent error handling with ApiError
 - Proper parameter validation
 - Pagination support (cursor, limit)
@@ -168,13 +168,13 @@ The CodeGraph domain has undergone significant refactoring that consolidated 11 
 
 **Old Documentation:**
 ```
-graph_find_symbols, graph_query, graph_find_related, 
+graph_find_symbols, graph_query, graph_find_related,
 graph_build, graph_trace_flow, arch_analyze, arch_audit
 ```
 
 **Current Implementation:**
 ```
-graph_search, graph_query, graph_audit, 
+graph_search, graph_query, graph_audit,
 graph_build, graph_relationship, graph_refactor
 ```
 

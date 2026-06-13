@@ -1,4 +1,4 @@
-# CodeCortex for Gemini CLI
+﻿# CodeCortex for Gemini CLI
 
 ## Prerequisites
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed
@@ -13,8 +13,8 @@ Add to Gemini CLI config:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "gemini-cli"]
     }
   }
 }

@@ -4,7 +4,7 @@ title: WFK_MNR_001 — Mono-Repository Analysis
 workflow_id: WFK_MNR_001
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_MNR_001: Mono-Repository Analysis
@@ -13,7 +13,7 @@ standard: Aegis-Workflow-v2.0
 > **Trigger**: User works with a mono-repo (pnpm workspace, Nx, Turborepo, Lerna, Yarn workspaces, npm workspaces).
 > **Time**: 2-8 minutes (depends on workspace size).
 > **Cost**: Medium (indexing + workspace graph + package dependency analysis).
-> **Codification**: Aegis-Architecture-v1.0 §5 — `WFK_MNR_001`
+> **Codification**: CODDY-Architecture-v1.0 §5 — `WFK_MNR_001`
 
 ---
 
@@ -266,7 +266,7 @@ MCP: codecortex:codebase
   }
 ```
 
-**AI Logic**: 
+**AI Logic**:
 1. Identify changed files from `repo:sync` output.
 2. Map files → packages (via workspace structure).
 3. Run `cb:graph:query` to find all dependent packages.

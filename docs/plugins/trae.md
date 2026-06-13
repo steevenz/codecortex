@@ -5,18 +5,27 @@ Trae IDE (and SOLO/Web version) supports MCP server config + project rules.
 ## Installation
 
 ### MCP Server
-Trae reads MCP config from `.trae/mcp.json` or `.trae/mcp_npx.json`:
+
+Trae reads MCP config from `.trae/mcp.json`:
+
+> **IMPORTANT**: All IDE configs must point to **Node.js** (`index.cjs`), not Python. See [Setup Guide](../guides/how-to-setup-mcp.md).
 
 ```json
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": [
+        "C:/Users/steevenz/MCP/mcp-codecortex/scripts/server/js/index.cjs",
+        "--ide",
+        "trae"
+      ]
     }
   }
 }
 ```
+
+Replace the path with your actual CodeCortex installation path.
 
 ### System Prompt & Rules
 Trae auto-loads files from `.trae/`:
@@ -31,7 +40,7 @@ For SOLO Trae (web-based), the configuration format is **the same** — copy `.t
 
 ```
 .trae/
-├── mcp.json                  # MCP server config (uv)
+├── mcp.json                  # MCP server config (node)
 ├── mcp_npx.json              # Alternate MCP config (npx)
 ├── system_prompt.md          # CodeCortex usage policy
 ├── project_rules.md          # CodeCortex rules

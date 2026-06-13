@@ -117,7 +117,7 @@ def test_ga_init_repo():
             pass
 
 # ═══════════════════════════════════════════════════════════════════
-# GIT HISTORY  
+# GIT HISTORY
 # ═══════════════════════════════════════════════════════════════════
 
 def test_gh_real():
@@ -153,16 +153,16 @@ def test_gh_real():
 # ═══════════════════════════════════════════════════════════════════
 
 def test_search_service():
-    from src.modules.codegraph.services.search import AEGISGraphSearch
+    from src.modules.codegraph.services.search import CODDYGraphSearch
     from src.core.database import DatabaseManager
     with tempfile.TemporaryDirectory() as tmpdir:
         db = DatabaseManager(str(Path(tmpdir) / "test.db"))
-        svc = AEGISGraphSearch(db)
+        svc = CODDYGraphSearch(db)
         assert svc is not None
         db.close()
 
 # ═══════════════════════════════════════════════════════════════════
-# ConfigParser: individual methods  
+# ConfigParser: individual methods
 # ═══════════════════════════════════════════════════════════════════
 
 def test_cp_individual():

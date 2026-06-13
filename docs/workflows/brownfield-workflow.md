@@ -4,7 +4,7 @@ title: WFK_LGY_001-005 — Brownfield Code Modernization
 workflow_id: WFK_LGY_001, WFK_LGY_002, WFK_LGY_003, WFK_LGY_004, WFK_LGY_005
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_LGY_001-005: Brownfield Code Modernization
@@ -14,7 +14,7 @@ standard: Aegis-Workflow-v2.0
 > **Time**: 2-15 minutes (depends on repo size and workflow depth).
 > **Cost**: Medium-to-high (full indexing + graph build + audits).
 > **Research Basis**: Brownfield AI Development best practices (Tests as Boundaries, Documentation as Context, Incrementalism as Risk Management).
-> **Codification**: Aegis-Architecture-v1.0 §5
+> **Codification**: CODDY-Architecture-v1.0 §5
 
 ---
 

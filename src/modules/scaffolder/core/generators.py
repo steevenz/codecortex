@@ -4,8 +4,8 @@ Content generators – produces .gitignore, .env, pyproject.toml, README, Docker
 :project: CodeCortex
 :package: Modules.Scaffolder.Core.Generators
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ def gitignore(project_type: ProjectCategory) -> str:
         .env
         !.env.example
     """).lstrip()
-    
+
     # Add type-specific ignores
     if project_type == ProjectCategory.DATA_SCIENCE:
         base += textwrap.dedent("""
@@ -95,11 +95,11 @@ def gitignore(project_type: ProjectCategory) -> str:
         base += textwrap.dedent("""
             # Uploads
             uploads/
-            
+
             # Static files
             staticfiles/
         """)
-    
+
     return base
 
 def env_boilerplate(project_type: ProjectCategory) -> str:
@@ -111,7 +111,7 @@ def env_boilerplate(project_type: ProjectCategory) -> str:
         SECRET_KEY=change-me-to-a-secure-random-key
         PYTHONPATH=src
     """).lstrip()
-    
+
     if project_type == ProjectCategory.DATA_SCIENCE:
         base += textwrap.dedent("""
             # Data Science settings
@@ -126,7 +126,7 @@ def env_boilerplate(project_type: ProjectCategory) -> str:
             DATABASE_URL=sqlite:///db.sqlite3
             CORS_ORIGINS=["http://localhost:3000", "http://127.0.0.1:3000"]
         """)
-    
+
     return base
 
 def pyproject(author: str, email: str, project_name: str, project_type: ProjectCategory, project_directory: str = None) -> str:
@@ -136,7 +136,7 @@ def pyproject(author: str, email: str, project_name: str, project_type: ProjectC
         'pyyaml>=6.0',
         'python-dotenv>=1.0',
     ]
-    
+
     if project_type == ProjectCategory.DATA_SCIENCE:
         base_deps.extend([
             'numpy>=1.24',
@@ -162,15 +162,15 @@ def pyproject(author: str, email: str, project_name: str, project_type: ProjectC
             'schedule>=1.2',
             'requests>=2.31',
         ])
-    
+
     deps_str = "\n".join([f'        "{dep}",' for dep in base_deps])
-    
+
     # Use project_directory for script name (snake_case) or fallback to project_name converted to snake_case
     script_name = project_directory if project_directory else project_name.lower().replace(' ', '_')
-    
+
     # Convert project_directory to kebab-case for PEP 508 compliance
     pep508_name = project_directory.replace('_', '-') if project_directory else project_name.lower().replace(' ', '-')
-    
+
     return textwrap.dedent(f"""
         [build-system]
         requires = ["setuptools>=61.0", "wheel"]
@@ -212,7 +212,7 @@ def readme(project_name: str, author: str, email: str, project_type: ProjectCate
         "![Status](https://img.shields.io/badge/status-active-success.svg)",
         "![GitHub](https://img.shields.io/badge/license-MIT-blue.svg)",
     ]
-    
+
     if project_type == ProjectCategory.DATA_SCIENCE:
         badges.extend([
             "![Python](https://img.shields.io/badge/python-3.10%2B-blue)",
@@ -224,9 +224,9 @@ def readme(project_name: str, author: str, email: str, project_type: ProjectCate
             "![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green)",
             "![Python](https://img.shields.io/badge/python-3.10%2B-blue)",
         ])
-    
+
     badges_str = "\n".join(badges)
-    
+
     project_type_desc = {
         ProjectCategory.STANDARD: "A standard project with a professional structure.",
         ProjectCategory.DATA_SCIENCE: "A data science project with tools for analysis and machine learning.",
@@ -234,7 +234,7 @@ def readme(project_name: str, author: str, email: str, project_type: ProjectCate
         ProjectCategory.CLI_TOOL: "A command-line interface tool.",
         ProjectCategory.AUTOMATION: "An automation script project.",
     }
-    
+
     return textwrap.dedent(f"""
         # {project_name}
 
@@ -327,18 +327,18 @@ def requirements(project_type: ProjectCategory) -> str:
     """Generate requirements.txt content."""
     from .config import get_config_manager
     config_manager = get_config_manager()
-    
+
     # Get dependencies from configuration
     project_type_str = project_type.name.lower()
     project_deps = config_manager.get_dependencies_for_project_type(project_type_str)
-    
+
     if project_deps:
         # Use dependencies from config
         requirements_list = []
         requirements_list.append(f"# {project_type.value} dependencies")
         requirements_list.extend(project_deps)
         return "\n".join(requirements_list)
-    
+
     # Fallback to hardcoded dependencies if config doesn't provide them
     base = textwrap.dedent("""
         # Core dependencies
@@ -352,7 +352,7 @@ def requirements(project_type: ProjectCategory) -> str:
         pytest>=7.0
         ipython>=8.0
     """).lstrip()
-    
+
     if project_type == ProjectCategory.DATA_SCIENCE:
         base += textwrap.dedent("""
             # Data Science
@@ -388,7 +388,7 @@ def requirements(project_type: ProjectCategory) -> str:
             beautifulsoup4>=4.12
             selenium>=4.15
         """)
-    
+
     return base
 
 def dockerfile(project_type: ProjectCategory) -> str:
@@ -397,7 +397,7 @@ def dockerfile(project_type: ProjectCategory) -> str:
     config_manager = get_config_manager()
     config = config_manager.load_config()
     docker_config = config.docker
-    
+
     base = textwrap.dedent(f"""
         FROM {docker_config.base_image}
 
@@ -426,7 +426,7 @@ def dockerfile(project_type: ProjectCategory) -> str:
 
         CMD ["python", "run.py"]
     """).lstrip()
-    
+
     if project_type == ProjectCategory.DATA_SCIENCE:
         base += textwrap.dedent("""
             # Additional system dependencies for data science
@@ -435,7 +435,7 @@ def dockerfile(project_type: ProjectCategory) -> str:
                 liblapack-dev \\
                 && rm -rf /var/lib/apt/lists/*
         """)
-    
+
     return base
 
 def docker_compose(project_type: ProjectCategory) -> str:
@@ -444,7 +444,7 @@ def docker_compose(project_type: ProjectCategory) -> str:
     config_manager = get_config_manager()
     config = config_manager.load_config()
     docker_config = config.docker
-    
+
     base = textwrap.dedent(f"""
         version: "3.9"
         services:
@@ -460,7 +460,7 @@ def docker_compose(project_type: ProjectCategory) -> str:
             ports:
               - "{docker_config.port}:{docker_config.port}"
     """).lstrip()
-    
+
     if project_type == ProjectCategory.WEB_API:
         base += textwrap.dedent("""
           database:
@@ -477,7 +477,7 @@ def docker_compose(project_type: ProjectCategory) -> str:
         volumes:
           postgres_data:
         """)
-    
+
     return base
 
 def setup_sh(project_name: str, author: str) -> str:
@@ -486,11 +486,11 @@ def setup_sh(project_name: str, author: str) -> str:
         # Setup script for {project_name} - Unix-like systems
         # Created by: {author}
         set -e
-        
+
         # Parse command line arguments
         CLEAN_MODE=false
         SHOW_HELP=false
-        
+
         while [[ $# -gt 0 ]]; do
             case $1 in
                 --clean)
@@ -507,7 +507,7 @@ def setup_sh(project_name: str, author: str) -> str:
                     ;;
             esac
         done
-        
+
         if [[ "$SHOW_HELP" == "true" ]]; then
             echo -e "\033[32m{project_name} Setup Script\033[0m"
             echo ""
@@ -519,7 +519,7 @@ def setup_sh(project_name: str, author: str) -> str:
             echo ""
             exit 0
         fi
-        
+
         if [[ "$CLEAN_MODE" == "true" ]]; then
             echo -e "\033[33m🧹 Clean setup mode enabled\033[0m"
             echo -e "\033[32mSetting up {project_name} (CLEAN MODE)...\033[0m"
@@ -528,18 +528,18 @@ def setup_sh(project_name: str, author: str) -> str:
         fi
         echo "Author: {author}"
         echo ""
-        
+
         # Check if Python is installed
         echo -e "\033[33mChecking Python version...\033[0m"
         if ! command -v python3 &> /dev/null; then
             echo -e "\033[31mPython 3 is not installed or not in PATH. Please install Python 3.8 or higher.\033[0m"
             exit 1
         fi
-        
+
         PYTHON_VERSION=$(python3 --version)
         echo -e "\033[32m$PYTHON_VERSION found\033[0m"
         echo ""
-        
+
         # Handle clean setup - remove existing venv and clear cache
         if [[ "$CLEAN_MODE" == "true" ]]; then
             if [[ -d "venv" ]]; then
@@ -547,13 +547,13 @@ def setup_sh(project_name: str, author: str) -> str:
                 rm -rf venv
                 echo -e "\033[32mExisting virtual environment removed\033[0m"
             fi
-            
+
             echo "Clearing pip cache..."
             python3 -m pip cache purge 2>/dev/null || true
             echo -e "\033[32mPip cache cleared\033[0m"
             echo ""
         fi
-        
+
         # Create virtual environment
         echo -e "\033[33mSetting up virtual environment...\033[0m"
         if [[ ! -d "venv" ]]; then
@@ -564,13 +564,13 @@ def setup_sh(project_name: str, author: str) -> str:
             echo -e "\033[32mVirtual environment already exists\033[0m"
         fi
         echo ""
-        
+
         # Activate virtual environment
         echo -e "\033[33mActivating virtual environment...\033[0m"
         source venv/bin/activate
         echo -e "\033[32mVirtual environment activated\033[0m"
         echo ""
-        
+
         # Upgrade pip
         echo -e "\033[33mUpgrading pip...\033[0m"
         if python -m pip install --upgrade pip; then
@@ -579,7 +579,7 @@ def setup_sh(project_name: str, author: str) -> str:
             echo -e "\033[33mFailed to upgrade pip, continuing...\033[0m"
         fi
         echo ""
-        
+
         # Install dependencies
         INSTALL_FLAGS=""
         if [[ "$CLEAN_MODE" == "true" ]]; then
@@ -588,7 +588,7 @@ def setup_sh(project_name: str, author: str) -> str:
         else
             echo -e "\033[33mInstalling dependencies...\033[0m"
         fi
-        
+
         if [[ -f "requirements.txt" ]]; then
             pip install -r requirements.txt $INSTALL_FLAGS
             echo -e "\033[32mDependencies installed from requirements.txt\033[0m"
@@ -597,7 +597,7 @@ def setup_sh(project_name: str, author: str) -> str:
             pip install -e . $INSTALL_FLAGS
             echo -e "\033[32mProject installed in editable mode\033[0m"
         fi
-        
+
         # Install development dependencies
         echo -e "\033[33mInstalling development dependencies...\033[0m"
         if pip install black mypy pytest ipython $INSTALL_FLAGS; then
@@ -606,13 +606,13 @@ def setup_sh(project_name: str, author: str) -> str:
             echo -e "\033[33mFailed to install development dependencies, continuing...\033[0m"
         fi
         echo ""
-        
+
         # Create necessary directories
         echo -e "\033[33mCreating necessary directories...\033[0m"
         mkdir -p datasets outputs logs caches
         echo -e "\033[32mDirectories created\033[0m"
         echo ""
-        
+
         echo -e "\033[32mSetup completed successfully!\033[0m"
         echo ""
         echo -e "\033[36mTo get started:\033[0m"
@@ -629,11 +629,11 @@ def setup_bat(project_name: str, author: str) -> str:
         REM Setup script for {project_name} - Windows Batch
         REM Created by: {author}
         setlocal
-        
+
         REM Parse command line arguments
         set "CLEAN_MODE=false"
         set "SHOW_HELP=false"
-        
+
         :parse_args
         if "%~1"=="" goto args_done
         if /i "%~1"=="--clean" (
@@ -648,9 +648,9 @@ def setup_bat(project_name: str, author: str) -> str:
         )
         echo Unknown option: %~1
         exit /b 1
-        
+
         :args_done
-        
+
         if "%SHOW_HELP%"=="true" (
             echo {project_name} Setup Script
             echo.
@@ -662,7 +662,7 @@ def setup_bat(project_name: str, author: str) -> str:
             echo.
             exit /b 0
         )
-        
+
         if "%CLEAN_MODE%"=="true" (
             echo Clean setup mode enabled
             echo Setting up {project_name} ^(CLEAN MODE^)...
@@ -671,7 +671,7 @@ def setup_bat(project_name: str, author: str) -> str:
         )
         echo Author: {author}
         echo.
-        
+
         REM Check if Python is installed
         echo Checking Python version...
         python --version >nul 2>&1
@@ -680,11 +680,11 @@ def setup_bat(project_name: str, author: str) -> str:
             pause
             exit /b 1
         )
-        
+
         for /f "tokens=2" %%i in ('python --version 2^>^&1') do set "PYTHON_VERSION=%%i"
         echo Python %PYTHON_VERSION% found
         echo.
-        
+
         REM Handle clean setup - remove existing venv and clear cache
         if "%CLEAN_MODE%"=="true" (
             if exist "venv" (
@@ -692,13 +692,13 @@ def setup_bat(project_name: str, author: str) -> str:
                 rmdir /s /q "venv"
                 echo Existing virtual environment removed
             )
-            
+
             echo Clearing pip cache...
             python -m pip cache purge >nul 2>&1
             echo Pip cache cleared
             echo.
         )
-        
+
         REM Create virtual environment
         echo Setting up virtual environment...
         if not exist "venv" (
@@ -714,7 +714,7 @@ def setup_bat(project_name: str, author: str) -> str:
             echo Virtual environment already exists
         )
         echo.
-        
+
         REM Activate virtual environment
         echo Activating virtual environment...
         call venv\\Scripts\\activate.bat
@@ -725,7 +725,7 @@ def setup_bat(project_name: str, author: str) -> str:
         )
         echo Virtual environment activated
         echo.
-        
+
         REM Upgrade pip
         echo Upgrading pip...
         python -m pip install --upgrade pip
@@ -735,7 +735,7 @@ def setup_bat(project_name: str, author: str) -> str:
             echo Pip upgraded
         )
         echo.
-        
+
         REM Install dependencies
         if "%CLEAN_MODE%"=="true" (
             echo Installing dependencies ^(clean mode: force reinstall, no cache^)...
@@ -794,7 +794,7 @@ def setup_bat(project_name: str, author: str) -> str:
         )
         echo Development dependencies installed
         echo.
-        
+
         REM Create necessary directories
         echo Creating necessary directories...
         if not exist datasets mkdir datasets
@@ -803,7 +803,7 @@ def setup_bat(project_name: str, author: str) -> str:
         if not exist caches mkdir caches
         echo Directories created
         echo.
-        
+
         echo Setup completed successfully!
         echo.
         echo To get started:
@@ -818,14 +818,14 @@ def setup_ps1(project_name: str, author: str) -> str:
     return textwrap.dedent(f"""
         # Setup script for {project_name} - PowerShell
         # Created by: {author}
-        
+
         param(
             [switch]$Clean,
             [switch]$Help
         )
-        
+
         $ErrorActionPreference = "Stop"
-        
+
         if ($Help) {{
             Write-Host "{project_name} Setup Script" -ForegroundColor Green
             Write-Host ""
@@ -837,7 +837,7 @@ def setup_ps1(project_name: str, author: str) -> str:
             Write-Host ""
             exit 0
         }}
-        
+
         if ($Clean) {{
             Write-Host "🧹 Clean setup mode enabled" -ForegroundColor Yellow
             Write-Host "Setting up {project_name} (CLEAN MODE)..." -ForegroundColor Green
@@ -846,7 +846,7 @@ def setup_ps1(project_name: str, author: str) -> str:
         }}
         Write-Host "Author: {author}"
         Write-Host ""
-        
+
         try {{
             # Check if Python is installed
             Write-Host "Checking Python version..." -ForegroundColor Yellow
@@ -856,10 +856,10 @@ def setup_ps1(project_name: str, author: str) -> str:
                 Read-Host "Press Enter to exit"
                 exit 1
             }}
-            
+
             Write-Host "$pythonVersion found" -ForegroundColor Green
             Write-Host ""
-            
+
             # Handle clean setup - remove existing venv and clear cache
             if ($Clean) {{
                 if (Test-Path "venv") {{
@@ -867,13 +867,13 @@ def setup_ps1(project_name: str, author: str) -> str:
                     Remove-Item -Recurse -Force "venv"
                     Write-Host "Existing virtual environment removed" -ForegroundColor Green
                 }}
-                
+
                 Write-Host "Clearing pip cache..."
                 python -m pip cache purge 2>$null
                 Write-Host "Pip cache cleared" -ForegroundColor Green
                 Write-Host ""
             }}
-            
+
             # Create virtual environment
             Write-Host "Setting up virtual environment..." -ForegroundColor Yellow
             if (-not (Test-Path "venv")) {{
@@ -887,7 +887,7 @@ def setup_ps1(project_name: str, author: str) -> str:
                 Write-Host "Virtual environment already exists" -ForegroundColor Green
             }}
             Write-Host ""
-            
+
             # Activate virtual environment
             Write-Host "Activating virtual environment..." -ForegroundColor Yellow
             & ".\\venv\\Scripts\\Activate.ps1"
@@ -896,7 +896,7 @@ def setup_ps1(project_name: str, author: str) -> str:
             }}
             Write-Host "Virtual environment activated" -ForegroundColor Green
             Write-Host ""
-            
+
             # Upgrade pip
             Write-Host "Upgrading pip..." -ForegroundColor Yellow
             python -m pip install --upgrade pip
@@ -906,7 +906,7 @@ def setup_ps1(project_name: str, author: str) -> str:
                 Write-Host "Failed to upgrade pip, continuing..." -ForegroundColor Yellow
             }}
             Write-Host ""
-            
+
             # Install dependencies
             $installFlags = ""
             if ($Clean) {{
@@ -915,7 +915,7 @@ def setup_ps1(project_name: str, author: str) -> str:
             }} else {{
                 Write-Host "Installing dependencies..." -ForegroundColor Yellow
             }}
-            
+
             if (Test-Path "requirements.txt") {{
                 $command = "pip install -r requirements.txt $installFlags".Trim()
                 Invoke-Expression $command
@@ -932,7 +932,7 @@ def setup_ps1(project_name: str, author: str) -> str:
                 }}
                 Write-Host "Project installed in editable mode" -ForegroundColor Green
             }}
-            
+
             # Install development dependencies
             Write-Host "Installing development dependencies..." -ForegroundColor Yellow
             $devCommand = "pip install black mypy pytest ipython $installFlags".Trim()
@@ -943,7 +943,7 @@ def setup_ps1(project_name: str, author: str) -> str:
                 Write-Host "Failed to install development dependencies, continuing..." -ForegroundColor Yellow
             }}
             Write-Host ""
-            
+
             # Create necessary directories
             Write-Host "Creating necessary directories..." -ForegroundColor Yellow
             @("datasets", "outputs", "logs", "caches") | ForEach-Object {{
@@ -953,7 +953,7 @@ def setup_ps1(project_name: str, author: str) -> str:
             }}
             Write-Host "Directories created" -ForegroundColor Green
             Write-Host ""
-            
+
             Write-Host "Setup completed successfully!" -ForegroundColor Green
             Write-Host ""
             Write-Host "To get started:" -ForegroundColor Cyan
@@ -961,7 +961,7 @@ def setup_ps1(project_name: str, author: str) -> str:
             Write-Host "  2. Run the project: python run.py" -ForegroundColor White
             Write-Host ""
             Write-Host "Happy coding!" -ForegroundColor Magenta
-            
+
         }} catch {{
             Write-Host "Setup failed: $($_.Exception.Message)" -ForegroundColor Red
             Read-Host "Press Enter to exit"
@@ -970,13 +970,13 @@ def setup_ps1(project_name: str, author: str) -> str:
     """).lstrip()
 
 def logger_py(author: str) -> str:
-    """Generate logger.py content with structured JSON logging per Aegis Codework standards."""
+    """Generate logger.py content with structured JSON logging per CODDY Codework standards."""
     return textwrap.dedent(f'''
         """
         src/core/logger.py
         Structured JSON logging module
 
-        Complies with Aegis Codework logging-standard.md
+        Complies with CODDY Codework logging-standard.md
         """
 
         from __future__ import annotations

@@ -4,8 +4,8 @@ CSS/SCSS parser — regex-based with tree-sitter fallback.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Css
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 import re
 from pathlib import Path

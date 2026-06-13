@@ -4,7 +4,7 @@
 The **Repository Domain** is responsible for physical codebase discovery, file tracking, and Git history synchronization. It serves as the foundation for the CodeCortex pipeline by providing a normalized view of the source files.
 
 ## Architecture
-This domain follows the **Aegis Modular Monolith** standard with Proactive Domain Segregation:
+This domain follows the **CODDY Modular Monolith** standard with Proactive Domain Segregation:
 
 - **api/**: External interface layer. Contains MCP tool registrations.
 - **application/**: Orchestration layer. Contains the `RepositoryService` and structural analysis logic.

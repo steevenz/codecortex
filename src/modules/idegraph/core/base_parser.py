@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.core
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.core
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 BaseIDEParser — Abstract base class for all IDE data parsers.
 """

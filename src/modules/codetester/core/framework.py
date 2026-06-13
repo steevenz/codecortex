@@ -4,8 +4,8 @@ FrameworkDetector - Auto-detect test frameworks by scanning project config files
 :project: CodeCortex
 :package: Modules.Codetester.Core.Framework
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import os

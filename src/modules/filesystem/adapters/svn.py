@@ -4,8 +4,8 @@ SVN.
 :project: CodeCortex
 :package: Modules.Filesystem.Adapters.Svn
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 from __future__ import annotations
@@ -81,6 +81,45 @@ class DiskSvn:
     def clear_cache(cls) -> None:
         cls._svn_available = None
         cls._root_cache.clear()
+
+    @classmethod
+    def restore_file(cls, root: Path, path: Path) -> Dict[str, Any]:
+        """Restore a corrupted/tracked file from SVN repository.
+
+        Uses 'svn revert <file>' to restore the file to its last committed state.
+        Works even if the working copy is corrupted.
+
+        Returns:
+            {'ok': True} on success.
+            {'ok': False, 'error': str, 'reason': str} on failure.
+        """
+        if not cls.is_svn_available():
+            return {'ok': False, 'error': 'svn CLI not available', 'reason': 'no_svn_cli'}
+        try:
+            rel = path.relative_to(root)
+        except ValueError:
+            return {'ok': False, 'error': f'File {path} is not under SVN root {root}',
+                    'reason': 'path_not_in_repo'}
+        if not cls.is_tracked(root, path):
+            return {'ok': False, 'error': f'File {rel} is not tracked in SVN',
+                    'reason': 'file_not_tracked'}
+        try:
+            result = subprocess.run(
+                ["svn", "revert", str(rel)],
+                cwd=str(root), capture_output=True, text=True, timeout=30,
+            )
+            if result.returncode == 0:
+                return {'ok': True, 'method': 'svn_revert'}
+            return {
+                'ok': False,
+                'error': f'svn revert failed: {result.stderr.strip()}',
+                'reason': 'svn_command_failed',
+            }
+        except subprocess.TimeoutExpired:
+            return {'ok': False, 'error': 'svn revert timed out after 30s',
+                    'reason': 'timeout'}
+        except Exception as e:
+            return {'ok': False, 'error': str(e), 'reason': 'exception'}
 
     @classmethod
     def is_tracked(cls, root: Path, path: Path) -> bool:

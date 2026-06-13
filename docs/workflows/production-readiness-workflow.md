@@ -4,7 +4,7 @@ title: WFK_PRD_001 — Production Readiness Checklist
 workflow_id: WFK_PRD_001
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_PRD_001: Production Readiness Checklist
@@ -14,7 +14,7 @@ standard: Aegis-Workflow-v2.0
 > **Time**: 3-8 minutes (14 gates, parallelizable).
 > **Cost**: Medium-to-high (audit + search + test run + graph analysis).
 > **Output**: PASS/FAIL per gate with blocking issues, warnings, and recommendations.
-> **Codification**: Aegis-Architecture-v1.0 §5
+> **Codification**: CODDY-Architecture-v1.0 §5
 
 ---
 

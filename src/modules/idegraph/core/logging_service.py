@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.core.logging
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.core.logging
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Logging Service — Structured JSON logging for SideCortex.
 """
@@ -43,11 +43,11 @@ class JsonFormatter(logging.Formatter):
             "workspace_id": getattr(record, 'workspace_id', None),
             "request_id": getattr(record, 'request_id', None),
         }
-        
+
         # Add extra fields if provided
         if hasattr(record, 'extra_data'):
             log_data.update(record.extra_data)
-            
+
         # Error handling
         if record.levelno >= logging.ERROR:
             log_data["error_code"] = getattr(record, 'error_code', 'INTERNAL_ERROR')
@@ -67,13 +67,13 @@ class LoggingService:
         self.env = os.getenv("ENV", "development")
         self.version = self._load_version()
         self.log_dir = self.root_path / "outputs" / "logs" / self.env / datetime.now().strftime('%Y-%m-%d')
-        
+
         # Ensure log directory exists
         self.log_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.logger = logging.getLogger(app_name)
         self.logger.setLevel(os.getenv("LOG_LEVEL", "INFO").upper())
-        
+
         # Prevent duplicate handlers
         if not self.logger.handlers:
             self._setup_handlers()

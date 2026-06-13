@@ -1,4 +1,4 @@
-# CodeCortex for Kiro IDE
+﻿# CodeCortex for Kiro IDE
 
 Kiro IDE supports plugins via `.kiro/` directory with agents, skills, hooks, and MCP.
 
@@ -16,8 +16,8 @@ Add to your Kiro MCP config (`.kiro/mcp.json` or MCP settings):
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "kiro"]
     }
   }
 }

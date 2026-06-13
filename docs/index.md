@@ -1,13 +1,28 @@
 # CodeCortex - Executive Summary
 
-**Version:** 0.1.0  
-**Status:** Development  
-**Author:** Steeven Andrian  
-**Copyright:** © 2026 Aegis Codework
+**Version:** 0.1.0
+**Status:** Development
+**Author:** Steeven Andrian
+**Copyright:** © 2026 CODDY Codework
 
 ## Overview
 
 CodeCortex is a multi-dimensional code intelligence platform that provides deep analysis, semantic search, and architectural insights for software codebases. Built on Domain-Driven Design (DDD) principles with clean architecture patterns, it enables developers to understand code structure, trace dependencies, and identify technical debt at scale.
+
+### Architecture: Node.js + Python
+
+CodeCortex uses a two-layer architecture:
+
+```
+IDE ──stdio──► Node (index.cjs) ──HTTP/SSE──► Python (src/main.py)
+```
+
+| Layer | Role |
+|-------|------|
+| **Node.js** | MCP stdio proxy, multi-IDE lifecycle, file-lock concurrency, JSON-RPC forwarding |
+| **Python** | MCP server core: code intelligence, graph, filesystem, refactoring |
+
+> **All IDE MCP configs must point to Node.js** (`scripts/server/js/index.cjs`), not Python. Direct Python mode is deprecated. See [Setup Guide](guides/how-to-setup-mcp.md).
 
 ## Core Vision
 
@@ -93,7 +108,7 @@ src/
 - **Protocol:** MCP (Model Context Protocol) via FastMCP
 - **Transport:** stdio, SSE, HTTP/JSON-RPC
 - **Architecture:** Domain-Driven Design (DDD), Clean Architecture, Hexagonal Architecture
-- **Standards:** Aegis Codeworks v1.0
+- **Standards:** CODDY Codeworks v1.0
 
 ## Design Principles
 
@@ -138,4 +153,4 @@ See [Product Roadmap](../product/roadmap.md) for detailed release planning.
 
 ---
 
-*This document follows Aegis Codeworks documentation standards.*
+*This document follows CODDY Codeworks documentation standards.*

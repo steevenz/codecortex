@@ -1,12 +1,12 @@
 """
 KuzuBackend — Embedded graph database (primary backend). Zero external server.
-Ported from legacy codegraph database_kuzu.py with Aegis-compliant structure.
+Ported from legacy codegraph database_kuzu.py with CODDY-compliant structure.
 
 :project: CodeCortex
 :package: Core.Graph.Backends.Kuzu_backend
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

@@ -4,8 +4,8 @@ Graph backend abstraction layer — unified interface for Kùzu, Neo4j, FalkorDB
 :project: CodeCortex
 :package: Core.Graph.Backends
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from .base import GraphBackend, GraphSession, GraphResult

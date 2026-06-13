@@ -11,7 +11,7 @@ Usage:
 :project: CodeCortex
 :package: CLI.Unified
 :author: Steeven Andrian (MCP Conversion)
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 :standard: MCP-CLI-v1.0
 """
 
@@ -242,7 +242,7 @@ def _get_available_actions(tool: str) -> Dict[str, str]:
 def _execute_action(tool: str, action: str, args: Dict, **kwargs) -> Dict:
     """Execute an action through the shared ActionRouter or specific tool functions."""
     import asyncio
-    
+
     if tool == "codecortex_neocortex":
         return _execute_neocortex_action(action, args)
     elif tool == "codecortex_ai":
@@ -255,22 +255,22 @@ def _execute_action(tool: str, action: str, args: Dict, **kwargs) -> Dict:
         return _execute_cloud_action(action, args)
     elif tool == "remote":
         return _execute_remote_action(action, args)
-        
+
     from src.api.orchestration import ActionRouter
-    
+
     # Lazy import to avoid circular dependency
     from src.main import CortexOrchestrator
     def _factory():
         return CortexOrchestrator()
-        
+
     router = ActionRouter(_factory)
-    
+
     # Merge kwargs into args to match ActionRouter expectations
     merged_args = {**args}
     for k, v in kwargs.items():
         if v is not None and k not in merged_args:
             merged_args[k] = v
-            
+
     # dispatch is async, so we use asyncio.run
     try:
         loop = asyncio.get_event_loop()
@@ -279,7 +279,7 @@ def _execute_action(tool: str, action: str, args: Dict, **kwargs) -> Dict:
             nest_asyncio.apply()
     except RuntimeError:
         pass
-        
+
     result = asyncio.run(router.dispatch(tool, action, merged_args))
     return result
 
@@ -332,10 +332,10 @@ def _execute_knowledge_action(action: str, args: Dict) -> Dict:
     """Execute knowledge graph actions."""
     from src.main import CortexOrchestrator
     from src.modules.knowledgegraph.adapters.storage import KnowledgeStore
-    
+
     orch = CortexOrchestrator()
     store = KnowledgeStore(orch.db)
-    
+
     try:
         if action == "query":
             result = store.query(
@@ -373,7 +373,7 @@ def _execute_server_action(action: str, args: Dict) -> Dict:
     """Execute server actions."""
     import argparse
     from src.cli.server import cmd_server_start, cmd_server_stop, cmd_server_status
-    
+
     # Mock Namespace from dict args
     ns = argparse.Namespace(**args)
     if action == "start":

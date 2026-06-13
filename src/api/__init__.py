@@ -7,6 +7,6 @@ All 31 domain tools remain registered in src/modules/*/api/tools.py.
 :project: CodeCortex
 :package: Api
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-API-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-API-v1.0
 """

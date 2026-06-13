@@ -5,8 +5,8 @@ Supports SSH auth, delta fetch (--depth=1), and commit audit (secrets scan).
 :project: CodeCortex
 :package: Modules.Coderepository.Adapters.Git.History
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 import re
@@ -141,7 +141,7 @@ class GitHistoryWorker:
         for diff in diffs:
             change_type = diff.change_type
             file_path = diff.b_path if diff.b_path else diff.a_path
-            
+
             file_id = self.store.find_file_id_by_path(repository_id, file_path)
             if file_id:
                 self.store.upsert_file_commit({

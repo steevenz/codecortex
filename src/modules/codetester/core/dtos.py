@@ -5,8 +5,8 @@ Supports run, coverage, discover, generate, diagnose actions.
 :project: CodeCortex
 :package: Modules.Codetester.Core.Dtos
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 from dataclasses import dataclass, field

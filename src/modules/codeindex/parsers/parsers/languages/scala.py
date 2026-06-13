@@ -4,8 +4,8 @@ Scala tree-sitter parser — full implementation with traits, objects, case clas
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Scala
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,7 +17,7 @@ SCALA_QUERIES = {
             name: (identifier) @name
             parameters: (parameters) @params
         ) @function_node
-        
+
         (function_declaration
             name: (identifier) @name
         ) @function_node
@@ -38,11 +38,11 @@ SCALA_QUERIES = {
         (val_definition
             name: (identifier) @name
         ) @variable
-        
+
         (var_definition
             name: (identifier) @name
         ) @variable
-        
+
         (pattern
             (identifier) @name
         ) @variable
@@ -51,7 +51,7 @@ SCALA_QUERIES = {
         (call_expression
             function: (identifier) @name
         ) @call_node
-        
+
         (call_expression
             function: (field_expression
                 field: (identifier) @name

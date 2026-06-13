@@ -4,8 +4,8 @@ Phpunit.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Phpunit
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class PHPUnit(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "phpunit", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -27,20 +27,20 @@ class PHPUnit(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "phpunit", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Check for phpunit.xml or phpunit.xml.dist to ensure we are in a PHPUnit project
         phpunit_xml = os.path.join(repo_path, "phpunit.xml")
         phpunit_xml_dist = os.path.join(repo_path, "phpunit.xml.dist")
         if not (os.path.exists(phpunit_xml) or os.path.exists(phpunit_xml_dist)):
             return {"tool": "phpunit", "status": "error", "error": "phpunit.xml or phpunit.xml.dist not found - PHPUnit requires a configuration file"}
-        
+
         # Build the phpunit command
         cmd = ["phpunit"]
         if target_path:
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -49,7 +49,7 @@ class PHPUnit(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # PHPUnit exit code: 0 = success, 1 = failures, 2 = errors, 3 = incomplete, 4 = skipped, 5 = risk, 6 = failure
             # We consider 0 and 1 as success (failures are still a successful run, just with failing tests)
             # But note: in the context of QA, we might want to know if tests passed or failed.
@@ -71,7 +71,7 @@ class PHPUnit(BaseQA):
                 status = "warning"
             else:
                 status = "error"
-            
+
             return {
                 "tool": "phpunit",
                 "status": status,

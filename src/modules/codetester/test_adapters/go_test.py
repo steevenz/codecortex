@@ -4,8 +4,8 @@ Go Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Go_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class GoTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "go_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for go.mod to ensure we are in a Go module
         go_mod_path = os.path.join(repo_path, "go.mod")
         if not os.path.exists(go_mod_path):
             return {"tool": "go_test", "status": "error", "error": "go.mod not found - Go test requires a Go module"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -32,7 +32,7 @@ class GoTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "go_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the go test command
         cmd = ["go", "test", "./..."]
         if target_path:
@@ -41,7 +41,7 @@ class GoTest(BaseQA):
             cmd[-1] = target_path  # replace "./..." with target_path
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -50,10 +50,10 @@ class GoTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # go test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "go_test",
                 "status": status,

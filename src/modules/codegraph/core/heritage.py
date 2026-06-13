@@ -6,8 +6,8 @@ Supports Python, TypeScript/JS, Java, and Go inheritance patterns.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Heritage
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import logging

@@ -116,7 +116,7 @@ CodeCortex registers **6 unified MCP tools** in `src/main.py`. Each tool accepts
       "context": "surrounding code lines",
       "confidence": 0.95,
       "remediation": "Move to environment variable",
-      "standard_ref": "Aegis-Security-v1.0"
+      "standard_ref": "CODDY-Security-v1.0"
     }
   ],
   "recommendations": ["Move secrets to .env", "Add type hints to 15 functions"],
@@ -130,7 +130,7 @@ CodeCortex registers **6 unified MCP tools** in `src/main.py`. Each tool accepts
 - `compliance_score` is a 0-100 metric for readiness assessment
 - Prioritize findings with `severity=critical` + `confidence>0.9`
 - `remediation` contains actionable fix suggestions
-- `standard_ref` refers to the Aegis standard violated — suitable for compliance reporting
+- `standard_ref` refers to the CODDY standard violated — suitable for compliance reporting
 - For incremental audit, use `since` with ISO timestamp from previous audit
 
 ---
@@ -230,7 +230,7 @@ CodeCortex registers **6 unified MCP tools** in `src/main.py`. Each tool accepts
 **🧠 AI Insight**:
 - For refactoring: `query_type="all_callers"` for full blast radius
 - For bug tracing: `query_type="trace_flow"` from entry point
-- For dependency audit: `query_type="deps"` or `query_type="circular"` 
+- For dependency audit: `query_type="deps"` or `query_type="circular"`
 - Use `"module::function"` format in `target` if names are ambiguous
 
 ---

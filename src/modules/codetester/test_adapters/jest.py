@@ -4,8 +4,8 @@ Jest.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Jest
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -19,12 +19,12 @@ class Jest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "jest", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check if we have package.json and jest configured
         package_json_path = os.path.join(repo_path, "package.json")
         if not os.path.exists(package_json_path):
             return {"tool": "jest", "status": "error", "error": "package.json not found - Jest requires a Node.js project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -33,14 +33,14 @@ class Jest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "jest", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the jest command
         cmd = ["npx", "jest", "--json", "--outputFile=/tmp/jest_report.json"]
         if target_path:
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -49,7 +49,7 @@ class Jest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # Try to read the JSON report if it was created
             report_data = {}
             report_path = "/tmp/jest_report.json"
@@ -60,10 +60,10 @@ class Jest(BaseQA):
                     os.remove(report_path)
                 except Exception:
                     pass  # If we can't read the report, we'll still return the basic result
-            
+
             # Jest exit code: 0 = all tests passed, 1 = some tests failed
             status = "success" if result.returncode == 0 else "failed"
-            
+
             response = {
                 "tool": "jest",
                 "status": status,
@@ -71,7 +71,7 @@ class Jest(BaseQA):
                 "stdout": result.stdout[-5000:],
                 "stderr": result.stderr[-2000:]
             }
-            
+
             # Add report data if available
             if report_data:
                 response["report"] = {
@@ -79,10 +79,10 @@ class Jest(BaseQA):
                     "passed": report_data.get("numPassedTests", 0),
                     "failed": report_data.get("numFailedTests", 0),
                     "pending": report_data.get("numPendingTests", 0),
-                    "duration": report_data.get("testResults", [{}])[0].get("perfStats", {}).get("end", 0) - 
+                    "duration": report_data.get("testResults", [{}])[0].get("perfStats", {}).get("end", 0) -
                                report_data.get("testResults", [{}])[0].get("perfStats", {}).get("start", 0)
                 }
-            
+
             return response
         except subprocess.TimeoutExpired:
             # Clean up temp file if it exists

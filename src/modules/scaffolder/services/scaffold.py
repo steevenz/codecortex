@@ -4,8 +4,8 @@ Scaffold — main orchestrator that assembles directories, renders templates,.
 :project: CodeCortex
 :package: Modules.Scaffolder.Services.Scaffold
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations
@@ -303,11 +303,11 @@ class Scaffold:
     ) -> None:
         """Generate AI context files for the project."""
         self._notify(progress, "Creating AI context structure...")
-        
+
         # Create .agents/contexts/working.md
         agents_context_dir = target / ".agents" / "contexts"
         agents_context_dir.mkdir(parents=True, exist_ok=True)
-        
+
         working_content = f"""---
 Version: 1.0.0
 Date: {project.created_at.strftime("%Y-%m-%d")}
@@ -345,11 +345,11 @@ Date: {project.created_at.strftime("%Y-%m-%d")}
 """
         (agents_context_dir / "working.md").write_text(working_content, encoding="utf-8")
         self._notify(progress, "  📄 .agents/contexts/working.md")
-        
+
         # Create .agents/states/current.yaml
         agents_states_dir = target / ".agents" / "states"
         agents_states_dir.mkdir(parents=True, exist_ok=True)
-        
+
         current_content = f"""version: 1.0.0
 date: {project.created_at.strftime("%Y-%m-%d")}
 state: initialization
@@ -361,15 +361,15 @@ author: {project.author}
 """
         (agents_states_dir / "current.yaml").write_text(current_content, encoding="utf-8")
         self._notify(progress, "  📄 .agents/states/current.yaml")
-        
+
         # Create .aicoders/rules/ directory
         aicoders_rules_dir = target / ".aicoders" / "rules"
         aicoders_rules_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Copy standard rules from CodeCortex
         rules_content = """# Architecture Compliance Rules
 
-> **Standard:** Aegis-Architecture-v1.0
+> **Standard:** CODDY-Architecture-v1.0
 > **Applies to:** All domains/modules in this project
 
 ## 1. Lego Principle (Modular Monolith)
@@ -435,12 +435,12 @@ models/     → DTOs (chunk, relationship)
     ) -> None:
         """Generate project documentation files."""
         self._notify(progress, "Creating project documentation...")
-        
+
         # Create docs/features/{domain}/concept.md
         domain_name = project.name.slug
         docs_features_dir = target / "docs" / "features" / domain_name
         docs_features_dir.mkdir(parents=True, exist_ok=True)
-        
+
         concept_content = f"""# {project.name.display}: {project.name.display}
 
 > **Domain:** {domain_name}
@@ -457,7 +457,7 @@ models/     → DTOs (chunk, relationship)
 
 - Rapid project initialization with standard structure
 - AI coder-friendly directory structure
-- Compliance with Aegis Codeworks standards
+- Compliance with CODDY Codeworks standards
 - Ready for immediate development
 
 ## Architecture
@@ -488,7 +488,7 @@ Aliases: {domain_name[:3]}
 
 ## ~/.aicoders/ Compliance
 
-- Follows Aegis-Architecture-v1.0 standards
+- Follows CODDY-Architecture-v1.0 standards
 - Constructor injection for all services
 - DTOs for all layer crossings
 - Adapters wrap all 3rd-party dependencies
@@ -523,14 +523,14 @@ Aliases: {domain_name[:3]}
 """
         (docs_features_dir / "concept.md").write_text(concept_content, encoding="utf-8")
         self._notify(progress, f"  📄 docs/features/{domain_name}/concept.md")
-        
+
         # Create docs/architecture/ARCHITECTURE.md
         docs_arch_dir = target / "docs" / "architecture"
         docs_arch_dir.mkdir(parents=True, exist_ok=True)
-        
+
         arch_content = f"""# Architecture — {project.name.display}
 
-> **Standard:** Aegis-Architecture-v1.0
+> **Standard:** CODDY-Architecture-v1.0
 > **Project:** {project.name.display}
 > **Stack:** {project.stack_name}
 > **Pattern:** {project.project_type.pattern.value}
@@ -583,11 +583,11 @@ All services use constructor injection:
 """
         (docs_arch_dir / "ARCHITECTURE.md").write_text(arch_content, encoding="utf-8")
         self._notify(progress, "  📄 docs/architecture/ARCHITECTURE.md")
-        
+
         # Create docs/architecture/SECURITY.md
         security_content = f"""# Security — {project.name.display}
 
-> **Standard:** Aegis-Security-v1.0
+> **Standard:** CODDY-Security-v1.0
 > **Project:** {project.name.display}
 > **Stack:** {project.stack_name}
 
@@ -620,7 +620,7 @@ All services use constructor injection:
 """
         (docs_arch_dir / "SECURITY.md").write_text(security_content, encoding="utf-8")
         self._notify(progress, "  📄 docs/architecture/SECURITY.md")
-        
+
         # Create AGENTS.md
         agents_content = f"""# AGENTS.md — Project Operating Manual for AI Agents
 
@@ -648,10 +648,10 @@ All services use constructor injection:
 
 ## 5. Project Standards
 
-- Architecture: Aegis-Architecture-v1.0
-- Project Structure: Aegis-ProjectStructure-v1.0
-- API: Aegis-API-v1.0
-- Documentation: Aegis-Documentation-v1.0
+- Architecture: CODDY-Architecture-v1.0
+- Project Structure: CODDY-ProjectStructure-v1.0
+- API: CODDY-API-v1.0
+- Documentation: CODDY-Documentation-v1.0
 
 ## 6. Setup
 
@@ -667,7 +667,7 @@ Run `pytest tests/` to run tests.
 """
         (target / "AGENTS.md").write_text(agents_content, encoding="utf-8")
         self._notify(progress, "  📄 AGENTS.md")
-        
+
         # Create principal.md
         principal_content = f"""# Principal — {project.name.display}
 
@@ -697,10 +697,10 @@ Run `pytest tests/` to run tests.
 
 ## Development Standards
 
-- Architecture: Aegis-Architecture-v1.0
-- Project Structure: Aegis-ProjectStructure-v1.0
-- API: Aegis-API-v1.0
-- Documentation: Aegis-Documentation-v1.0
+- Architecture: CODDY-Architecture-v1.0
+- Project Structure: CODDY-ProjectStructure-v1.0
+- API: CODDY-API-v1.0
+- Documentation: CODDY-Documentation-v1.0
 
 ## AI Context
 

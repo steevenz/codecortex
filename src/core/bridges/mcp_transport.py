@@ -5,7 +5,7 @@ Handles dynamic switching between SSE and Stdio MCP Client protocols.
 :project: Cognitive Server
 :package: Core.Bridges
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 import os

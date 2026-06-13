@@ -17,7 +17,7 @@ try:
         json={
             "prompt": "GitBook-style sidebar redesign: organization switcher header, collapsible Projects/Workspaces sections, bottom actions bar with theme/settings/help.",
             "format": "insight",
-            "project_id": "aegisbots-sidebar-refactor",
+            "project_id": "CODDYbots-sidebar-refactor",
             "max_tokens": 400,
         },
         headers={"X-API-KEY": KEY, "Content-Type": "application/json"},
@@ -40,7 +40,7 @@ payload = {
         "arguments": {
             "action": "generate",
             "mode": "explorer",
-            "project_id": "aegisbots-sidebar-refactor",
+            "project_id": "CODDYbots-sidebar-refactor",
             "session_id": "",
             "topic": "GitBook-style sidebar redesign: organization switcher header, collapsible Projects/Workspaces sections, bottom actions bar with theme/settings/help. Need to map current Coddy sidebar structure to new layout while preserving nav items, workspaces, chats, clusters, and user profile data.",
         },

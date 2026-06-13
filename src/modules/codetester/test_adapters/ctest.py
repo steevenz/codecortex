@@ -4,8 +4,8 @@ Ctest.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Ctest
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class Ctest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "ctest", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for CMake project (CMakeLists.txt)
         cmake_lists_path = os.path.join(repo_path, "CMakeLists.txt")
         if not os.path.exists(cmake_lists_path):
             return {"tool": "ctest", "status": "error", "error": "CMakeLists.txt not found - Ctest requires a CMake project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -32,7 +32,7 @@ class Ctest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "ctest", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the ctest command
         cmd = ["ctest", "--output-on-failure"]
         if target_path:
@@ -40,7 +40,7 @@ class Ctest(BaseQA):
             cmd.extend(["-R", target_path])
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -49,10 +49,10 @@ class Ctest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # ctest exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "ctest",
                 "status": status,

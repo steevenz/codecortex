@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.tests
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.tests
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Tests for idegraph Engram domain model.
 """

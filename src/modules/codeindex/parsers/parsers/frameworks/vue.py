@@ -4,8 +4,8 @@ Vue.js framework detection and symbol enrichment.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Frameworks.Vue
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from typing import Dict, List, Any, Optional
 
@@ -18,7 +18,7 @@ def detect_vue(
     repo_configs: Dict[str, Any],
 ) -> bool:
     """Detect Vue.js usage with zero false positives.
-    
+
     Requires at least TWO of the following signals:
     1. Vue import from 'vue' or '@vue/*'
     2. .vue file extension
@@ -26,23 +26,23 @@ def detect_vue(
     4. Vue-specific decorators (@Component, @Prop, @Watch)
     """
     signals = []
-    
+
     # Signal 1: Vue imports
     for imp in imports:
         mod = (imp.get("module") or "").lower()
         if mod == "vue" or mod.startswith("@vue/") or mod.startswith("vue-"):
             signals.append("vue_import")
             break
-    
+
     # Signal 2: .vue file extension
     if rel_path.endswith(".vue"):
         signals.append("vue_extension")
-    
+
     # Signal 3: package.json dependency
     pkg_deps = repo_configs.get("package.json", {}).get("dependencies", {})
     if "vue" in pkg_deps:
         signals.append("vue_dependency")
-    
+
     # Signal 4: Vue decorators
     for fn in functions:
         decorators = fn.get("decorators", [])
@@ -50,14 +50,14 @@ def detect_vue(
         if any(dec in decorators for dec in vue_decorators):
             signals.append("vue_decorator")
             break
-    
+
     # Signal 5: Vue class extends Vue
     for cls in classes:
         bases = [b.lower() for b in cls.get("bases", [])]
         if "vue" in bases or "component" in bases:
             signals.append("vue_class")
             break
-    
+
     # Zero false positives: require at least 2 signals
     return len(signals) >= 2
 
@@ -72,7 +72,7 @@ def enrich_function(fn: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Tag Vue-specific functions and lifecycle hooks."""
     name = fn.get("name", "")
     decorators = fn.get("decorators", [])
-    
+
     # Vue lifecycle hooks
     vue_hooks = [
         "beforeCreate", "created", "beforeMount", "mounted",
@@ -82,7 +82,7 @@ def enrich_function(fn: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     ]
     if name in vue_hooks:
         return {"vue_lifecycle": name}
-    
+
     # Vue decorators
     if "@Component" in decorators:
         return {"vue_decorator": "Component"}
@@ -90,5 +90,5 @@ def enrich_function(fn: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return {"vue_decorator": "Prop"}
     if "@Watch" in decorators:
         return {"vue_decorator": "Watch"}
-    
+
     return None

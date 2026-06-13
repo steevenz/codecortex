@@ -4,8 +4,8 @@ Class QA - Manage testing and linting jobs with background execution and webhook
 :project: CodeCortex
 :package: Modules.Codetester.Services.Qa
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import json
@@ -79,14 +79,14 @@ class QA:
     def run_tests(self, path: str, **kwargs) -> Dict[str, Any]:
         """
         Run tests on a codebase path.
-        
+
         Args:
             path: Path to the codebase
             **kwargs: Additional options
                 - repo_id: Repository ID
                 - framework: Test framework to use (default: pytest for Python)
                 - background: Run in background (default: True)
-        
+
         Returns:
             Dict with test results
         """
@@ -99,7 +99,7 @@ class QA:
             "path": path
         }
 
-    def run_qa_task(self, repo_id: str, tool: str, target_path: Optional[str] = None, 
+    def run_qa_task(self, repo_id: str, tool: str, target_path: Optional[str] = None,
                    extra_args: Optional[str] = None, webhook_url: Optional[str] = None,
                    background: bool = True) -> Dict[str, Any]:
         """Orchestrate a QA task (test/lint)."""
@@ -107,7 +107,7 @@ class QA:
             return {"error": f"Tool '{tool}' not supported. Available: {list(self.adapters.keys())}"}
 
         task_id = str(uuid.uuid4())
-        
+
         # 1. Create Task Entry
         try:
             with self.db.transaction() as txn:

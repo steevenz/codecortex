@@ -1,6 +1,6 @@
 # Architecture — Myawesomeproject
 
-> **Standard:** Aegis-Architecture-v1.0
+> **Standard:** CODDY-Architecture-v1.0
 > **Project:** Myawesomeproject
 > **Stack:** python
 > **Pattern:** layered

@@ -5,7 +5,7 @@ Zero-Trust Handshake & API Key Validation
 :project: CodeCortex
 :package: Core.Security.Auth
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 import json
@@ -153,7 +153,7 @@ class AuthService:
                 if row["expires_at"] and _iso(_utc_now()) > row["expires_at"]:
                     self._audit("AUTH_VALIDATE", result="denied", request_id=request_id, ip=ip, reason_code="expired_key")
                     return AuthResult(False, 403, "expired_key")
-                
+
                 scopes = json.loads(row["scopes"])
                 principal = {
                     "auth_type": "issued_api_key",
@@ -182,7 +182,7 @@ class AuthService:
         handshake_id = f"hs_{secrets.token_hex(12)}"
         challenge = secrets.token_hex(16)
         server_nonce = secrets.token_hex(8)
-        
+
         with self._write_lock:
             self.conn.execute(
                 "INSERT INTO auth_handshakes (handshake_id, llm_instance_id, challenge, created_at, status) VALUES (?, ?, ?, ?, ?)",
@@ -226,7 +226,7 @@ class AuthService:
         key_hash = hashlib.sha256(new_api_key.encode("utf-8")).hexdigest()
         key_id = f"key_{secrets.token_hex(8)}"
         scopes = json.dumps(["mcp:sync", "mcp:sse"])
-        
+
         with self._write_lock:
             self.conn.execute(
                 """
@@ -238,7 +238,7 @@ class AuthService:
             self.conn.commit()
 
         self._audit("HANDSHAKE", result="success", llm_instance_id=llm_instance_id, key_id=key_id)
-        
+
         return AuthResult(True, 200, "ok", {
             "api_key": new_api_key,
             "key_id": key_id,

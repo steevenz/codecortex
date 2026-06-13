@@ -6,8 +6,8 @@ preserving graph-backend rich data for downstream graph sync.
 :project: CodeCortex
 :package: Modules.Codeindex.Core.Converters
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 from typing import List, Dict, Any

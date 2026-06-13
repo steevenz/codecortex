@@ -12,8 +12,8 @@ Query modes supported:
     range queries (importance_score, confidence_score), task-based keyword/semantic.
 
 Standards:
-    - Aegis-Architecture-v1.0    → Adapter Pattern (wraps SQLite + GoldenKnowledgeStore)
-    - Aegis-ProjectStructure-v1.0 → adapters/ requirements
+    - CODDY-Architecture-v1.0    → Adapter Pattern (wraps SQLite + GoldenKnowledgeStore)
+    - CODDY-ProjectStructure-v1.0 → adapters/ requirements
 """
 
 from __future__ import annotations
@@ -168,7 +168,7 @@ class KnowledgeStore:
         columns_el = [row["name"] for row in self.db.conn.execute("PRAGMA table_info(extraction_log)").fetchall()]
         if "repo_id" not in columns_el:
             self.db.conn.execute("ALTER TABLE extraction_log ADD COLUMN repo_id TEXT DEFAULT ''")
-            
+
         self.db.conn.commit()
 
         self.db.conn.execute(

@@ -3,8 +3,8 @@
  * @project   CodeCortex
  * @package   Tests
  * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
+ * @copyright (c) 2026 CODDY Codework
+ * @standard  CODDY-CrossStack-v1.0
  * * Tests for multi-repo sync and quota enforcement.
  */
 """

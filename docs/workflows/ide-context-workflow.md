@@ -4,7 +4,7 @@ title: WFK_IDE_001 — IDE Context & Memory Management
 workflow_id: WFK_IDE_001
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_IDE_001: IDE Context & Memory Management
@@ -13,7 +13,7 @@ standard: Aegis-Workflow-v2.0
 > **Trigger**: User asks to remember a codebase, search previous work, or build persistent knowledge.
 > **Time**: 2-5 minutes (one-time ingest), <1s (search).
 > **Cost**: Medium (ingest), Zero (search from cached graph).
-> **Codification**: Aegis-Architecture-v1.0 §5 — `WFK_IDE_001`
+> **Codification**: CODDY-Architecture-v1.0 §5 — `WFK_IDE_001`
 
 ---
 

@@ -5,7 +5,7 @@ Main facade for communicating with Neocortex from CodeCortex.
 :project: CodeCortex
 :package: Core.Bridges
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 import os
@@ -22,7 +22,7 @@ class NeocortexClient:
     Client adapter to execute tasks on Neocortex Cognitive Engine.
     Uses dynamic proxy and universal transport.
     """
-    
+
     _instance: Optional["NeocortexClient"] = None
 
     def __init__(self):

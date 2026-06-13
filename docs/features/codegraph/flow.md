@@ -47,12 +47,12 @@
 
 | Tool | Method | Description |
 |------|--------|-------------|
-| `graph_build` | `AEGIS.build()` | Build/rebuild the graph with modular detection |
-| `graph_search` | `AEGISGraphSearch.search()` | Unified search (symbols, relations, semantic, modular) |
-| `graph_query` | `CodeGraphService.analyze_code_relationships()` + `AEGISGraphTrace.trace()` | Type-specific query + trace |
-| `graph_audit` | `AEGISGraphAudit.audit()` + `CodeGraphService` methods | Full architectural audit |
-| `graph_relationship` | `AEGISGraphRelationship.explore()` | Explore relationships with community detection |
-| `graph_refactor` | `AEGISGraphRefactor.refactor()` | Architectural-scale code transformation |
+| `graph_build` | `CODDY.build()` | Build/rebuild the graph with modular detection |
+| `graph_search` | `CODDYGraphSearch.search()` | Unified search (symbols, relations, semantic, modular) |
+| `graph_query` | `CodeGraphService.analyze_code_relationships()` + `CODDYGraphTrace.trace()` | Type-specific query + trace |
+| `graph_audit` | `CODDYGraphAudit.audit()` + `CodeGraphService` methods | Full architectural audit |
+| `graph_relationship` | `CODDYGraphRelationship.explore()` | Explore relationships with community detection |
+| `graph_refactor` | `CODDYGraphRefactor.refactor()` | Architectural-scale code transformation |
 
 ---
 

@@ -1,4 +1,4 @@
-# CodeCortex for Verdent AI
+﻿# CodeCortex for Verdent AI
 
 Verdent AI is an agentic coding suite with parallel agents, plan mode, BYOK, and Eco Mode. Supports VS Code and JetBrains.
 
@@ -14,8 +14,8 @@ Install CodeCortex as an MCP server in Verdent AI settings:
 ```json
 {
   "name": "codecortex",
-  "command": "uv",
-  "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+  "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "verdent"]
 }
 ```
 

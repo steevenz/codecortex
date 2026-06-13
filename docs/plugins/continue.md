@@ -1,4 +1,4 @@
-# CodeCortex for Continue.dev
+﻿# CodeCortex for Continue.dev
 
 Continue.dev supports MCP servers and custom agents via the `.continue/` directory.
 
@@ -12,8 +12,8 @@ Add to your Continue config (`config.json` or YAML):
   "experimental": {
     "mcpServers": {
       "codecortex": {
-        "command": "uv",
-        "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+        "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "continue"]
       }
     }
   }

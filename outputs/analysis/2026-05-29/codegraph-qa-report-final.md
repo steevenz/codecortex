@@ -1,9 +1,9 @@
 # CodeGraph Domain - Comprehensive QA Report
 
-**Date:** 2026-05-29  
-**Tester:** QA Expert (Cascade)  
-**Scope:** CodeGraph - 6 MCP Tools + 0 CLI Commands  
-**Perspective:** AI MCP Expert & AI Coder Specialist  
+**Date:** 2026-05-29
+**Tester:** QA Expert (Cascade)
+**Scope:** CodeGraph - 6 MCP Tools + 0 CLI Commands
+**Perspective:** AI MCP Expert & AI Coder Specialist
 **Source of Truth:** Source Code Implementation
 
 ---
@@ -148,8 +148,8 @@ The documentation was never updated to reflect these changes, creating a complet
    - Improves response time by 30%
    - Eliminates redundant tool calls
 
-5. **Modular Detection Understands AEGIS Architecture**
-   - Improves AEGIS project support by 90%
+5. **Modular Detection Understands CODDY Architecture**
+   - Improves CODDY project support by 90%
    - Increases relevance by 65%
    - Detects modules, plugins, widgets, components
 
@@ -215,7 +215,7 @@ With 59% average token savings, CodeGraph is highly efficient for AI coding work
 ### 4. Architecture is Well-Designed
 
 The implementation follows best practices:
-- Proper adapter pattern (AEGIS* services)
+- Proper adapter pattern (CODDY* services)
 - Consistent error handling with ApiError
 - Proper parameter validation
 - Pagination support (cursor, limit)

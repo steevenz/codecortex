@@ -4,8 +4,8 @@ Pnpm.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Pnpm
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class Pnpm(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "pnpm", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for package.json to ensure we are in an npm/pnpm project
         package_json_path = os.path.join(repo_path, "package.json")
         if not os.path.exists(package_json_path):
             return {"tool": "pnpm", "status": "error", "error": "package.json not found - pnpm requires a Node.js project"}
-        
+
         # Prevent path traversal for target_path (though pnpm test doesn't take a target path in the same way, we'll still check if provided)
         if target_path:
             # Normalize paths
@@ -32,12 +32,12 @@ class Pnpm(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "pnpm", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the pnpm test command
         cmd = ["pnpm", "test"]
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -46,10 +46,10 @@ class Pnpm(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # pnpm test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "pnpm",
                 "status": status,

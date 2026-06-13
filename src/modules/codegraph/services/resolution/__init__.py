@@ -4,8 +4,8 @@ Call and inheritance resolution logic ported from legacy codegraph.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Resolution
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from .calls import resolve_function_call, build_function_call_groups

@@ -10,8 +10,8 @@ Provides runtime-like insights without actual execution:
 :project: CodeCortex
 :package: Modules.Codeanalysis.Services.Operational
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from __future__ import annotations

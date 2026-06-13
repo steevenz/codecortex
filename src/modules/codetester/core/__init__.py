@@ -4,8 +4,8 @@ CodeTester core domain — DTOs and framework detection.
 :project: CodeCortex
 :package: Modules.Codetester.Core
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 from .dtos import (

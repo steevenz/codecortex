@@ -4,8 +4,8 @@ Module tools – 1 MCP tool: code_index (index management).
 :project: CodeCortex
 :package: Modules.Codeindex.Api.Tools
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from __future__ import annotations
 import os

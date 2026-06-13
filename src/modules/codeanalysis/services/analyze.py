@@ -6,8 +6,8 @@ Depends on: db (DatabaseManager), fs_service (Filesystem), graph_service.
 :project: CodeCortex
 :package: Modules.Codeanalysis.Services.Analyze
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from __future__ import annotations

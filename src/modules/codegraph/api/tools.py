@@ -4,8 +4,8 @@ Tools.
 :project: CodeCortex
 :package: Modules.Codegraph.Api.Tools
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from __future__ import annotations
@@ -16,12 +16,12 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 
 from src.core import api_response, new_request_id, ApiError
-from src.modules.codegraph.services.aegis import AEGIS
-from src.modules.codegraph.services.search import AEGISGraphSearch
-from src.modules.codegraph.services.audit import AEGISGraphAudit
-from src.modules.codegraph.services.trace import AEGISGraphTrace
-from src.modules.codegraph.services.relationship import AEGISGraphRelationship
-from src.modules.codegraph.services.refactor import AEGISGraphRefactor
+from src.modules.codegraph.services.coddy import CODDY
+from src.modules.codegraph.services.search import CODDYGraphSearch
+from src.modules.codegraph.services.audit import CODDYGraphAudit
+from src.modules.codegraph.services.trace import CODDYGraphTrace
+from src.modules.codegraph.services.relationship import CODDYGraphRelationship
+from src.modules.codegraph.services.refactor import CODDYGraphRefactor
 
 
 _RELATION_ALIASES: Dict[str, str] = {
@@ -168,7 +168,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                     return api_response(success=False, status_code=400,
                         message=f"repo_id required for action='{action}'",
                         data=None, request_id=request_id, error_code="GRPH_008")
-                searcher = AEGISGraphSearch(orchestrator.db, orchestrator.graph_service.graph_manager)
+                searcher = CODDYGraphSearch(orchestrator.db, orchestrator.graph_service.graph_manager)
                 result = await searcher.search(
                     repo_id=repo_id, action=action, query=query,
                     relation_type=relation_type, target_symbol_id=target_symbol_id,
@@ -254,14 +254,14 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                     return api_response(success=False, status_code=400,
                         message="repo_id required for trace_path", data=None,
                         request_id=request_id, error_code="GRPH_002")
-                tracer = AEGISGraphTrace(orchestrator.db, orchestrator.graph_service.graph_manager)
+                tracer = CODDYGraphTrace(orchestrator.db, orchestrator.graph_service.graph_manager)
                 result = await tracer.trace(
                     repo_id=repo_id, query_type="trace_path", target_node=target,
                     max_depth=min(max_depth, 10), end_node=end_node, limit=limit)
                 return _wrap_result(request_id=request_id, repo_id=repo_id, raw=result, default_message="trace_path completed", limit=limit)
 
             if query_type in ("callers", "callees") and repo_id:
-                tracer = AEGISGraphTrace(orchestrator.db, orchestrator.graph_service.graph_manager)
+                tracer = CODDYGraphTrace(orchestrator.db, orchestrator.graph_service.graph_manager)
                 result = await tracer.trace(
                     repo_id=repo_id, query_type=f"find_{query_type}", target_node=target,
                     max_depth=min(max_depth, 10), limit=limit)
@@ -341,7 +341,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                 data=None, request_id=request_id, error_code="GRPH_002")
 
     # ═══════════════════════════════════════════════════════════════════
-    # 3. graph_audit = arch_analyze + arch_audit + graph_audit (AEGIS)
+    # 3. graph_audit = arch_analyze + arch_audit + graph_audit (CODDY)
     # ═══════════════════════════════════════════════════════════════════
 
     @mcp.tool()
@@ -433,7 +433,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
 
             if all_flag or "circular_deps" in types:
                 try:
-                    auditor = AEGISGraphAudit(orchestrator.db, orchestrator.graph_service.graph_manager)
+                    auditor = CODDYGraphAudit(orchestrator.db, orchestrator.graph_service.graph_manager)
                     audit_result = await auditor.audit(repo_id=repo_id, max_depth=5, include_suggestions=True)
                     result["circular_deps"] = {
                         "count": len(audit_result.get("circular_dependencies", [])),
@@ -505,7 +505,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
 
         @param repo_path: Absolute path to the repository root directory
         @param repo_id: Optional UUID of the repository (auto-resolved if not provided)
-        @param detect_modular: Detect AEGIS modular structure
+        @param detect_modular: Detect CODDY modular structure
         @param build_dependency_graph: Build module dependency graph
         @param include_core_contracts: Include core/Contracts/ as nodes in the graph
         @param scan_hmvc_p: Scan HMVC-P structure
@@ -524,7 +524,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                     message=f"Path not found: {repo_path}", data=None,
                     request_id=request_id, error_code="GRPH_004")
 
-            builder = AEGIS(orchestrator.db, orchestrator.graph_service.graph_manager)
+            builder = CODDY(orchestrator.db, orchestrator.graph_service.graph_manager)
             result = await builder.build(
                 repo_path=str(repo_path_obj), repo_id=repo_id,
                 detect_modular=detect_modular, build_dependency_graph=build_dependency_graph,
@@ -605,7 +605,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         request_id = new_request_id()
         orchestrator = orchestrator_factory()
         try:
-            explorer = AEGISGraphRelationship(orchestrator.db, orchestrator.graph_service.graph_manager)
+            explorer = CODDYGraphRelationship(orchestrator.db, orchestrator.graph_service.graph_manager)
             result = await explorer.explore(
                 repo_id=repo_id, target_node=target_node, relation_type=relation_type,
                 direction=direction, depth=depth, modular_type=modular_type,
@@ -699,7 +699,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                     message="target_node is required for impact/preview/apply actions",
                     data=None, request_id=request_id, error_code="GRPH_012")
 
-            refacter = AEGISGraphRefactor(orchestrator.db, orchestrator.graph_service.graph_manager)
+            refacter = CODDYGraphRefactor(orchestrator.db, orchestrator.graph_service.graph_manager)
             result = await refacter.refactor(
                 repo_id=repo_id, action=action, refactor_type=refactor_type,
                 target_node=target_node, options=options or {}, dry_run=dry_run,

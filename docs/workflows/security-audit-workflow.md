@@ -4,8 +4,8 @@ title: WFK_SEC_001 — Security & Compliance Audit
 workflow_id: WFK_SEC_001
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
-codification: Aegis-Architecture-v1.0 §5
+standard: CODDY-Workflow-v2.0
+codification: CODDY-Architecture-v1.0 §5
 ---
 
 # WFK_SEC_001: Security & Compliance Audit
@@ -14,7 +14,7 @@ codification: Aegis-Architecture-v1.0 §5
 > **Trigger**: User asks for security audit, secret scan, vulnerability check, or compliance review.
 > **Time**: 1-3 minutes.
 > **Cost**: Medium (full scan of source + history + filesystem).
-> **Standards**: Aegis-Security-v1.0, OWASP-aligned categories.
+> **Standards**: CODDY-Security-v1.0, OWASP-aligned categories.
 
 ---
 
@@ -85,7 +85,7 @@ MCP: codecortex:codebase
 | `findings[].category` | Group by category for the deliverable. |
 | `findings[].code` | Exact offending line — quote in report. |
 | `findings[].remediation` | Suggest this as the fix. |
-| `findings[].standard_ref` | Reference Aegis standard violated. |
+| `findings[].standard_ref` | Reference CODDY standard violated. |
 | `recommendations[]` | High-level fixes from CodeCortex. |
 
 ### Incremental Audit
@@ -284,13 +284,13 @@ codecortex cg audit <repo_id> --types security,coupling,complexity
 
 ## 8. Standards Mapping
 
-| Aegis Standard | Audit Category | Check |
+| CODDY Standard | Audit Category | Check |
 |----------------|----------------|-------|
-| Aegis-Security-v1.0 §3.1 | secrets | No hardcoded credentials |
-| Aegis-Security-v1.0 §3.2 | pii | PII encrypted at rest |
-| Aegis-Security-v1.0 §4.1 | misconfig | debug disabled in prod |
-| Aegis-Security-v1.0 §5.1 | vulns | No known vulnerability patterns |
-| Aegis-Architecture-v1.0 §2.3 | di_compliance | Constructor injection only |
+| CODDY-Security-v1.0 §3.1 | secrets | No hardcoded credentials |
+| CODDY-Security-v1.0 §3.2 | pii | PII encrypted at rest |
+| CODDY-Security-v1.0 §4.1 | misconfig | debug disabled in prod |
+| CODDY-Security-v1.0 §5.1 | vulns | No known vulnerability patterns |
+| CODDY-Architecture-v1.0 §2.3 | di_compliance | Constructor injection only |
 
 ---
 

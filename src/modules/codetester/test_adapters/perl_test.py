@@ -4,8 +4,8 @@ Perl Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Perl_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class PerlTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "perl_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for Perl project signs: Makefile.PL, Build.PL, or a t/ directory with tests
         # We'll also check for a META.json or META.yml (modern Perl distributions)
         build_pl = os.path.join(repo_path, "Build.PL")
@@ -26,11 +26,11 @@ class PerlTest(BaseQA):
         meta_json = os.path.join(repo_path, "META.json")
         meta_yml = os.path.join(repo_path, "META.yml")
         test_dir = os.path.join(repo_path, "t")
-        
+
         # If none of these exist, we might still have a single .pl file with tests, but we'll require at least one sign
         if not (os.path.exists(build_pl) or os.path.exists(makefile_pl) or os.path.exists(meta_json) or os.path.exists(meta_yml) or os.path.isdir(test_dir)):
             return {"tool": "perl_test", "status": "error", "error": "No Perl project found (missing Build.PL, Makefile.PL, META.json, META.yml, or t/ directory)"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -39,7 +39,7 @@ class PerlTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "perl_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the prove command
         # We'll use prove with verbose output and maybe other options
         cmd = ["prove", "-v"]  # verbose
@@ -48,7 +48,7 @@ class PerlTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -57,10 +57,10 @@ class PerlTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # prove exit code: 0 = all tests passed, non-zero = some tests failed
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "perl_test",
                 "status": status,

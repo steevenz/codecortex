@@ -4,8 +4,8 @@ Class Search - Regex-based search and replace across the codebase using DB persi
 :project: CodeCortex
 :package: Modules.Codetester.Services.Search
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import re
@@ -33,7 +33,7 @@ class Search:
             # 1. Fetch all code content in batches to prevent memory overflow
             cursor = self.db.conn.execute(
                 """
-                SELECT f.id, f.name, f.content, d.relative_path 
+                SELECT f.id, f.name, f.content, d.relative_path
                 FROM files f
                 JOIN directories d ON d.id = f.directory_id
                 WHERE f.repository_id = ? AND f.is_deleted = 0 AND f.content IS NOT NULL
@@ -43,7 +43,7 @@ class Search:
 
             results = []
             flags = 0 if case_sensitive else re.IGNORECASE
-            
+
             pattern = query if is_regex else re.escape(query)
             regex = re.compile(pattern, flags)
 
@@ -51,7 +51,7 @@ class Search:
                 files = cursor.fetchmany(100)
                 if not files:
                     break
-                    
+
                 for f in files:
                     content = f["content"]
                     matches = list(regex.finditer(content))
@@ -62,14 +62,14 @@ class Search:
                             "match_count": len(matches),
                             "matches": []
                         }
-                        
+
                         # Extract context (line number and surrounding text)
                         lines = content.splitlines()
                         for match in matches:
                             start_pos = match.start()
                             # Calculate line number
                             line_no = content.count('\n', 0, start_pos) + 1
-                            
+
                             file_results["matches"].append({
                                 "line": line_no,
                                 "match": match.group(0),
@@ -86,13 +86,13 @@ class Search:
         """Global find and replace across the repository."""
         try:
             search_results = self.search_code(repo_id, find_query, is_regex=is_regex, case_sensitive=True)
-            
+
             if not search_results or "error" in search_results[0]:
                 return {"status": "no_matches", "results": []}
 
             affected_files = []
             total_matches = 0
-            
+
             flags = 0
             pattern = find_query if is_regex else re.escape(find_query)
             regex = re.compile(pattern, flags)
@@ -100,11 +100,11 @@ class Search:
             for res in search_results:
                 file_id = res["file_id"]
                 file_path = res["file_path"]
-                
+
                 # Get full content
                 row = self.db.conn.execute("SELECT content FROM files WHERE id = ?", (file_id,)).fetchone()
                 new_content = regex.sub(replace_text, row["content"])
-                
+
                 affected_files.append({
                     "file_id": file_id,
                     "path": file_path,
@@ -117,9 +117,9 @@ class Search:
                     cursor = self.db.conn.execute("SELECT root_path FROM repositories WHERE id = ?", (repo_id,))
                     repo_root = Path(cursor.fetchone()["root_path"])
                     abs_path = repo_root / file_path
-                    
+
                     abs_path.write_text(new_content, encoding="utf-8")
-                    
+
                     # Update DB
                     with self.db.transaction() as txn:
                         txn.execute("UPDATE files SET content = ? WHERE id = ?", (new_content, file_id))

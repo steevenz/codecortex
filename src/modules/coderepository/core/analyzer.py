@@ -4,8 +4,8 @@ Class RepoStructureAnalyzer – Single Responsibility: Analyze repository struct
 :project: CodeCortex
 :package: Modules.Coderepository.Core.Analyzer
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ class RepoStructureAnalyzer:
     def __init__(self, repo_path: Path):
         """
         Initialize with repository path and gitignore patterns.
-        
+
         @param repo_path: Absolute path to the repository
         """
         self.repo_path = repo_path
@@ -33,7 +33,7 @@ class RepoStructureAnalyzer:
     def _load_gitignore(self) -> Optional[PathSpec]:
         """
         Load .gitignore patterns from the repository root.
-        
+
         @return: PathSpec object if .gitignore exists, else None
         """
         gitignore_path = self.repo_path / '.gitignore'
@@ -48,7 +48,7 @@ class RepoStructureAnalyzer:
     def should_ignore(self, path: Path) -> bool:
         """
         Check if a path should be ignored based on .gitignore or default rules.
-        
+
         @param path: Absolute or relative path to check
         @return: True if ignored, False otherwise
         """
@@ -63,13 +63,13 @@ class RepoStructureAnalyzer:
 
         if self.gitignore_spec:
             return self.gitignore_spec.match_file(str(rel_path))
-        
+
         return False
 
     def get_structure(self, sub_path: Optional[str] = None, max_depth: int = 3) -> FileStructure:
         """
         Recursively traverse the repository to build a file structure tree.
-        
+
         @param sub_path: Optional subdirectory path relative to repository root
         @param max_depth: Maximum depth for traversal
         @return: FileStructure object representing the root of the (sub)tree
@@ -85,7 +85,7 @@ class RepoStructureAnalyzer:
     def _build_structure(self, current_path: Path, max_depth: int, current_depth: int = 0) -> FileStructure:
         """
         Internal recursive method to build the file structure.
-        
+
         @param current_path: Current path being analyzed
         @param max_depth: Maximum depth allowed
         @param current_depth: Current depth in the recursion

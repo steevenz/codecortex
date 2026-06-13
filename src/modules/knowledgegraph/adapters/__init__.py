@@ -7,8 +7,8 @@ following the Adapter Pattern:
     FormatParser     → Multi-format document parsing (docx, pdf, xlsx, pptx, csv, json, log)
 
 Standards:
-    - Aegis-Architecture-v1.0 (Adapter Pattern)
-    - Aegis-ProjectStructure-v1.0 (adapters/ requirements)
+    - CODDY-Architecture-v1.0 (Adapter Pattern)
+    - CODDY-ProjectStructure-v1.0 (adapters/ requirements)
 """
 
 from .storage import KnowledgeStore

@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.domain
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.domain
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Engram — Unified domain model for AI interaction memories across all IDEs.
 """

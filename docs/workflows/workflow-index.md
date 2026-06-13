@@ -1,21 +1,21 @@
 ---
-description: Master decision matrix and tool inventory for all CodeCortex AI workflows — Aegis Codification Edition
+description: Master decision matrix and tool inventory for all CodeCortex AI workflows — CODDY Codification Edition
 title: Workflow Master Index
 version: 2.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # Workflow Master Index
 
-> **Purpose**: The single entry point for AI agents using CodeCortex. Contains the complete tool inventory, comprehensive decision trees, Aegis-compliant workflow codification, and routing logic for all workflows.
+> **Purpose**: The single entry point for AI agents using CodeCortex. Contains the complete tool inventory, comprehensive decision trees, CODDY-compliant workflow codification, and routing logic for all workflows.
 > **Audience**: AI coding agents (Claude, Cursor, Windsurf, Cline, Trae, Continue).
 > **Must Read Before**: Any other workflow document.
-> **Codification Standard**: Aegis-Architecture-v1.0 §5 — Human codes follow `{DOMAIN}_{CATEGORY}_{NNN}` pattern.
+> **Codification Standard**: CODDY-Architecture-v1.0 §5 — Human codes follow `{DOMAIN}_{CATEGORY}_{NNN}` pattern.
 
 ---
 
-## 1. Aegis Codification Standard (Applied)
+## 1. CODDY Codification Standard (Applied)
 
 ### 1.1 Pattern
 

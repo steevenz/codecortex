@@ -6,8 +6,8 @@ Office document extractor integrated into graph build pipeline.
 :project: CodeCortex
 :package: Modules.Codegraph.Graph_builders.Office
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import docx
@@ -24,13 +24,13 @@ class OfficeWorker:
     """
     Production-grade extractor for Office and PDF documents.
     """
-    
+
     def process_file(self, file_path: Path) -> Optional[str]:
         """
         Extract text from supported office formats.
         """
         ext = file_path.suffix.lower()
-        
+
         try:
             if ext == '.docx':
                 return self._extract_docx(file_path)

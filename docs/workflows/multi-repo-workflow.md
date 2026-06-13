@@ -4,7 +4,7 @@ title: WFK_MRP_001 — Multi-Repository Analysis
 workflow_id: WFK_MRP_001
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_MRP_001: Multi-Repository Analysis
@@ -13,7 +13,7 @@ standard: Aegis-Workflow-v2.0
 > **Trigger**: User mentions multiple projects, cross-repo dependencies, or wants a portfolio-wide analysis.
 > **Time**: 1-10 minutes (depends on repo count and size).
 > **Cost**: High (scales with repo count).
-> **Codification**: Aegis-Architecture-v1.0 §5 — `WFK_MRP_001`
+> **Codification**: CODDY-Architecture-v1.0 §5 — `WFK_MRP_001`
 
 ---
 

@@ -4,8 +4,8 @@ Elixir tree-sitter parser — full implementation with modules, macros, structs,
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Elixir
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,18 +17,18 @@ ELIXIR_QUERIES = {
             target: (identifier) @name
             (arguments)
         ) @function_node
-        
+
         (call
             target: (dot
                 right: (identifier) @name
             )
             (arguments)
         ) @function_node
-        
+
         (function_clause
             name: (identifier) @name
         ) @function_node
-        
+
         (macro_clause
             name: (identifier) @name
         ) @function_node
@@ -49,7 +49,7 @@ ELIXIR_QUERIES = {
     """,
     "variables": """
         (match left: (identifier) @variable)
-        
+
         (module_attribute) @variable
     """,
     "calls": """
@@ -57,7 +57,7 @@ ELIXIR_QUERIES = {
             target: (identifier) @name
             (arguments)
         ) @call_node
-        
+
         (call
             target: (dot
                 right: (identifier) @name

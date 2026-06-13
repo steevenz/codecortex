@@ -1,6 +1,6 @@
 # Security — Myawesomeproject
 
-> **Standard:** Aegis-Security-v1.0
+> **Standard:** CODDY-Security-v1.0
 > **Project:** Myawesomeproject
 > **Stack:** python
 

@@ -4,8 +4,8 @@ MCP Resources for CodeCortex — structured URIs for repo data.
 :project: CodeCortex
 :package: Api.Resources
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-API-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-API-v1.0
 """
 
 from __future__ import annotations

@@ -5,7 +5,13 @@
   "type": "module",
   "dependencies": {
     "modules": [],
-    "core": ["config", "database", "errors", "logging", "telemetry"]
+    "core": [
+      "config",
+      "database",
+      "errors",
+      "logging",
+      "telemetry"
+    ]
   },
   "providers": {
     "services": [
@@ -14,16 +20,35 @@
       "svn_service"
     ],
     "adapters": {
-      "filesystem": ["file_reader", "sqlite_store"],
-      "git": ["adapter", "history", "service"],
-      "svn": ["adapter", "service"]
+      "filesystem": [
+        "file_reader",
+        "sqlite_store"
+      ],
+      "git": [
+        "adapter",
+        "history",
+        "service"
+      ],
+      "svn": [
+        "adapter",
+        "service"
+      ]
     },
     "models": [
-      "repository", "directory", "file", "symbol", "commit", "manifest_entry"
+      "repository",
+      "directory",
+      "file",
+      "symbol",
+      "commit",
+      "manifest_entry"
     ],
     "repositories": [
-      "repository_repo", "directory_repo", "file_repo",
-      "symbol_repo", "commit_repo", "manifest_repo"
+      "repository_repo",
+      "directory_repo",
+      "file_repo",
+      "symbol_repo",
+      "commit_repo",
+      "manifest_repo"
     ]
   },
   "tools": {
@@ -45,12 +70,15 @@
       "repo_restore"
     ]
   },
-  "vcs_support": ["git", "svn"],
+  "vcs_support": [
+    "git",
+    "svn"
+  ],
   "max_repos": 50,
   "author": {
     "name": "Steeven Andrian",
     "email": "steevenz@steevenz.com"
   },
-  "copyright": "Copyright (c) 2026 Aegis Codework",
-  "standard": "Aegis-CrossStack-v1.0"
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v1.0"
 }

@@ -4,8 +4,8 @@ Data Transfer Objects for Repository Analysis.
 :project: CodeCortex
 :package: Modules.Coderepository.Core.Dto
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from typing import List, Optional
 class Summary:
     """
     Aggregated statistics for a directory.
-    
+
     Single Responsibility: Carry directory statistics data.
     """
     file_count: int = 0
@@ -27,7 +27,7 @@ class Summary:
 class FileStructure:
     """
     Node in the repository file tree.
-    
+
     Single Responsibility: Represent a file or directory node in the tree.
     """
     path: str

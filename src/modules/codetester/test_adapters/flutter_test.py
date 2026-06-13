@@ -4,8 +4,8 @@ Flutter Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Flutter_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class FlutterTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "flutter_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for Flutter project signs: pubspec.yaml and presence of lib/ or test/
         pubspec_path = os.path.join(repo_path, "pubspec.yaml")
         if not os.path.exists(pubspec_path):
             return {"tool": "flutter_test", "status": "error", "error": "pubspec.yaml not found - Flutter test requires a Flutter project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -32,7 +32,7 @@ class FlutterTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "flutter_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the flutter test command
         cmd = ["flutter", "test"]
         if target_path:
@@ -40,7 +40,7 @@ class FlutterTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -49,10 +49,10 @@ class FlutterTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # flutter test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "flutter_test",
                 "status": status,

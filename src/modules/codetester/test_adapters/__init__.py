@@ -4,8 +4,8 @@ CodeTester test adapters — 28 framework-specific test runners.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 from .base import BaseQA

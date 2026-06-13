@@ -3,8 +3,8 @@
  * @project   CodeCortex
  * @package   Tests
  * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
+ * @copyright (c) 2026 CODDY Codework
+ * @standard  CODDY-CrossStack-v1.0
  * @stack     Python
  * * Test: Verify code_tester MCP tool produces spec-compliant JSON output for all 5 actions.
  */

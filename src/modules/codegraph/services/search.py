@@ -1,12 +1,12 @@
 """
-AEGIS Graph Search – Modular-Aware Symbol & Relation Search
+CODDY Graph Search – Modular-Aware Symbol & Relation Search
 Graph-aware search for symbols, relations, trace flow, and modular types.
 
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Search
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import json
@@ -68,9 +68,9 @@ class PaginationInfo:
     has_more: bool = False
     total: int = 0
 
-class AEGISGraphSearch:
+class CODDYGraphSearch:
     """
-    Graph-aware search engine following AEGIS standard.
+    Graph-aware search engine following CODDY standard.
     Supports symbol, relation, trace_flow, and modular search actions.
     """
 

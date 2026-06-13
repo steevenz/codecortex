@@ -4,8 +4,8 @@ Filesystem — safe file and directory operations for scaffolding output.
 :project: CodeCortex
 :package: Modules.Scaffolder.Adapters.Filesystem
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations

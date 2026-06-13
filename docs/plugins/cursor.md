@@ -1,4 +1,4 @@
-# CodeCortex for Cursor
+﻿# CodeCortex for Cursor
 
 Cursor IDE supports plugins via the `.cursor-plugin/` directory + MCP server integration.
 
@@ -13,15 +13,15 @@ Plugin is already at `.cursor-plugin/plugin.json` — Cursor auto-detects.
 2. Fill:
    - **Name**: `codecortex`
    - **Type**: `command`
-   - **Command**: `uv --directory /path/to/mcp-codecortex run python -m src.main`
+   - **Command**: `node scripts/server/js/index.cjs --ide cursor`
 
 **Or via `.cursor/mcp.json`:**
 ```json
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "cursor"]
     }
   }
 }

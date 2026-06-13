@@ -23,7 +23,7 @@ self_evaluation:
   scores:
     project_structure: "100 — idegraph follows modular standard, api/tools.py pattern, module.json"
     package_paths: "100 — all imports use src.modules.idegraph.*"
-    docblocks: "100 — all files have CodeCortex/Aegis docblocks"
+    docblocks: "100 — all files have CodeCortex/CODDY docblocks"
     class_naming: "100 — no redundant Service suffix (coding-standard R1)"
     output_standard: "100 — api_response() + insight field on all tools"
     db_integration: "100 — all modules use shared database/codecortex.db"

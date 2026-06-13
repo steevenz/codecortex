@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.services
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.services
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Storage — SQLite persistence layer for cross-IDE memories, settings, and configurations.
 """
@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from src.core.config.database import get_db_path
 from src.modules.idegraph.core.logging_service import get_logger
 from src.modules.idegraph.domain.engram import Engram, IDEInfo, Message
 
@@ -61,7 +62,7 @@ class Storage:
             return
         # Standalone mode (legacy)
         root = Path(__file__).resolve().parents[4]
-        self.db_path = db_path or Path(os.environ.get("CODECORTEX_DB_PATH", str(root / "database" / "codecortex.db")))
+        self.db_path = db_path or Path(os.environ.get("CODECORTEX_DB_PATH", "") or get_db_path())
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 

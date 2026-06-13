@@ -4,8 +4,8 @@ Elixir Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Elixir_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class ElixirTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "elixir_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for Elixir project signs: mix.exs
         mix_exs_path = os.path.join(repo_path, "mix.exs")
         if not os.path.exists(mix_exs_path):
             return {"tool": "elixir_test", "status": "error", "error": "mix.exs not found - Elixir test requires a Mix project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -32,7 +32,7 @@ class ElixirTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "elixir_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the elixir test command
         cmd = ["mix", "test"]
         if target_path:
@@ -40,7 +40,7 @@ class ElixirTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -49,10 +49,10 @@ class ElixirTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # elixir test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "elixir_test",
                 "status": status,

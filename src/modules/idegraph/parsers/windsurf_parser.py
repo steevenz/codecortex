@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.parsers
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.parsers
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 @fileoverview WindsurfParser - Parser for Windsurf IDE AI interaction data.
 """
 
@@ -34,9 +34,9 @@ class WindsurfParser(BaseIDEParser):
         system = platform.system()
         home = Path.home()
         locations = []
-        
+
         patterns = ['Windsurf', 'windsurf', '.windsurf']
-        
+
         if system == "Darwin":
             base_dirs = [home / "Library/Application Support", home / ".config"]
         elif system == "Linux":
@@ -56,13 +56,13 @@ class WindsurfParser(BaseIDEParser):
                 path = base_dir / pattern
                 if path.exists():
                     locations.append(path)
-        
+
         return list(set(locations))
 
     def parse_all(self) -> List[Engram]:
         all_engrams = []
         installations = self.find_installations()
-        
+
         for inst in installations:
             workspace_storage = inst / "User/workspaceStorage"
             if workspace_storage.exists():
@@ -94,7 +94,7 @@ class WindsurfParser(BaseIDEParser):
             if not workspace_storage.exists() and not global_db.exists():
                 for db_file in self._iter_db_files(inst):
                     all_engrams.extend(self._artifact_any_db_file(db_file=db_file, installation=inst, workspace_id="installation"))
-                
+
         return all_engrams
 
     def _parse_chat_db(self, db_path: Path, workspace_id: str, installation: Path) -> List[Engram]:
@@ -178,16 +178,16 @@ class WindsurfParser(BaseIDEParser):
 
         query = "SELECT key, value FROM ItemTable WHERE key LIKE '%agent%' OR key LIKE '%flow%' OR key LIKE '%cascade%'"
         results = self._read_sqlite(db_path, query)
-        
+
         for key, value in results:
             data = self._safe_json_loads(value)
             if not data or not isinstance(data, dict):
                 continue
-            
+
             engram = self._extract_agent_conversation(data, key, db_path, installation, workspace_id="global")
             if engram:
                 engrams.append(engram)
-                
+
         kv_query = "SELECT key, value FROM cursorDiskKV WHERE key LIKE 'composerData:%' OR key LIKE 'agentData:%' OR key LIKE 'flowData:%'"
         kv_results = self._read_sqlite(db_path, kv_query)
         for key, value in kv_results:
@@ -196,7 +196,7 @@ class WindsurfParser(BaseIDEParser):
                 engram = self._extract_agent_conversation(data, key, db_path, installation, workspace_id="global")
                 if engram:
                     engrams.append(engram)
-                    
+
         return engrams
 
     def _extract_windsurf_modern_sessions(self, db_path: Path, installation: Path) -> List[Engram]:
@@ -236,16 +236,16 @@ class WindsurfParser(BaseIDEParser):
     ) -> Optional[Engram]:
         if 'conversation' not in data or not isinstance(data['conversation'], list):
             return None
-            
+
         messages = []
         inferred_path: Optional[str] = None
         for bubble in data['conversation']:
             bubble_type = bubble.get('type')
             role = 'user' if (bubble_type == 1 or bubble.get('role') == 'user') else 'assistant'
             text = bubble.get('text') or bubble.get('rawText') or bubble.get('markdownText') or ''
-            
+
             msg = Message(role=role, content=text)
-            
+
             # Context
             if 'context' in bubble and 'selections' in bubble['context']:
                 for sel in bubble['context']['selections']:
@@ -258,27 +258,27 @@ class WindsurfParser(BaseIDEParser):
                         })
                         if inferred_path is None:
                             inferred_path = self._normalize_project_path(Path(fp).parent)
-            
+
             # Tool Calls and Results
             if 'toolCalls' in bubble:
                 msg.tool_use.extend(bubble['toolCalls'])
             if 'toolResults' in bubble:
                 msg.metadata['tool_results'] = bubble['toolResults']
-            
+
             # Code Blocks / Diffs
             if 'suggestedCodeBlocks' in bubble:
                 msg.metadata['suggested_code_blocks'] = bubble['suggestedCodeBlocks']
             if 'diffHistories' in bubble:
                 msg.diffs = bubble['diffHistories']
-                
+
             # Plan / Step Info
             if 'step' in bubble:
                 msg.metadata['step'] = bubble['step']
             if 'checkpoint' in bubble:
                 msg.metadata['checkpoint'] = bubble['checkpoint']
-                
+
             messages.append(msg)
-            
+
         if not messages:
             return None
 

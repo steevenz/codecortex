@@ -56,4 +56,4 @@ Each feature page follows this structure:
 
 ---
 
-*This document follows Aegis Codeworks documentation standards.*
+*This document follows CODDY Codeworks documentation standards.*

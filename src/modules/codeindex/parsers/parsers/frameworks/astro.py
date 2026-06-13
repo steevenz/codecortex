@@ -4,8 +4,8 @@ Astro framework detection and symbol enrichment.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Frameworks.Astro
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from typing import Dict, List, Any, Optional
 

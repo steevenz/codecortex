@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.utils
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.utils
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 DB Explorer — Explore VSCode-style SQLite storage.
 """
@@ -22,7 +22,7 @@ def dump_vscdb(db_path: str) -> None:
     Explore the content of a vscdb (SQLite) file and print interesting keys.
     """
     logger.info(f"Exploring database: {db_path}")
-    
+
     if not os.path.exists(db_path):
         logger.error(f"Database file does not exist: {db_path}")
         return

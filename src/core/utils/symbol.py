@@ -4,8 +4,8 @@ Symbol utilities — target parsing and code reference builders.
 :project: CodeCortex
 :package: Core.Utils.Symbol
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

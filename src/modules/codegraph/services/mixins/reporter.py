@@ -4,8 +4,8 @@ Mixin for generating high-craft architectural reports.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Mixins.Reporter
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import datetime
@@ -86,10 +86,10 @@ class ArchitecturalReporterMixin:
             "",
             "## 5. Structural Risks & Observations",
         ])
-        
+
         for obs in data.get('observations', []):
             lines.append(f"- {obs}")
-            
+
         if not data.get('observations'):
             lines.append("- No immediate structural risks detected. System appears balanced.")
 
@@ -99,7 +99,7 @@ class ArchitecturalReporterMixin:
             "Questions suggested by the graph topology for deep exploration:",
             ""
         ])
-        
+
         for q in data.get('questions', []):
             lines.append(f"- **{q}**")
 

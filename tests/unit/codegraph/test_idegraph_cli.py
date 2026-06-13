@@ -2,8 +2,8 @@
 @project   CodeCortex
 @package   modules.idegraph.tests
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
-:standard: Aegis-IdeGraph-v1.0
+@copyright (c) 2026 CODDY Codework
+:standard: CODDY-IdeGraph-v1.0
 
 Tests for idegraph CLI commands.
 """

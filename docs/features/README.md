@@ -1,6 +1,6 @@
 # CodeCortex Documentation Guide
 
-This directory contains all project documentation following Aegis Codeworks standards.
+This directory contains all project documentation following CODDY Codeworks standards.
 
 ## Quick Links
 
@@ -43,7 +43,7 @@ Feature documentation is organized in `docs/features/` by domain:
 
 ## Documentation Standards
 
-All documentation follows Aegis Codeworks standards:
+All documentation follows CODDY Codeworks standards:
 - **lowercase-dashed** filenames
 - Each feature has: concept, flow (optional), tools, output, llm-impact
 - Sub-features nested under `sub-features/` with recursive structure

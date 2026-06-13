@@ -3,8 +3,8 @@
  * @project   CodeCortex
  * @package   Server
  * @author    Steeven Andrian
- * @copyright (c) 2026 Aegis Codework
- * @standard  Aegis-CrossStack-v1.0
+ * @copyright (c) 2026 CODDY Codework
+ * @standard  CODDY-CrossStack-v1.0
  * @stack     Python, FastAPI
  * * Webhook listener for Git events (push, PR, merge) to trigger re-index.
  */

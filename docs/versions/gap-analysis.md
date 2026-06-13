@@ -50,10 +50,10 @@ CodeCortex MCP Server is **not a typical RAG system**. It is a **code cognition 
 
 | # | Feature | Status | Evidence |
 |---|---------|--------|----------|
-| 1.1 | Project structure mapping | ✅ | `fs_manage(operation=tree)` — full recursive directory scan. `AEGIS.build()` detects Modules/Plugins/Widgets/Core structure. |
-| 1.2 | Module dependency graph | ✅ | `graph_build` with `build_dependency_graph=True`. AEGIS module detection + import graph via Tree-sitter. |
+| 1.1 | Project structure mapping | ✅ | `fs_manage(operation=tree)` — full recursive directory scan. `CODDY.build()` detects Modules/Plugins/Widgets/Core structure. |
+| 1.2 | Module dependency graph | ✅ | `graph_build` with `build_dependency_graph=True`. CODDY module detection + import graph via Tree-sitter. |
 | 1.3 | Service boundaries detection | ✅ | `src/modules/codegraph/core/service_boundary.py` — detects microservice boundaries from Dockerfile, go.mod, package.json, HTTP routes, gRPC, Thrift. |
-| 1.4 | Layer detection | ✅ | `AEGIS` system detects HMVC-P layers (Controllers, Presenters, Models, DTOs, Services, etc.) and module types. |
+| 1.4 | Layer detection | ✅ | `CODDY` system detects HMVC-P layers (Controllers, Presenters, Models, DTOs, Services, etc.) and module types. |
 | 1.5 | Entry-point detection | ✅ | `src/modules/codegraph/core/entry_point.py` — scores functions as entry points via 30+ patterns (main, bootstrap, handlers, controllers). Framework-aware (Django, Flask, FastAPI, Express, Next.js). |
 | 1.6 | Config discovery | ✅ | `repo_inspect` with `include_dependency_summary=True` — detects package.json, pyproject.toml, Dockerfile, etc. |
 | 1.7 | Build system understanding | ✅ | Dependency summary detects pip, npm, yarn, cargo, go, bundler, gradle, maven, composer. |
@@ -81,10 +81,10 @@ CodeCortex MCP Server is **not a typical RAG system**. It is a **code cognition 
 
 | # | Feature | Status | Evidence |
 |---|---------|--------|----------|
-| 3.1 | Architecture pattern detection | ✅ | AEGIS detects DDD-aligned structure: Entities, ValueObjects, Aggregates, Repositories, Services, Events. HMVC-P detection. Framework-aware routing. |
+| 3.1 | Architecture pattern detection | ✅ | CODDY detects DDD-aligned structure: Entities, ValueObjects, Aggregates, Repositories, Services, Events. HMVC-P detection. Framework-aware routing. |
 | 3.2 | Coupling analysis | ✅ | `graph_audit` with coupling analysis — Leiden community detection + surprise score for unexpected cross-module edges. |
 | 3.3 | Circular dependency detection | ✅ | `graph_audit(audit_types=["circular_deps"])` — detects cycles with suggestions for breaking them. |
-| 3.4 | Bounded context detection | ✅ | `ModuleInfo.bounded_context` field in AEGIS. Community clusters via Leiden algorithm map to bounded contexts. |
+| 3.4 | Bounded context detection | ✅ | `ModuleInfo.bounded_context` field in CODDY. Community clusters via Leiden algorithm map to bounded contexts. |
 | 3.5 | Shared state detection | ✅ | `StateAnalyzer` in `src/modules/codeanalysis/analyzers/state_analyzer.py` detects: module-level mutable vars (lists, dicts, sets), singleton patterns (__new__, instance holders), in-memory caches (_cache={}, @lru_cache), class-level mutable state, and mutable default arguments (def foo(x=[])). Categorized by risk with remediation suggestions. |
 | 3.6 | Layer violation detection | ✅ | Community coupling scores identify cross-layer violations. Surprise score > 0.4 flags unexpected connections. |
 
@@ -127,7 +127,7 @@ CodeCortex MCP Server is **not a typical RAG system**. It is a **code cognition 
 |---|-------|--------|----------|
 | 6.1 | Structural Layer | ✅ | `fs_manage(tree)`, `repo_inspect(file_statistics)` — folders, modules, file counts, sizes. |
 | 6.2 | Semantic Layer | ✅ | `code_analyze` — symbol extraction, call graphs, import graphs. Semantic embeddings via code_index. |
-| 6.3 | Architectural Layer | ✅ | AEGIS module detection, service boundaries, community clusters, layer detection, architecture audit. |
+| 6.3 | Architectural Layer | ✅ | CODDY module detection, service boundaries, community clusters, layer detection, architecture audit. |
 | 6.4 | Temporal Layer | ✅ | Co-change analysis via `CoChangeMatrix` provides full temporal coupling. Git churn + bug magnets + commit velocity + co-change matrix covers evolution timeline analysis. |
 | 6.5 | Operational Layer | ✅ | ExecutionTracer in src/modules/codeanalysis/services/operational.py |
 | 6.6 | Risk Layer | ✅ | `graph_audit` — god nodes, dead code, circular deps, coupling scores, security hygiene. `code_audit` — compliance scoring. |
@@ -240,7 +240,7 @@ CodeCortex MCP Server is **not a typical RAG system**. It is a **code cognition 
 
 | # | Feature | Status | Evidence |
 |---|---------|--------|----------|
-| 14.1 | Core architectural principles | ⚠️ Partial | Detected via AEGIS modular patterns but not explicitly stored as golden knowledge. |
+| 14.1 | Core architectural principles | ⚠️ Partial | Detected via CODDY modular patterns but not explicitly stored as golden knowledge. |
 | 14.2 | Coding conventions | ⚠️ Partial | File conventions per stack (snake_case, PascalCase) detected for scaffolding but not analyzed for existing code. |
 | 14.3 | Important invariants | ❌ Missing | No invariant detection or storage. |
 | 14.4 | Domain assumptions | ❌ Missing | No domain assumption extraction. |
@@ -301,7 +301,7 @@ Codebase MCP                               CodeCortex MCP Server
 ├── Parser Engine          ──── ✅ ───→    ├── Tree-sitter (24 languages)
 ├── AST Intelligence       ──── ✅ ───→    ├── Symbol extraction, call graphs
 ├── Semantic Analyzer      ──── ✅ ───→    ├── FTS5 + embeddings + graph
-├── Architecture Mapper    ──── ✅ ───→    ├── AEGIS + Leiden + service boundaries
+├── Architecture Mapper    ──── ✅ ───→    ├── CODDY + Leiden + service boundaries
 ├── Dependency Graph       ──── ✅ ───→    ├── Full import/call/inherit graph
 ├── Temporal Analyzer      ──── ❌ ───→    ├── Missing: co-change analysis
 ├── Risk Analyzer          ──── ✅ ───→    ├── God nodes, dead code, circular deps

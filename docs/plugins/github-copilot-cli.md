@@ -1,4 +1,4 @@
-# CodeCortex for GitHub Copilot CLI
+﻿# CodeCortex for GitHub Copilot CLI
 
 ## Prerequisites
 - [GitHub Copilot CLI](https://github.com/github/gh-copilot) installed
@@ -18,8 +18,8 @@ GitHub Copilot does not natively support MCP. But if using Copilot via **VS Code
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "github-copilot-cli"]
     }
   }
 }

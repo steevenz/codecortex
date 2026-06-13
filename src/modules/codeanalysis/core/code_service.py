@@ -4,8 +4,8 @@ Code Analysis Service - Unified interface for codebase operations.
 :project: CodeCortex
 :package: Modules.CodeAnalysis.Core.CodeService
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from typing import Dict, Any, Optional, List

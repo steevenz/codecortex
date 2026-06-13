@@ -4,8 +4,8 @@ Mixin for security hardening: SSRF protection and path guards.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Mixins.Security
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import ipaddress
@@ -72,7 +72,7 @@ class ArchitecturalSecurityMixin:
 
     def _audit_security_hygiene(self, repo_id: str) -> List[Dict]:
         """Scan for sensitive patterns or missing masks in the graph.
-        
+
         Note: requires 'self.db' to be available on the inheriting class.
         """
         patterns = ["API_KEY", "SECRET", "PASSWORD", "TOKEN"]
@@ -119,7 +119,7 @@ class ArchitecturalSecurityMixin:
                       AND s.code LIKE ?
                 """
                 code_params = (repo_id, f"%{p}%")
-            
+
             cursor = self.db.conn.execute(code_sql, code_params)
             for row in cursor.fetchall():
                 sid = row["id"]

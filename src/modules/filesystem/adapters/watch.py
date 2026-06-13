@@ -4,8 +4,8 @@ Watch.
 :project: CodeCortex
 :package: Modules.Filesystem.Adapters.Watch
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 from __future__ import annotations

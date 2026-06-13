@@ -42,7 +42,7 @@ src/modules/filesystem/
 ├── api/              → tools.py: 5 MCP tools, cli.py: CLI commands, api_response() compliant
 ├── adapters/         → 22 adapters: DiskTree, DiskSearch, DiskWatcher, DiskUsage, DiskAudit, etc.
 ├── core/            → service.py: FilesystemService (DI via constructor), dtos.py: typed DTOs
-└── __init__.py        → Package initialization with Aegis-Filesystem-v1.0 standard
+└── __init__.py        → Package initialization with CODDY-Filesystem-v1.0 standard
 ```
 
 ## Domain Boundary
@@ -65,7 +65,7 @@ The CLI domain is named `fs` (not `filesystem`) as an intentional UX decision. U
 - **Error Handling:** Guard clauses, structured errors via ApiError
 - **Logging:** `CodeCortex.Filesystem.*` logger namespace
 - **Documentation:** All docs in `docs/features/filesystem/`
-- **Standard:** Aegis-Filesystem-v1.0
+- **Standard:** CODDY-Filesystem-v1.0
 
 ## VCS Integration Strategy
 

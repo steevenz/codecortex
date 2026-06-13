@@ -2,8 +2,8 @@
 @project   CodeCortex
 @package   modules.idegraph.services
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
-:standard: Aegis-IdeGraph-v1.0
+@copyright (c) 2026 CODDY Codework
+:standard: CODDY-IdeGraph-v1.0
 
 Graph Builder — Constructs conversation graph from engrams with timeline,
 state snapshots, and digital artifact tracking.

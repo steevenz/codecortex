@@ -114,7 +114,7 @@ Build (or rebuild) the full code relationship graph for a repository using Tree-
 Parameters:
   repo_path (str)               — Absolute path to the repository root directory
   repo_id (str?)                — Optional UUID of the repository (auto-resolved if not provided)
-  detect_modular (bool)         — Detect AEGIS modular structure (default: True)
+  detect_modular (bool)         — Detect CODDY modular structure (default: True)
   build_dependency_graph (bool) — Build module dependency graph (default: True)
   include_core_contracts (bool) — Include core/Contracts/ as nodes in the graph (default: True)
   scan_hmvc_p (bool)            — Scan HMVC-P structure (default: True)

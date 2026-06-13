@@ -4,7 +4,7 @@ title: WFK_CCT_001 — CCT Deep Reasoning
 workflow_id: WFK_CCT_001
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_CCT_001: CCT Deep Reasoning
@@ -14,7 +14,7 @@ standard: Aegis-Workflow-v2.0
 > **Time**: 30s to 2 minutes (CCT server latency).
 > **Cost**: High (LLM reasoning, token-intensive).
 > **Important**: CCT is **CLI-only** — it proxies to the CCT cognitive server, not available as an MCP tool.
-> **Codification**: Aegis-Architecture-v1.0 §5 — `WFK_CCT_001`
+> **Codification**: CODDY-Architecture-v1.0 §5 — `WFK_CCT_001`
 
 ---
 
@@ -150,7 +150,7 @@ Example:
   CCT says: "Consider event sourcing for audit requirements"
   CodeCortex graph shows: OrderService has 45 callers (god node)
   CodeCortex audit shows: No existing event infrastructure
-  
+
   Synthesis: "Defer event sourcing. Current OrderService is already complex
     (45 callers). Add audit logging to existing CRUD first. Revisit event
     sourcing in Q3 when coupling is reduced."

@@ -5,8 +5,8 @@ Ported from GitNexus's entry-point-scoring.ts algorithm.
 :project: CodeCortex
 :package: Modules.Codegraph.Core.Entry_point
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import re

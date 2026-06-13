@@ -4,8 +4,8 @@ Dotnet Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Dotnet_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,16 +18,16 @@ class DotNetTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "dotnet_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for .NET project signs: .csproj, .fsproj, .vcxproj, or solution files
         has_csproj = any(f.endswith(".csproj") for f in os.listdir(repo_path) if os.path.isfile(os.path.join(repo_path, f)))
         has_fsproj = any(f.endswith(".fsproj") for f in os.listdir(repo_path) if os.path.isfile(os.path.join(repo_path, f)))
         has_vcxproj = any(f.endswith(".vcxproj") for f in os.listdir(repo_path) if os.path.isfile(os.path.join(repo_path, f)))
         has_sln = any(f.endswith(".sln") for f in os.listdir(repo_path) if os.path.isfile(os.path.join(repo_path, f)))
-        
+
         if not (has_csproj or has_fsproj or has_vcxproj or has_sln):
             return {"tool": "dotnet_test", "status": "error", "error": "No .NET project found (missing .csproj, .fsproj, .vcxproj, or .sln)"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -36,7 +36,7 @@ class DotNetTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "dotnet_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the dotnet test command
         cmd = ["dotnet", "test"]
         if target_path:
@@ -44,7 +44,7 @@ class DotNetTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -53,10 +53,10 @@ class DotNetTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # dotnet test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "dotnet_test",
                 "status": status,

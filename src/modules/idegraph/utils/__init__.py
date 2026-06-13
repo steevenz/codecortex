@@ -2,9 +2,9 @@
 @project   CodeCortex
 @package   modules.idegraph.utils
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
+@copyright (c) 2026 CODDY Codework
 :package:  modules.idegraph.utils
-:standard: Aegis-IdeGraph-v1.0
+:standard: CODDY-IdeGraph-v1.0
 
 Utilities for IDE database exploration and binary analysis.
 """

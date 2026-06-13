@@ -15,8 +15,8 @@ Public API:
     KnowledgeGraphBuilder→ Relationship mapping between knowledge chunks
 
 Standards:
-    - Aegis-Architecture-v1.0 (Lego Principle, DI/IoC, DTO Boundaries)
-    - Aegis-ProjectStructure-v1.0 (core/ requirements)
+    - CODDY-Architecture-v1.0 (Lego Principle, DI/IoC, DTO Boundaries)
+    - CODDY-ProjectStructure-v1.0 (core/ requirements)
 """
 
 from .extraction import KnowledgeExtractor

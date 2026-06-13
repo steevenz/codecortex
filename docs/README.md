@@ -1,6 +1,6 @@
 # CodeCortex Documentation
 
-This directory contains all project documentation following the Aegis Codeworks project-structure-standard.
+This directory contains all project documentation following the CODDY Codeworks project-structure-standard.
 
 ## Documentation Structure
 
@@ -57,7 +57,7 @@ High-level overview of the CodeCortex project, its purpose, and key components.
 
 All documentation must:
 1. Use **lowercase-dashed** filenames
-2. Follow the Aegis Codeworks documentation standards
+2. Follow the CODDY Codeworks documentation standards
 3. Include proper docblocks and copyright headers
 4. Be written in clear, professional English
 5. Use Markdown format with proper structure
@@ -86,4 +86,4 @@ All documentation must:
 
 ---
 
-*This document follows Aegis Codeworks documentation standards.*
+*This document follows CODDY Codeworks documentation standards.*

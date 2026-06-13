@@ -4,8 +4,8 @@ Cargo Test.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Cargo_test
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,12 +18,12 @@ class CargoTest(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "cargo_test", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for Cargo.toml to ensure we are in a Rust project
         cargo_toml_path = os.path.join(repo_path, "Cargo.toml")
         if not os.path.exists(cargo_toml_path):
             return {"tool": "cargo_test", "status": "error", "error": "Cargo.toml not found - Rust test requires a Cargo project"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -32,7 +32,7 @@ class CargoTest(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "cargo_test", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the cargo test command
         cmd = ["cargo", "test"]
         if target_path:
@@ -42,7 +42,7 @@ class CargoTest(BaseQA):
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -51,10 +51,10 @@ class CargoTest(BaseQA):
                 text=True,
                 timeout=120
             )
-            
+
             # cargo test exit code: 0 = success, non-zero = failure
             status = "success" if result.returncode == 0 else "failed"
-            
+
             return {
                 "tool": "cargo_test",
                 "status": status,

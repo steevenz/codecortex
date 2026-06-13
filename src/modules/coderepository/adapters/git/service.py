@@ -4,8 +4,8 @@ Class Git - Application service for Git-native workflows and atomic commits.
 :project: CodeCortex
 :package: Modules.Coderepository.Adapters.Git.Service
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 import os
@@ -74,7 +74,7 @@ class Git:
                     # If not under root, maybe it's already relative or invalid
                     # We'll just pass it through and let Git handle it
                     rel_paths.append(str(p).replace("\\", "/"))
-            
+
             await asyncio.to_thread(adapter.add, rel_paths)
             commit_hash = await asyncio.to_thread(adapter.commit, message)
             if commit_hash:

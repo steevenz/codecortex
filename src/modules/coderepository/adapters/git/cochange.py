@@ -8,8 +8,8 @@ direct code dependency. Critical for impact analysis and refactoring.
 :project: CodeCortex
 :package: Modules.Coderepository.Adapters.Git.Cochange
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 from __future__ import annotations

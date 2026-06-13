@@ -4,13 +4,24 @@
   "description": "Code graph domain — knowledge graph construction, query, relationship tracing, heritage extraction, route extraction, ORM dataflow, community detection, and architecture audit across 22 languages",
   "type": "module",
   "dependencies": {
-    "modules": ["coderepository", "codeindex"],
-    "core": ["config", "database", "errors", "graph", "logging", "telemetry", "token"]
+    "modules": [
+      "coderepository",
+      "codeindex"
+    ],
+    "core": [
+      "config",
+      "database",
+      "errors",
+      "graph",
+      "logging",
+      "telemetry",
+      "token"
+    ]
   },
   "providers": {
     "services": [
       "codegraph_service",
-      "aegis_builder",
+      "CODDY_builder",
       "community_leiden",
       "entry_point_scorer",
       "graph_audit",
@@ -47,11 +58,16 @@
     "contains",
     "references"
   ],
-  "graph_backends": ["kuzu", "neo4j", "falkordb", "supabase"],
+  "graph_backends": [
+    "kuzu",
+    "neo4j",
+    "falkordb",
+    "supabase"
+  ],
   "author": {
     "name": "Steeven Andrian",
     "email": "steevenz@steevenz.com"
   },
-  "copyright": "Copyright (c) 2026 Aegis Codework",
-  "standard": "Aegis-CrossStack-v1.0"
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v1.0"
 }

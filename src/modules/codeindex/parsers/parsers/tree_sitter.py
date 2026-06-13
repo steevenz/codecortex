@@ -6,8 +6,8 @@ Delegates to language-specific parsers for symbol extraction.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Tree_sitter
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ class _GenericFunctionParser:
     """Wraps a standalone parse function into TreeSitterParser-compatible interface."""
     def __init__(self, parse_func):
         self._parse_func = parse_func
-    
+
     def parse(self, path: Path, is_dependency: bool = False, **kwargs) -> Dict[str, Any]:
         return self._parse_func(path, is_dependency=is_dependency, **kwargs)
 

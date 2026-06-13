@@ -12,8 +12,8 @@ Architecture:
 :project: CodeCortex Relay
 :package: Relay.Models
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework (Paid) / MIT (Open Source)
-:standard: Aegis-CrossStack-v1.0
+:copyright: (c) 2026 CODDY Codework (Paid) / MIT (Open Source)
+:standard: CODDY-CrossStack-v1.0
 """
 
 from __future__ import annotations

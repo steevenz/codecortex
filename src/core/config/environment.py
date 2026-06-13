@@ -5,8 +5,8 @@ Provides version information and environment variable handling.
 :project: CodeCortex
 :package: Core.Config.Environment
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ class VersionProvider:
     """
     Provides version information without global state.
 
-    Follows Aegis modular-standard.md requirement for no global state.
+    Follows CODDY modular-standard.md requirement for no global state.
     Version caching is handled internally within the instance.
     """
 

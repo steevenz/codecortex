@@ -4,8 +4,8 @@ Maker engine — generates class files per Decision Matrix (19 types x 16 stacks
 :project: CodeCortex
 :package: Modules.Scaffolder.Core.Maker
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations
@@ -623,7 +623,7 @@ def _build_document_body(name: str, type_id: str, stack_meta: Dict[str, Any]) ->
     domain_lower = domain_pascal.lower()
     domain_upper = domain_pascal.upper()
     domain_slug = re.sub(r"(?<=[a-z])(?=[A-Z])", "-", domain_pascal).lower()
-    
+
     if type_id == "doc_draft":
         return f"""# {domain_pascal} - Draft Documentation
 
@@ -724,7 +724,7 @@ Aliases: {domain_lower[:3]}
 
 ## ~/.aicoders/ Compliance
 
-- Follows Aegis-Architecture-v1.0 standards
+- Follows CODDY-Architecture-v1.0 standards
 - Constructor injection for all services
 - DTOs for all layer crossings
 - Adapters wrap all 3rd-party dependencies

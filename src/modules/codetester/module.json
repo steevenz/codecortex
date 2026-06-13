@@ -4,8 +4,17 @@
   "description": "Code tester domain — QA quality gate with 28 test framework adapters (pytest, jest, vitest, go test, cargo, maven, phpunit, xUnit, flutter test, and more)",
   "type": "module",
   "dependencies": {
-    "modules": ["coderepository", "filesystem"],
-    "core": ["config", "database", "errors", "logging", "telemetry"]
+    "modules": [
+      "coderepository",
+      "filesystem"
+    ],
+    "core": [
+      "config",
+      "database",
+      "errors",
+      "logging",
+      "telemetry"
+    ]
   },
   "providers": {
     "services": [
@@ -13,11 +22,30 @@
       "search_service"
     ],
     "adapters": [
-      "pytest", "unittest", "jest", "vitest", "npm", "pnpm", "yarn",
-      "go_test", "cargo_test", "kotlin_test", "maven_test", "sbt_test",
-      "phpunit", "ruby_test", "elixir_test", "dart_test", "flutter_test",
-      "swift_test", "haskell_test", "perl_test", "dotnet_test",
-      "ctest", "stylelint", "flake8"
+      "pytest",
+      "unittest",
+      "jest",
+      "vitest",
+      "npm",
+      "pnpm",
+      "yarn",
+      "go_test",
+      "cargo_test",
+      "kotlin_test",
+      "maven_test",
+      "sbt_test",
+      "phpunit",
+      "ruby_test",
+      "elixir_test",
+      "dart_test",
+      "flutter_test",
+      "swift_test",
+      "haskell_test",
+      "perl_test",
+      "dotnet_test",
+      "ctest",
+      "stylelint",
+      "flake8"
     ]
   },
   "tools": {
@@ -32,6 +60,6 @@
     "name": "Steeven Andrian",
     "email": "steevenz@steevenz.com"
   },
-  "copyright": "Copyright (c) 2026 Aegis Codework",
-  "standard": "Aegis-CrossStack-v1.0"
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v1.0"
 }

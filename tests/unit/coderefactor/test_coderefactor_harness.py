@@ -13,7 +13,7 @@ Covers:
 :project: CodeCortex
 :package: Tests.Coderefactor
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
+:copyright: (c) 2026 CODDY Codework
 """
 
 from __future__ import annotations

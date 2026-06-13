@@ -13,8 +13,8 @@ scaffolder  : project scaffolding (list_stacks, get_stack, validate_name,
 :project: CodeCortex
 :package: Api.Tools
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-API-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-API-v1.0
 """
 from __future__ import annotations
 import time
@@ -338,8 +338,14 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         @return: Dict with success, data.
         """
         t0 = time.monotonic()
+        try:
+            coerced_args = _coerce_args(args)
+        except TypeError as e:
+            from src.core import api_response as _api_resp, new_request_id as _new_rid
+            return _api_resp(success=False, status_code=400, message=str(e),
+                             data=None, request_id=_new_rid(), error_code="API_400")
         result = await _router().dispatch_scaffolder(
-            action, args or {},
+            action, coerced_args,
         )
         result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_scaffolder", action)

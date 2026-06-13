@@ -23,8 +23,8 @@ Confidence Scoring (5 signals, averaged):
 - Architecture tags (categorized)
 
 Standards:
-    - Aegis-Architecture-v1.0    → Multi-dimension scoring with explicit weights
-    - Aegis-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
+    - CODDY-Architecture-v1.0    → Multi-dimension scoring with explicit weights
+    - CODDY-ProjectStructure-v1.0 → core/ logic, testable without MCP/CLI
 """
 
 from __future__ import annotations

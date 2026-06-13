@@ -5,8 +5,8 @@ Stores repo metadata in ~/.codecortex/registry.json for cross-session discovery.
 :project: CodeCortex
 :package: Modules.Coderepository.Core.Registry
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 import json

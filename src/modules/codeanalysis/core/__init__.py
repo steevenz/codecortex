@@ -4,8 +4,8 @@ CodeAnalysis core domain — data transfer objects.
 :project: CodeCortex
 :package: Modules.Codeanalysis.Core
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeAnalysis-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeAnalysis-v1.0
 """
 
 from .dtos import (

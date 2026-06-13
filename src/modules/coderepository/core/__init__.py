@@ -4,8 +4,8 @@ CodeRepository core domain — repository models, stores, and utilities.
 :project: CodeCortex
 :package: Modules.Coderepository.Core
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 from .store import ICodeRepositoryStore

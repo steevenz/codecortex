@@ -9,8 +9,8 @@ and proxies incoming HTTP requests from the relay to the local FastAPI.
 :project: CodeCortex
 :package: Scripts.Server.Tunnel
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CrossStack-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CrossStack-v1.0
 """
 
 from __future__ import annotations

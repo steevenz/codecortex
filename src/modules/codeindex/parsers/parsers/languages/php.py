@@ -4,8 +4,8 @@ PHP tree-sitter parser — full implementation with traits, namespaces, closures
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Php
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,17 +17,17 @@ PHP_QUERIES = {
             name: (name) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
+
         (method_declaration
             name: (name) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
+
         (arrow_function
             name: (name) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
+
         (anonymous_function_creation_expression
             parameters: (formal_parameters) @params
         ) @function_node
@@ -42,7 +42,7 @@ PHP_QUERIES = {
     """,
     "imports": """
         (use_declaration) @import
-        
+
         (namespace_name) @namespace
     """,
     "variables": """
@@ -51,7 +51,7 @@ PHP_QUERIES = {
                 left: (variable_name) @name
             )
         ) @variable
-        
+
         (property_declaration
             (property_element
                 name: (variable_name) @name
@@ -62,11 +62,11 @@ PHP_QUERIES = {
         (function_call_expression
             function: (name) @name
         ) @call_node
-        
+
         (function_call_expression
             function: (qualified_name) @name
         ) @call_node
-        
+
         (member_call_expression
             name: (name) @name
         ) @call_node
@@ -253,7 +253,7 @@ class PhpTreeSitterParser:
                 use_match = re.search(r'use\s+([^;]+)', import_text)
                 if use_match:
                     import_path = use_match.group(1).strip()
-                    
+
                     # Extract alias if present
                     alias = None
                     as_match = re.search(r'\bas\s+(\w+)', import_path)

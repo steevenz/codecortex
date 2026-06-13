@@ -4,8 +4,8 @@ CodeGraph core domain — pure domain logic, algorithms, and knowledge graph.
 :project: CodeCortex
 :package: Modules.Codegraph.Core
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 from .knowledge_graph import KnowledgeGraph, GraphNode, GraphRelationship, RelationshipType

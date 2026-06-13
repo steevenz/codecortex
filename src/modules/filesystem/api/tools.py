@@ -4,8 +4,8 @@ Tools.
 :project: CodeCortex
 :package: Modules.Filesystem.Api.Tools
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 from __future__ import annotations
 from typing import Optional, Dict, Any, Callable, List

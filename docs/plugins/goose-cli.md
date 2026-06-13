@@ -1,4 +1,4 @@
-# CodeCortex for Goose CLI
+﻿# CodeCortex for Goose CLI
 
 ## Prerequisites
 - [Goose CLI](https://github.com/block/goose) installed
@@ -13,8 +13,8 @@ Add to Goose CLI config:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "goose-cli"]
     }
   }
 }

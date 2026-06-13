@@ -5,8 +5,8 @@ Ported from GitNexus's wildcard-synthesis.ts pipeline phase.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Wildcard_imports
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 import re
@@ -27,7 +27,7 @@ def get_exported_symbols(content: str, language: str) -> List[str]:
     Go: capitalized names
     """
     exported = []
-    
+
     if language == "python":
         # Match top-level functions, classes, variables (no _ prefix)
         patterns = [
@@ -46,12 +46,12 @@ def get_exported_symbols(content: str, language: str) -> List[str]:
             explicit = re.findall(r"['\"]([^'\"]+)['\"]", all_match.group(1))
             if explicit:
                 return explicit
-    
+
     elif language in ("typescript", "javascript", "tsx", "jsx"):
         pat = re.compile(r"^export\s+(?:default\s+)?(?:function|class|const|let|var|interface|type)\s+(\w+)", re.MULTILINE)
         for m in pat.finditer(content):
             exported.append(m.group(1))
-    
+
     elif language == "go":
         # Go: capitalized names are exported
         pat = re.compile(r"^func\s+([A-Z]\w*)\s*\(", re.MULTILINE)
@@ -60,7 +60,7 @@ def get_exported_symbols(content: str, language: str) -> List[str]:
         pat2 = re.compile(r"^type\s+([A-Z]\w*)", re.MULTILINE)
         for m in pat2.finditer(content):
             exported.append(m.group(1))
-    
+
     return exported
 
 def synthesize_wildcard_imports(
@@ -69,7 +69,7 @@ def synthesize_wildcard_imports(
 ) -> Dict[str, List[str]]:
     """
     Synthesize wildcard imports into explicit symbol imports.
-    
+
     Returns: source_file -> [resolved_symbol_names]
     Maps each file that has `from X import *` to the list of symbols
     that would be imported from module X.
@@ -85,37 +85,37 @@ def synthesize_wildcard_imports(
         exported = get_exported_symbols(content, lang)
         if exported:
             export_index[file_path] = exported
-    
+
     # Resolve wildcard imports
     result: Dict[str, List[str]] = {}
     for file_path, content in files.items():
         lines = content.split("\n")
         lang = language_map.get(file_path, "python")
-        
+
         for line in lines:
             if not is_wildcard_import(line):
                 continue
-            
+
             # Parse: from module import *
             m = re.match(r"from\s+([\w.]+)\s+import\s+\*", line)
             if not m:
                 continue
-            
+
             module_path = m.group(1).replace(".", "/")
             resolved = []
-            
+
             # Look for the module in our files
             for fpath, exports in export_index.items():
                 # Check if this file matches the module path
                 norm_fpath = fpath.replace("\\", "/").rstrip(".py")
-                if (norm_fpath == module_path or 
-                    norm_fpath.endswith(f"/{module_path}") or 
+                if (norm_fpath == module_path or
+                    norm_fpath.endswith(f"/{module_path}") or
                     norm_fpath.endswith(f"/{module_path}/__init__")):
                     resolved.extend(exports)
-            
+
             if resolved:
                 result[file_path] = list(set(resolved))
-    
+
     return result
 
 def quick_wildcard_resolve(
@@ -128,14 +128,14 @@ def quick_wildcard_resolve(
     m = re.match(r"from\s+([\w.]+)\s+import\s+\*", import_line)
     if not m:
         return []
-    
+
     module_path = m.group(1).replace(".", "/")
     result = []
-    
+
     for fpath, content in all_files.items():
         norm = fpath.replace("\\", "/").rstrip(".py")
         if norm == module_path or norm.endswith(f"/{module_path}") or norm.endswith(f"/{module_path}/__init__"):
             lang = language_map.get(fpath, "python")
             result.extend(get_exported_symbols(content, lang))
-    
+
     return list(set(result))

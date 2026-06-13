@@ -1,4 +1,4 @@
-# CodeCortex for Codex CLI (OpenAI)
+﻿# CodeCortex for Codex CLI (OpenAI)
 
 Codex CLI supports plugins via the `.codex-plugin/` directory. Format similar to Claude Code.
 
@@ -14,8 +14,8 @@ Configure in your Codex CLI MCP settings:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "codex-cli"]
     }
   }
 }

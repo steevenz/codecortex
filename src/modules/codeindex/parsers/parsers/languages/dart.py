@@ -4,8 +4,8 @@ Dart tree-sitter parser — full implementation with mixins, extensions, generic
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Dart
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,12 +17,12 @@ DART_QUERIES = {
             name: (identifier) @name
             formal_parameters: (formal_parameter_list) @params
         ) @function_node
-        
+
         (method_signature
             name: (identifier) @name
             formal_parameters: (formal_parameter_list) @params
         ) @function_node
-        
+
         (constructor_signature
             name: (identifier) @name
             formal_parameters: (formal_parameter_list) @params
@@ -45,13 +45,13 @@ DART_QUERIES = {
                 name: (identifier) @name
             )
         ) @variable
-        
+
         (variable_declaration
             (initialized_variable_definition
                 name: (identifier) @name
             )
         ) @variable
-        
+
         (initialized_identifier
             name: (identifier) @name
         ) @variable
@@ -60,11 +60,11 @@ DART_QUERIES = {
         (function_expression_invocation
             function: (identifier) @name
         ) @call_node
-        
+
         (method_invocation
             function: (identifier) @name
         ) @call_node
-        
+
         (constructor_invocation
             type: (_) @name
         ) @call_node

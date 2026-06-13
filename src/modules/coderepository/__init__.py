@@ -4,8 +4,8 @@ Coderepository Package.
 :project: CodeCortex
 :package: Modules.Coderepository
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 from .core.repository import Repository

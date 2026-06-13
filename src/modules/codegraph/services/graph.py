@@ -5,8 +5,8 @@ Handles both low-level graph construction and high-level analytical modeling.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Graph
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import asyncio
@@ -78,7 +78,7 @@ class Graph(
     async def run_in_thread(self, sync_func, *args, **kwargs):
         """
         Execute a synchronous function in a thread pool.
-        
+
         Provides a reusable wrapper around asyncio.to_thread for offloading
         blocking operations from the event loop.
 
@@ -183,7 +183,7 @@ class Graph(
                         "File", "path", fpath,
                         "Class", "uid", f"cls:{fpath}:{cls['name']}:{cls['line_number']}",
                     )
-        
+
         await asyncio.to_thread(_write_nodes)
 
         def _write_batches():
@@ -223,7 +223,7 @@ class Graph(
             _do_batch(cls_cls, "Class",    "Class")
             _do_batch(file_fn, "File",     "Function")
             _do_batch(file_cls,"File",     "Class")
-            
+
             return fn_fn, fn_cls, cls_fn, cls_cls, file_fn, file_cls
 
         fn_fn, fn_cls, cls_fn, cls_cls, file_fn, file_cls = await asyncio.to_thread(_write_batches)
@@ -376,12 +376,12 @@ class Graph(
 
         # Build Graph from DB (Offloaded to thread)
         G = await self._build_graph_from_db(repo_id)
-        
+
         # Heavy computations offloaded to threads
         god_nodes = await asyncio.to_thread(self.find_god_nodes, G)
         communities = await asyncio.to_thread(self.cluster_communities, G)
         node_to_comm = {node: cid for cid, nodes in communities.items() for node in nodes}
-        
+
         # Analyze connections
         def _calc_coupling():
             coupling = []
@@ -395,7 +395,7 @@ class Graph(
                         "relation": data.get("relation_type", "CALLS")
                     })
             return coupling
-            
+
         coupling = await asyncio.to_thread(_calc_coupling)
 
         security = self._audit_security_hygiene(repo_id)
@@ -423,7 +423,7 @@ class Graph(
             ).fetchall()
             for n in nodes:
                 G.add_node(n["id"], label=n["name"], type=n["symbol_type"])
-                
+
             # Add edges
             edges = self.db.conn.execute(
                 "SELECT source_id, target_id, weight, relation_type FROM edges WHERE repository_id = ?",
@@ -432,7 +432,7 @@ class Graph(
             for e in edges:
                 G.add_edge(e["source_id"], e["target_id"], weight=e["weight"], relation_type=e["relation_type"])
             return G
-            
+
         return await asyncio.to_thread(_build)
 
     async def build_comprehensive_report(self, repo_id: str, request_id: str = "internal") -> Dict[str, Any]:
@@ -442,7 +442,7 @@ class Graph(
                 "SELECT id, name, root_path, sync_at FROM repositories WHERE id = ?",
                 (repo_id,),
             ).fetchone()
-            
+
         repo_row = await asyncio.to_thread(_get_repo_info)
         if not repo_row:
             return {"error": "repository_not_found", "repository_id": repo_id}
@@ -455,10 +455,10 @@ class Graph(
             self._ast_stats(repo_id),
             self._dependency_graph_stats(repo_id)
         )
-        
+
         def _get_dot():
             return self._dependency_graph_dot(repo_id, limit_edges=200)
-            
+
         graph_stats["visualization"] = {
             "format": "graphviz_dot",
             "dot": await asyncio.to_thread(_get_dot),
@@ -466,12 +466,12 @@ class Graph(
 
         # Build Graph once for all analyses
         G = await self._build_graph_from_db(repo_id)
-        
+
         # Offload remaining heavy analysis to threads
         god_nodes = await asyncio.to_thread(self.find_god_nodes, G)
         communities = await asyncio.to_thread(self.cluster_communities, G)
         node_to_comm = {str(node): cid for cid, nodes in communities.items() for node in nodes}
-        
+
         def _calc_coupling():
             coupling = []
             for u, v, data in G.edges(data=True):
@@ -486,7 +486,7 @@ class Graph(
             return coupling
 
         coupling = await asyncio.to_thread(_calc_coupling)
-        
+
         # Fetch other findings in parallel where possible
         entrypoints, lint, security, code_quality, module_analysis, hotspots, temporal_coupling = await asyncio.gather(
             self._entrypoints(repo_id),
@@ -503,9 +503,9 @@ class Graph(
             docs = self._documentation_completeness(repo_root, ast_stats)
             health = self._repository_health(repo_root, tree_stats, tests, docs)
             return tests, docs, health
-            
+
         tests, docs, health = await asyncio.to_thread(_do_manual_checks)
-        
+
         questions = await asyncio.to_thread(self.suggest_architectural_questions, G, god_nodes, communities)
 
         report_data = {
@@ -518,7 +518,7 @@ class Graph(
             "module_analysis": module_analysis,
             "questions": questions
         }
-        
+
         markdown = await asyncio.to_thread(self.generate_markdown_report, report_data)
 
         return {

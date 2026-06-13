@@ -4,7 +4,7 @@ title: WFK_SCH_001 — Advanced Search & Discovery
 workflow_id: WFK_SCH_001
 version: 1.0.0
 author: Steeven Andrian
-standard: Aegis-Workflow-v2.0
+standard: CODDY-Workflow-v2.0
 ---
 
 # WFK_SCH_001: Advanced Search & Discovery
@@ -13,7 +13,7 @@ standard: Aegis-Workflow-v2.0
 > **Trigger**: User asks to find code, search symbols, trace calls, or discover dead code.
 > **Time**: <1s (text) to 5s (graph-enriched).
 > **Cost**: Low (FTS5) to Medium (semantic + graph).
-> **Codification**: Aegis-Architecture-v1.0 §5 — `WFK_SCH_001`
+> **Codification**: CODDY-Architecture-v1.0 §5 — `WFK_SCH_001`
 
 ---
 

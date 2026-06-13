@@ -4,8 +4,8 @@ Stylelint.
 :project: CodeCortex
 :package: Modules.Codetester.Test_adapters.Stylelint
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeTester-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeTester-v1.0
 """
 
 import subprocess
@@ -18,7 +18,7 @@ class Stylelint(BaseQA):
         # Validate that repo_path exists and is a directory
         if not os.path.isdir(repo_path):
             return {"tool": "stylelint", "status": "error", "error": f"Repository path does not exist: {repo_path}"}
-        
+
         # Check for stylelint configuration: .stylelintrc, .stylelintrc.js, stylelint.config.js, etc.
         # Or check for stylelint in package.json devDependencies
         stylelint_config_files = [
@@ -30,9 +30,9 @@ class Stylelint(BaseQA):
             "stylelint.config.js",
             "stylelint.config.json"
         ]
-        
+
         has_config = any(os.path.exists(os.path.join(repo_path, f)) for f in stylelint_config_files)
-        
+
         # Also check package.json for stylelint dependency
         package_json_path = os.path.join(repo_path, "package.json")
         has_stylelint_in_package = False
@@ -48,10 +48,10 @@ class Stylelint(BaseQA):
                     has_stylelint_in_package = True
             except Exception:
                 pass  # If we can't parse package.json, we'll rely on config files
-        
+
         if not (has_config or has_stylelint_in_package):
             return {"tool": "stylelint", "status": "error", "error": "Stylelint not found (missing config file or not in package.json dependencies)"}
-        
+
         # Prevent path traversal for target_path
         if target_path:
             # Normalize paths
@@ -60,14 +60,14 @@ class Stylelint(BaseQA):
             # Check if target_path_abs starts with repo_path_abs
             if not target_path_abs.startswith(repo_path_abs):
                 return {"tool": "stylelint", "status": "error", "error": "Target path is outside the repository"}
-        
+
         # Build the stylelint command
         cmd = ["npx", "stylelint"]
         if target_path:
             cmd.append(target_path)
         if extra_args:
             cmd.extend(extra_args.split())
-        
+
         try:
             result = subprocess.run(
                 cmd,
@@ -76,7 +76,7 @@ class Stylelint(BaseQA):
                 text=True,
                 timeout=60
             )
-            
+
             # stylelint exit code: 0 = no warnings, 1 = warnings present, >1 = error
             if result.returncode == 0:
                 status = "success"
@@ -84,7 +84,7 @@ class Stylelint(BaseQA):
                 status = "warning"  # CSS issues found but stylelint ran successfully
             else:
                 status = "error"
-            
+
             return {
                 "tool": "stylelint",
                 "status": status,

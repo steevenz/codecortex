@@ -98,7 +98,7 @@ Generate complete, standards-compliant project scaffolds with a single MCP tool 
 
 - **14+ technology stacks:** Python, TypeScript, JavaScript, Go, Java, Kotlin, C#, Swift, Rust, C++, Dart, Flutter, PHP -- each with idiomatic structure
 - **34 generation types:** 28 code types (models, services, controllers, DTOs) + 6 documentation types (concepts, flows, ADRs) -- all following `~/.aicoders/` standards
-- **Aegis Codework compliance:** Auto-generates proper file headers, directory structures, DI wiring, and boilerplate -- no manual setup
+- **CODDY Codework compliance:** Auto-generates proper file headers, directory structures, DI wiring, and boilerplate -- no manual setup
 - **Dry-run safety:** Preview the entire scaffold before writing a single file
 
 **Token impact:** Scaffolding a new microservice typically requires 3,000+ tokens of back-and-forth. Scaffolder does it in one tool call. The LLM spends tokens on *logic*, not *boilerplate*.
@@ -277,9 +277,29 @@ uv sync
 
 ### Configure
 
-Add to your MCP client config:
+CodeCortex uses a **Node.js + Python** architecture. All IDE configs MUST point to Node.js (`index.cjs`), not Python.
 
-**Option A — Python (uv):**
+**Recommended — Node.js (multi-IDE safe):**
+```json
+{
+  "mcpServers": {
+    "codecortex": {
+      "command": "node",
+      "args": [
+        "C:/Users/steevenz/MCP/mcp-codecortex/scripts/server/js/index.cjs",
+        "--ide",
+        "<YOUR_IDE_NAME>"
+      ]
+    }
+  }
+}
+```
+
+Replace `<YOUR_IDE_NAME>` with your IDE: `trae`, `cursor`, `vscode`, `claude`, `windsurf`, etc.
+
+> Node.js proxy provides atomic file-lock concurrency, multi-IDE lifecycle management (refCount), auto Python venv discovery, bidirectional stdio↔HTTP/SSE forwarding, and PID handshake. **Required for multi-IDE setups.**
+
+**Deprecated — Python (direct):**
 ```json
 {
   "mcpServers": {
@@ -291,25 +311,7 @@ Add to your MCP client config:
 }
 ```
 
-**Option B — Node.js (shared proxy, multi-IDE safe):**
-```json
-{
-  "mcpServers": {
-    "codecortex": {
-      "command": "node",
-      "args": [
-        "C:\\Users\\steevenz\\MCP\\mcp-codecortex\\scripts\\server\\js\\index.cjs",
-        "--ide",
-        "antigravity",
-        "--transport",
-        "stdio"
-      ]
-    }
-  }
-}
-```
-
-> Node.js proxy provides atomic file-lock concurrency control, auto Python venv discovery, bidirectional stdio↔HTTP/SSE forwarding, and multi-port fallback. Recommended for multi-IDE setups.
+> ⚠️ Direct Python mode is **deprecated**. No multi-IDE lifecycle, no refCount, no PID handshake. Use only for testing.
 
 ### MCP Resources
 
@@ -398,7 +400,7 @@ MIT -- see [LICENSE](LICENSE).
 
 ---
 
-**Developed with passion by [Steeven Andrian](https://github.com/steevenz)** -- Founder & Principal Engineer, Aegis Codework
+**Developed with passion by [Steeven Andrian](https://github.com/steevenz)** -- Founder & Principal Engineer, CODDY Codework
 
 **Support the project: [PayPal](https://paypal.me/steevenlim)**
 

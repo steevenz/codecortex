@@ -1,6 +1,6 @@
 # Architecture Compliance Rules
 
-> **Standard:** Aegis-Architecture-v1.0
+> **Standard:** CODDY-Architecture-v1.0
 > **Applies to:** All domains/modules in CodeCortex
 
 ## 1. Lego Principle (Modular Monolith)

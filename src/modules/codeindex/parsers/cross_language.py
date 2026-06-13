@@ -10,8 +10,8 @@ Detects integration points between language ecosystems:
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Cross_language
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 
 from __future__ import annotations

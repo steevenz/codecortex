@@ -1,4 +1,4 @@
-# CodeCortex for Claude Code
+﻿# CodeCortex for Claude Code
 
 Claude Code supports plugins natively via the `.claude-plugin/` directory.
 
@@ -14,8 +14,8 @@ Add to `claude_desktop_config.json` or project-level MCP config:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "claude-code"]
     }
   }
 }

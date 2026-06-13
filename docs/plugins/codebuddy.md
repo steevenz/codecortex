@@ -1,4 +1,4 @@
-# CodeCortex for Codebuddy
+﻿# CodeCortex for Codebuddy
 
 Codebuddy is an AI code editor. Add CodeCortex via MCP server configuration.
 
@@ -11,8 +11,8 @@ Configure in Codebuddy's MCP settings:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "codebuddy"]
     }
   }
 }

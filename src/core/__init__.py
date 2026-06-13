@@ -4,8 +4,8 @@ Core package — Modular monolith infrastructure for CodeCortex.
 :project: CodeCortex
 :package: Core
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from .config import (
     utc_ts_to_iso,
     VersionProvider,
     get_db_path,
+    get_data_dir,
     get_project_root,
 )
 from .config.ignore_patterns import (
@@ -120,6 +121,7 @@ __all__ = [
     "utc_ts_to_iso",
     "VersionProvider",
     "get_db_path",
+    "get_data_dir",
     "get_project_root",
     "BUILTIN_IGNORE_PATTERNS",
     "load_ignore_patterns",

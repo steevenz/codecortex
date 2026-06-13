@@ -5,8 +5,8 @@ Delegates graph topology to Kùzu (default), Neo4j, or FalkorDB.
 :project: CodeCortex
 :package: Core.Graph.Manager
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from __future__ import annotations

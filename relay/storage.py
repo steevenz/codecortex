@@ -3,7 +3,7 @@ SQLite storage layer for relay server.
 
 :project: CodeCortex Relay
 :package: Relay.Storage
-:standard: Aegis-CrossStack-v1.0
+:standard: CODDY-CrossStack-v1.0
 """
 
 from __future__ import annotations

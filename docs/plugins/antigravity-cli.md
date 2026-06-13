@@ -1,4 +1,4 @@
-# CodeCortex for Antigravity CLI / IDE / Agent
+﻿# CodeCortex for Antigravity CLI / IDE / Agent
 
 Antigravity CLI, Antigravity IDE, and Antigravity Agent all share the same `.antigravity/` config format.
 
@@ -11,8 +11,8 @@ Add to Antigravity CLI config:
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "antigravity-cli"]
     }
   }
 }

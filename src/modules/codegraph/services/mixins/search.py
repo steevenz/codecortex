@@ -4,8 +4,8 @@ Class CodeSearchMixin – Single Responsibility: Provide graph-based code search
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Mixins.Search
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import logging
@@ -62,7 +62,7 @@ class CodeSearchMixin:
         params: Dict[str, Any] = {}
         if repo_path:
             params["repo_path"] = repo_path
-        
+
         backend_limit = "LIMIT 5000"
         query = f"""
             MATCH (node:{label})
@@ -342,7 +342,7 @@ class CodeSearchMixin:
                 "ORDER BY child_is_dependency ASC, child_class",
                 class_name=class_name, path=path, repo_path=repo_path
             )
-            
+
             return {
                 "class_name": class_name,
                 "parent_classes": parents_result.data(),
@@ -477,7 +477,7 @@ class CodeSearchMixin:
                     "chain_length": chain_len,
                 })
             return transformed
-            
+
     async def trace_execution_flow(self, start_symbol_id: str, max_depth: int = 5) -> Dict[str, Any]:
         """
         Recursively trace the call graph starting from a specific symbol.
@@ -507,7 +507,7 @@ class CodeSearchMixin:
             n_row = n_cursor.fetchone()
             if not n_row:
                 return {"id": sid, "name": "unknown"}
-            
+
             node = {
                 "id": sid,
                 "name": n_row["name"],
@@ -516,28 +516,28 @@ class CodeSearchMixin:
                 "line": n_row["start_line"],
                 "callees": []
             }
-            
+
             if depth < max_depth:
                 # Cycle prevention: only recurse if we haven't seen this SID in the CURRENT path
                 if sid in seen:
                     node["note"] = "circular reference"
                     return node
-                
+
                 new_seen = seen | {sid}
-                
+
                 # Find callees via edges table
                 e_cursor = self.db.conn.execute("""
                     SELECT target_id, relation_type, line_number, weight
                     FROM edges
                     WHERE source_id = ? AND relation_type = 'CALLS'
                 """, (sid,))
-                
+
                 for e_row in e_cursor.fetchall():
                     child = await _trace_recursive(e_row["target_id"], depth + 1, new_seen)
                     child["call_line"] = e_row["line_number"]
                     child["call_weight"] = e_row["weight"]
                     node["callees"].append(child)
-            
+
             return node
 
         flow_tree = await _trace_recursive(start_symbol_id, 1, set())
@@ -982,5 +982,5 @@ class CodeSearchMixin:
             # For now, just return high-confidence bridges or similar
             # Full Leiden/Louvain logic can be added if requested
             pass
-            
+
         return surprises[:top_n]

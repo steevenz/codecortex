@@ -4,8 +4,8 @@ Mixin for graph analysis, clustering, and heuristic scoring.
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Mixins.Analysis
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import contextlib
@@ -29,7 +29,7 @@ class ArchitecturalAnalysisMixin:
             return {}
         if G.is_directed():
             G = G.to_undirected()
-        
+
         # Leiden warns and drops isolates - handle them separately
         isolates = [n for n in G.nodes() if G.degree(n) == 0]
         connected_nodes = [n for n in G.nodes() if G.degree(n) > 0]
@@ -93,18 +93,18 @@ class ArchitecturalAnalysisMixin:
         label = attrs.get("label", "")
         if not label:
             return False
-            
+
         # File-level hub: label matches the actual source filename
         source_file = attrs.get("source_file", "")
         if source_file:
             from pathlib import Path as _Path
             if label == _Path(source_file).name:
                 return True
-                
+
         # Method stub: AST extractor labels methods as '.method_name()'
         if label.startswith(".") and label.endswith("()"):
             return True
-            
+
         # Module-level function stub: labeled 'function_name()' - only has a contains edge
         if label.endswith("()") and G.degree(node_id) <= 1:
             return True
@@ -114,22 +114,22 @@ class ArchitecturalAnalysisMixin:
         """Identify high-impact nodes with architectural ranking. Excludes structural noise."""
         if G.number_of_nodes() == 0:
             return []
-            
+
         degrees = dict(G.degree())
         in_degrees = dict(G.in_degree())
         out_degrees = dict(G.out_degree())
-        
+
         # Calculate centrality
         try:
             pagerank = nx.pagerank(G, weight='weight') if G.number_of_edges() > 0 else {}
         except Exception:
             pagerank = {node: 0.0 for node in G.nodes()}
-        
+
         candidates = []
         for node in G.nodes():
             if self._is_file_node(G, node):
                 continue
-                
+
             candidates.append({
                 "id": node,
                 "label": G.nodes[node].get("label", node),
@@ -138,7 +138,7 @@ class ArchitecturalAnalysisMixin:
                 "out_degree": out_degrees.get(node, 0),
                 "pagerank": round(pagerank.get(node, 0.0), 4),
             })
-            
+
         candidates.sort(key=lambda x: (x["pagerank"], x["degree"]), reverse=True)
         return candidates[:top_n]
 
@@ -146,28 +146,28 @@ class ArchitecturalAnalysisMixin:
         """Ported high-fidelity heuristic for surprising connections."""
         score = 0.0
         reasons: List[str] = []
-        
+
         data = G.get_edge_data(source, target) or {}
-        
+
         # 1. Confidence weight
         conf = data.get("confidence", "EXTRACTED")
         conf_bonus = {"AMBIGUOUS": 0.3, "INFERRED": 0.2, "EXTRACTED": 0.1}.get(conf, 0.1)
         score += conf_bonus
-        
+
         # 2. Cross-community bonus
         src_cid = communities.get(source)
         tgt_cid = communities.get(target)
         if src_cid is not None and tgt_cid is not None and src_cid != tgt_cid:
             score += 0.5
             reasons.append("bridges separate communities")
-            
+
         # 3. Hub-to-Peripheral bonus
         src_degree = G.degree(source)
         tgt_degree = G.degree(target)
         if min(src_degree, tgt_degree) <= 2 and max(src_degree, tgt_degree) >= 10:
             score += 0.4
             reasons.append("peripheral-hub link")
-            
+
         return round(score, 2)
 
     def suggest_architectural_questions(self, G: nx.DiGraph, god_nodes: List[Dict], communities: Dict[int, List[str]] = None) -> List[str]:
@@ -175,15 +175,15 @@ class ArchitecturalAnalysisMixin:
         questions = []
         if not god_nodes:
             return ["Why is the codebase so disconnected? (No clear central hubs found)"]
-            
+
         top_hub = god_nodes[0]["id"]
         questions.append(f"What is the single responsibility of {top_hub}? It appears to be a massive central hub.")
-        
+
         # Bridge nodes
         if G.number_of_edges() > 0:
             try:
                 betweenness = nx.betweenness_centrality(G, k=min(100, G.number_of_nodes()))
-                bridges = sorted([(n, s) for n, s in betweenness.items() if not self._is_file_node(G, n) and s > 0], 
+                bridges = sorted([(n, s) for n, s in betweenness.items() if not self._is_file_node(G, n) and s > 0],
                                 key=lambda x: x[1], reverse=True)[:2]
                 for node_id, score in bridges:
                     label = G.nodes[node_id].get("label", node_id)
@@ -196,7 +196,7 @@ class ArchitecturalAnalysisMixin:
             components = list(nx.weakly_connected_components(G))
             if len(components) > 1:
                 questions.append(f"The graph is split into {len(components)} isolated clusters. Is this intentional decoupling or a missing dependency link?")
-                
+
         return questions
 
     def analyze_module_dependencies(self, repo_id: str) -> Dict[str, Any]:
@@ -206,7 +206,7 @@ class ArchitecturalAnalysisMixin:
         """
         # 1. Fetch all edges with their symbol file info
         sql = """
-            SELECT 
+            SELECT
                 d1.relative_path AS source_module,
                 d2.relative_path AS target_module,
                 COUNT(*) AS call_count,
@@ -222,16 +222,16 @@ class ArchitecturalAnalysisMixin:
             GROUP BY d1.relative_path, d2.relative_path
             ORDER BY total_weight DESC
         """
-        
+
         cursor = self.db.conn.execute(sql, (repo_id,))
         module_edges = [dict(row) for row in cursor.fetchall()]
-        
+
         # 2. Identify top level modules
         modules = set()
         for e in module_edges:
             modules.add(e["source_module"])
             modules.add(e["target_module"])
-            
+
         return {
             "module_count": len(modules),
             "dependencies": module_edges[:50],
@@ -244,7 +244,7 @@ class ArchitecturalAnalysisMixin:
         Files with high change frequency often correlate with complexity or technical debt.
         """
         sql = """
-            SELECT 
+            SELECT
                 d.relative_path || '/' || f.name as file_path,
                 COUNT(fc.commit_id) as commit_count
             FROM file_commits fc
@@ -264,7 +264,7 @@ class ArchitecturalAnalysisMixin:
         High co-commit counts between distinct modules may indicate hidden dependencies.
         """
         sql = """
-            SELECT 
+            SELECT
                 d1.relative_path || '/' || f1.name as file_a,
                 d2.relative_path || '/' || f2.name as file_b,
                 COUNT(fc1.commit_id) as co_commits
@@ -282,13 +282,13 @@ class ArchitecturalAnalysisMixin:
         """
         cursor = self.db.conn.execute(sql, (repo_id, min_commits, limit))
         results = [dict(row) for row in cursor.fetchall()]
-        
+
         if hasattr(self, "_log_event"):
             self._log_event("INFO", "TEMPORAL_COUPLING_ANALYZED", {
                 "repository_id": repo_id,
                 "pairs_found": len(results)
             })
-            
+
         return results
 
     def find_stub_implementations(self, repo_id: str, limit: int = 20) -> List[Dict[str, Any]]:
@@ -297,7 +297,7 @@ class ArchitecturalAnalysisMixin:
         These indicate incomplete work or placeholder code.
         """
         sql = """
-            SELECT 
+            SELECT
                 s.name as symbol_name,
                 s.symbol_type,
                 d.relative_path || '/' || f.name as file_path,

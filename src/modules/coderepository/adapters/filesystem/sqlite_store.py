@@ -4,8 +4,8 @@ Class SQLiteCodeRepositoryStore - Implementation of ICodeRepositoryStore using S
 :project: CodeCortex
 :package: Modules.Coderepository.Adapters.Filesystem.Sqlite_store
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeRepository-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeRepository-v1.0
 """
 
 import uuid

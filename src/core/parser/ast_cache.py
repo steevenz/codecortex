@@ -5,8 +5,8 @@ Keyed by (file_path, content_hash) to avoid re-parsing unchanged files.
 :project: CodeCortex
 :package: Core.Parser.Ast_cache
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Core-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Core-v1.0
 """
 
 from collections import OrderedDict

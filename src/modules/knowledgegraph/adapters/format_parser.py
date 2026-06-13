@@ -7,8 +7,8 @@ All content is normalized to markdown-like text for downstream KnowledgeExtracto
 No audio/video support (out of scope).
 
 Standards:
-    - Aegis-Architecture-v1.0    → Adapter Pattern (wraps python-docx, pypdf, openpyxl, python-pptx)
-    - Aegis-ProjectStructure-v1.0 → adapters/ requirements
+    - CODDY-Architecture-v1.0    → Adapter Pattern (wraps python-docx, pypdf, openpyxl, python-pptx)
+    - CODDY-ProjectStructure-v1.0 → adapters/ requirements
 """
 
 from __future__ import annotations

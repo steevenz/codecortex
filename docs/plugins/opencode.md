@@ -1,4 +1,4 @@
-# CodeCortex for OpenCode CLI
+﻿# CodeCortex for OpenCode CLI
 
 OpenCode CLI supports plugins via the `.opencode/` directory + JavaScript plugin loader.
 
@@ -18,8 +18,8 @@ Add to OpenCode MCP config (`opencode.json`):
 {
   "mcpServers": {
     "codecortex": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mcp-codecortex", "run", "python", "-m", "src.main"]
+      "command": "node",
+      "args": ["/path/to/mcp-codecortex/scripts/server/js/index.cjs", "--ide", "opencode"]
     }
   }
 }

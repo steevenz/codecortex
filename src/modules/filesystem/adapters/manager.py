@@ -4,8 +4,8 @@ Pure filesystem operations — no VCS logic (use repo_git/repo_svn instead).
 :project: CodeCortex
 :package: Modules.Filesystem.Adapters.Manager
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Filesystem-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Filesystem-v1.0
 """
 
 from typing import Any, Dict, Optional

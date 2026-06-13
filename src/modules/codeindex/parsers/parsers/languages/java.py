@@ -4,8 +4,8 @@ Java tree-sitter parser — ported from legacy codegraph.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Java
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,7 +17,7 @@ JAVA_QUERIES = {
             name: (identifier) @name
             parameters: (formal_parameters) @params
         ) @function_node
-        
+
         (constructor_declaration
             name: (identifier) @name
             parameters: (formal_parameters) @params
@@ -41,7 +41,7 @@ JAVA_QUERIES = {
                 name: (identifier) @name
             )
         ) @variable
-        
+
         (field_declaration
             type: (_) @type
             declarator: (variable_declarator
@@ -53,7 +53,7 @@ JAVA_QUERIES = {
         (method_invocation
             name: (identifier) @name
         ) @call_node
-        
+
         (object_creation_expression
             type: [
                 (type_identifier)

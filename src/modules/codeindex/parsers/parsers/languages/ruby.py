@@ -4,8 +4,8 @@ Ruby tree-sitter parser — full implementation with modules, blocks, mixins.
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Ruby
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,16 +17,16 @@ RUBY_QUERIES = {
             name: (identifier) @name
             parameters: (method_parameters) @params
         ) @function_node
-        
+
         (singleton_method
             name: (identifier) @name
             parameters: (method_parameters) @params
         ) @function_node
-        
+
         (block
             parameters: (block_parameters) @params
         ) @function_node
-        
+
         (lambda
             parameters: (block_parameters) @params
         ) @function_node
@@ -48,16 +48,16 @@ RUBY_QUERIES = {
         (assignment
             left: (identifier) @name
         ) @variable
-        
+
         (instance_variable) @variable
-        
+
         (class_variable) @variable
     """,
     "calls": """
         (call
             method: (identifier) @name
         ) @call_node
-        
+
         (call
             method: (constant) @name
         ) @call_node

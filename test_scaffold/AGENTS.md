@@ -24,10 +24,10 @@ web_api (Web API Project (FastAPI))
 
 ## 5. Project Standards
 
-- Architecture: Aegis-Architecture-v1.0
-- Project Structure: Aegis-ProjectStructure-v1.0
-- API: Aegis-API-v1.0
-- Documentation: Aegis-Documentation-v1.0
+- Architecture: CODDY-Architecture-v1.0
+- Project Structure: CODDY-ProjectStructure-v1.0
+- API: CODDY-API-v1.0
+- Documentation: CODDY-Documentation-v1.0
 
 ## 6. Setup
 

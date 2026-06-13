@@ -1,12 +1,12 @@
 """
-AEGIS Graph Trace – Call Graph Visualization & Execution Path Tracing
+CODDY Graph Trace – Call Graph Visualization & Execution Path Tracing
 Uses BFS/DFS traversal for explicit graph navigation without fuzzy matching.
 
 :project: CodeCortex
 :package: Modules.Codegraph.Services.Trace
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeGraph-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeGraph-v1.0
 """
 
 import json
@@ -61,7 +61,7 @@ class PathStep:
     node: Optional[TraceNode] = None
     edge: Optional[Dict[str, Any]] = None
 
-class AEGISGraphTrace:
+class CODDYGraphTrace:
     """
     Call graph visualization and execution path tracing.
     Uses BFS/DFS traversal for explicit graph navigation.

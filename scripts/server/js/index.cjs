@@ -23,6 +23,43 @@ const { spawn, spawnSync } = require("child_process");
 const readline = require("readline");
 const os = require("os");
 
+// ─────────────────────────────────────────────────────────────
+// CLI Argument Parsing
+// ─────────────────────────────────────────────────────────────
+const _CLI_ARGS = (() => {
+  const args = process.argv.slice(2);
+  const parsed = {};
+  for (let i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case "--ide":
+        parsed.ide = args[++i] || "unknown";
+        break;
+      case "--transport":
+        parsed.transport = args[++i] || "stdio";
+        break;
+      case "--port":
+        parsed.port = parseInt(args[++i], 10) || 8001;
+        break;
+      default:
+        // skip unknown flags
+        break;
+    }
+  }
+  return parsed;
+})();
+
+// Resolve IDE name: --ide flag > env auto-detection > "unknown"
+function _resolveIdeName() {
+  if (_CLI_ARGS.ide && _CLI_ARGS.ide !== "unknown") return _CLI_ARGS.ide;
+  if (process.env.TRAE_ID) return "trae";
+  if (process.env.VSCODE_NLS_CONFIG) return "vscode";
+  const tp = (process.env.TERM_PROGRAM || "").toLowerCase();
+  if (tp.includes("cursor")) return "cursor";
+  if (tp.includes("windsurf")) return "windsurf";
+  if (tp.includes("trae")) return "trae";
+  return _CLI_ARGS.ide || "unknown";
+}
+
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..", "..");
 const ENV_FILE = path.join(PROJECT_ROOT, ".env");
 

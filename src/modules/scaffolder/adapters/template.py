@@ -4,8 +4,8 @@ Template — resolves Jinja2 templates from local disk.
 :project: CodeCortex
 :package: Modules.Scaffolder.Adapters.Template
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-Scaffolder-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-Scaffolder-v1.0
 """
 
 from __future__ import annotations

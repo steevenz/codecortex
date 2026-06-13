@@ -4,8 +4,8 @@ C# tree-sitter parser — full implementation with generics, records, properties
 :project: CodeCortex
 :package: Modules.Codeindex.Parsers.Parsers.Languages.Csharp
 :author: Steeven Andrian
-:copyright: (c) 2026 Aegis Codework
-:standard: Aegis-CodeIndex-v1.0
+:copyright: (c) 2026 CODDY Codework
+:standard: CODDY-CodeIndex-v1.0
 """
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,16 +17,16 @@ CSHARP_QUERIES = {
             name: (identifier) @name
             parameters: (parameter_list) @params
         ) @function_node
-        
+
         (constructor_declaration
             name: (identifier) @name
             parameter_list: (parameter_list) @params
         ) @function_node
-        
+
         (property_declaration
             name: (identifier) @name
         ) @function_node
-        
+
         (indexer_declaration
             name: (identifier) @name
             parameters: (parameter_list) @params
@@ -51,7 +51,7 @@ CSHARP_QUERIES = {
                 name: (identifier) @name
             )
         ) @variable
-        
+
         (field_declaration
             type: (_) @type
             declarators: (variable_declarator
@@ -65,11 +65,11 @@ CSHARP_QUERIES = {
                 name: (identifier) @name
             )
         ) @call_node
-        
+
         (invocation_expression
             function: (identifier) @name
         ) @call_node
-        
+
         (object_creation_expression
             type: (_) @name
         ) @call_node

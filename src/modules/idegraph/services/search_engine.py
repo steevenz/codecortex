@@ -2,8 +2,8 @@
 @project   CodeCortex
 @package   modules.idegraph.services
 @author    Steeven Andrian
-@copyright (c) 2026 Aegis Codework
-:standard: Aegis-IdeGraph-v1.0
+@copyright (c) 2026 CODDY Codework
+:standard: CODDY-IdeGraph-v1.0
 
 Search Engine — Advanced search capabilities for AI coders.
 Supports keyword, glob, regex, fuzzy, boolean operators,
@@ -79,7 +79,7 @@ class SearchResult:
 class SearchEngine:
     """
     Advanced search engine for idegraph.
-    
+
     Supports:
     - Keyword: simple substring matching
     - Glob: fnmatch patterns (e.g. "*.py", "src/**")
@@ -135,7 +135,7 @@ class SearchEngine:
     def explain_query(self, query_str: str) -> SearchQuery:
         """
         Auto-detect search mode from query string.
-        
+
         Detection rules:
         - "*.py" or "src/**" → GLOB
         - "/pattern/flags" → REGEX

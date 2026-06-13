@@ -793,4 +793,4 @@ This document outlines comprehensive multi-scenario test cases for all CodeCorte
 
 ---
 
-*This test plan follows Aegis Codeworks QA standards.*
+*This test plan follows CODDY Codeworks QA standards.*
