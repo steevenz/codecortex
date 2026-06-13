@@ -12,7 +12,7 @@ ActionRouter — Maps top-level MCP tool actions to underlying domain service ca
 from __future__ import annotations
 import time
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from ..core import api_response, new_request_id
 
@@ -65,6 +65,37 @@ class ActionRouter:
         return api_response(success=False, status_code=status_code, message=message,
                             data=None, request_id=request_id or new_request_id(),
                             error_code=error_code)
+
+    def _fs_error(self, message: str, error_code: str, status_code: int = 400,
+                  recommendations: Optional[List[str]] = None,
+                  context: Optional[Dict[str, Any]] = None,
+                  request_id: Optional[str] = None) -> Dict[str, Any]:
+        """Structured filesystem error with diagnostic context and AI coder recommendations.
+
+        Returns a consistent JSON error response that helps AI coders diagnose
+        and resolve filesystem operation failures.
+
+        Args:
+            message: Human-readable error description.
+            error_code: Machine-readable error code (e.g., API_404, API_403).
+            status_code: HTTP-style status code.
+            recommendations: List of actionable steps for the AI coder.
+            context: Dict with additional diagnostic info (path, resolved, etc.).
+            request_id: Optional request identifier.
+        """
+        result = api_response(
+            success=False,
+            status_code=status_code,
+            message=message,
+            data=None,
+            request_id=request_id or new_request_id(),
+            error_code=error_code,
+            details={
+                "recommendations": recommendations or [],
+                "context": context or {},
+            },
+        )
+        return result
 
     def _resolve_id(self, repo_id: Optional[str], repo_path: Optional[str]) -> Optional[str]:
         if repo_id:
@@ -581,11 +612,38 @@ class ActionRouter:
         from ..core.database.integrity import FileIntegrity
 
         if not path:
-            return self._err("path required for read", "API_400")
+            return self._fs_error(
+                "path parameter is required for read operation",
+                "API_400", status_code=400,
+                recommendations=["Provide a valid file path in the 'path' parameter",
+                                 "Use list action to discover available files"],
+                context={"action": "read", "provided_path": path},
+            )
 
         resolved = str(Path(path).resolve()) if os.path.isabs(path) else (
             self.orchestrator.fs_service.resolve_repo_path(repo_id, path) if repo_id else str(Path(path).resolve())
         )
+
+        # Check file existence first
+        if not os.path.exists(resolved):
+            return self._fs_error(
+                f"File not found: {resolved}",
+                "API_404", status_code=404,
+                recommendations=["Verify the file path is correct",
+                                 "Check if the file was moved or deleted",
+                                 "Use list action on the parent directory to see available files"],
+                context={"action": "read", "resolved_path": resolved, "repo_id": repo_id},
+            )
+
+        if os.path.isdir(resolved):
+            return self._fs_error(
+                f"Path is a directory, not a file: {resolved}",
+                "API_400", status_code=400,
+                recommendations=["Provide a file path, not a directory path",
+                                 "Use list action to browse directory contents"],
+                context={"action": "read", "resolved_path": resolved, "is_directory": True},
+            )
+
         encoding = args.get("encoding", "utf-8")
         offset = args.get("offset", 0)
         limit = args.get("limit")
@@ -608,16 +666,113 @@ class ActionRouter:
                     pass
             return self._ok("File read", {"path": resolved, "content": content, "size": len(content)},
                             request_id=request_id)
-        except FileNotFoundError:
-            return self._err(f"File not found: {resolved}", "API_404", status_code=404)
+        except PermissionError:
+            return self._fs_error(
+                f"Permission denied: cannot read {resolved}",
+                "API_403", status_code=403,
+                recommendations=["Check file read permissions",
+                                 "Try running with elevated privileges",
+                                 "Verify the file is not locked by another process"],
+                context={"action": "read", "resolved_path": resolved, "encoding": encoding},
+            )
+        except OSError as e:
+            return self._fs_error(
+                f"OS error reading file {resolved}: {e}",
+                "API_500", status_code=500,
+                recommendations=["The file may be corrupted or on an inaccessible filesystem",
+                                 "Try copying the file to a different location",
+                                 "Run filesystem diagnostics to check disk health"],
+                context={"action": "read", "resolved_path": resolved, "error": str(e)},
+            )
+        except UnicodeDecodeError as e:
+            return self._fs_error(
+                f"Encoding error reading {resolved} with encoding '{encoding}': {e}",
+                "API_400", status_code=400,
+                recommendations=[f"Try a different encoding (e.g., encoding='latin-1' or encoding='utf-16')",
+                                 "The file may be binary — use binary read mode if applicable"],
+                context={"action": "read", "resolved_path": resolved, "encoding": encoding, "error": str(e)},
+            )
+
+    def _check_parent_write_chain(self, resolved_path: str) -> Dict[str, Any]:
+        """Recursively check parent directory chain for write access.
+
+        Walks up from the file's parent directory to find the first existing ancestor,
+        then verifies write access at each level. Returns dict with:
+          - ok: True if all parents accessible
+          - error: error dict if any parent is inaccessible
+          - first_existing: Path of the first existing ancestor
+          - missing_parents: List of missing parent paths
+        """
+        import os
+        from pathlib import Path
+
+        resolved = Path(resolved_path)
+        parent = resolved.parent
+
+        # Walk up to find first existing parent
+        missing_parents = []
+        current = parent
+        chain = []
+        while current.exists() == False or os.access(current, os.F_OK) == False:
+            # Check if we can at least see the parent
+            if current.parent == current:  # root reached
+                break
+            missing_parents.append(str(current))
+            chain.append(current)
+            current = current.parent
+
+        first_existing = current if current.exists() else None
+
+        # Verify write access on the first existing ancestor
+        if first_existing and not os.access(first_existing, os.W_OK):
+            return {
+                "ok": False,
+                "error": {
+                    "path": str(first_existing),
+                    "reason": f"No write permission on parent: {first_existing}",
+                },
+                "first_existing": first_existing,
+                "missing_parents": missing_parents,
+            }
+
+        # If there are missing parents, check we can reach them all
+        if chain:
+            # Verify write access on each level of the chain
+            for p in reversed(chain):
+                if p.parent.exists() and not os.access(p.parent, os.W_OK):
+                    return {
+                        "ok": False,
+                        "error": {
+                            "path": str(p.parent),
+                            "reason": f"No write permission to create subdirectory: {p.parent}",
+                        },
+                        "first_existing": first_existing,
+                        "missing_parents": missing_parents,
+                    }
+
+        return {
+            "ok": True,
+            "first_existing": first_existing,
+            "missing_parents": missing_parents,
+        }
 
     async def _fs_write(self, path: Optional[str], repo_id: Optional[str], args: Dict) -> Dict:
         import os
         from pathlib import Path
 
         if not path:
-            return self._err("path required for write", "API_400")
+            return self._fs_error(
+                "path parameter is required for write operation",
+                "API_400", status_code=400,
+                recommendations=["Provide a valid file path in the 'path' parameter",
+                                 "Use list action on the parent directory to discover available paths"],
+                context={"action": "write", "provided_path": path},
+            )
+
         content = args.get("content", "")
+        if not content and not args.get("content"):
+            content = ""
+
         encoding = args.get("encoding", "utf-8")
         atomic = args.get("atomic", True)
         backup = args.get("backup", False)
@@ -629,37 +784,249 @@ class ActionRouter:
             self.orchestrator.fs_service.resolve_repo_path(repo_id, path) if repo_id else str(Path(path).resolve())
         )
 
+        resolved_path = Path(resolved)
+
         try:
-            if os.path.exists(resolved) and not overwrite:
-                return self._err(f"File exists: {resolved}", "API_409", status_code=409)
-            if create_parents:
-                os.makedirs(os.path.dirname(resolved), exist_ok=True)
-            if backup and os.path.exists(resolved):
+            # STEP 1: Check if file exists
+            if resolved_path.exists():
+                if resolved_path.is_dir():
+                    return self._fs_error(
+                        f"Path is a directory, cannot write to it: {resolved}",
+                        "API_400", status_code=400,
+                        recommendations=["Provide a file path, not a directory",
+                                         "Use mkdir to create directories"],
+                        context={"action": "write", "resolved_path": resolved, "is_directory": True},
+                    )
+                if not overwrite:
+                    return self._fs_error(
+                        f"File already exists: {resolved}. Use overwrite=true to replace.",
+                        "API_409", status_code=409,
+                        recommendations=["Set overwrite=true to replace existing file",
+                                         "Use a different file path to avoid overwriting",
+                                         "Use read action first to check file contents"],
+                        context={"action": "write", "resolved_path": resolved, "file_exists": True},
+                    )
+                # Verify existing file is accessible (handles corrupted/locked files)
+                try:
+                    with open(resolved, "a") as _f:
+                        pass
+                except (OSError, PermissionError) as _pe:
+                    return self._fs_error(
+                        f"Cannot access existing file for overwrite: {resolved}. "
+                        f"The file may be corrupted, locked by another process, "
+                        f"or has permission issues.",
+                        "API_500", status_code=500,
+                        recommendations=["Check file permissions or disk health",
+                                         "Close any applications that may be locking the file",
+                                         "Consider deleting and recreating the file",
+                                         "Run filesystem diagnostics (chkdsk on Windows, fsck on Unix)"],
+                        context={"action": "write", "resolved_path": resolved,
+                                 "error": str(_pe), "file_state": "corrupted_or_locked"},
+                    )
+
+            # STEP 2: If file doesn't exist, verify parent folder chain
+            if not resolved_path.exists():
+                parent = resolved_path.parent
+                if not parent.exists():
+                    if not create_parents:
+                        return self._fs_error(
+                            f"Parent directory does not exist: {parent} and create_parents=false",
+                            "API_404", status_code=404,
+                            recommendations=["Set create_parents=true to auto-create parent directories",
+                                             "Use mkdir action to create the parent directory first"],
+                            context={"action": "write", "resolved_path": resolved,
+                                     "parent_path": str(parent), "create_parents": create_parents},
+                        )
+                    # Recursive parent write access check
+                    parent_check = self._check_parent_write_chain(resolved)
+                    if not parent_check["ok"]:
+                        err = parent_check["error"]
+                        return self._fs_error(
+                            f"Cannot create parent directories: {err['reason']}",
+                            "API_403", status_code=403,
+                            recommendations=["Choose a writable directory for the file",
+                                             "Run with elevated privileges if appropriate",
+                                             "Verify the target filesystem is not read-only"],
+                            context={"action": "write", "resolved_path": resolved,
+                                     "failed_path": err["path"], "reason": err["reason"],
+                                     "missing_parents": parent_check["missing_parents"]},
+                        )
+                    # Create parent directories recursively
+                    try:
+                        parent.mkdir(parents=True, exist_ok=True)
+                    except PermissionError:
+                        return self._fs_error(
+                            f"Permission denied: cannot create parent directory {parent}",
+                            "API_403", status_code=403,
+                            recommendations=["Choose a different directory with write access",
+                                             "Run with elevated privileges",
+                                             "Check folder permissions on the target path"],
+                            context={"action": "write", "resolved_path": resolved,
+                                     "parent_path": str(parent)},
+                        )
+                    except OSError as _mkdir_err:
+                        return self._fs_error(
+                            f"Cannot create parent directory {parent}: {_mkdir_err}",
+                            "API_500", status_code=500,
+                            recommendations=["Check disk space availability",
+                                             "Verify the path does not contain invalid characters",
+                                             "Ensure the filesystem is not read-only"],
+                            context={"action": "write", "resolved_path": resolved,
+                                     "parent_path": str(parent), "error": str(_mkdir_err)},
+                        )
+
+                # Verify parent directory write access
+                if not os.access(parent, os.W_OK):
+                    return self._fs_error(
+                        f"No write permission on parent directory: {parent}",
+                        "API_403", status_code=403,
+                        recommendations=["Change directory permissions",
+                                         "Choose a writable directory",
+                                         "Run with elevated privileges"],
+                        context={"action": "write", "resolved_path": resolved,
+                                 "parent_path": str(parent)},
+                    )
+
+                # STEP 3: Touch file before writing (ensures file can be created)
+                try:
+                    resolved_path.touch(exist_ok=False)
+                except FileExistsError:
+                    pass  # Race condition — file created between checks, continue
+                except PermissionError:
+                    return self._fs_error(
+                        f"Permission denied: cannot create file {resolved}",
+                        "API_403", status_code=403,
+                        recommendations=["Check write permissions on the parent directory",
+                                         "Try a different file name or location",
+                                         "Run with elevated privileges"],
+                        context={"action": "write", "resolved_path": resolved},
+                    )
+                except OSError as _touch_err:
+                    return self._fs_error(
+                        f"Cannot create file {resolved}: {_touch_err}",
+                        "API_500", status_code=500,
+                        recommendations=["Check disk space",
+                                         "Verify the filename does not contain invalid characters",
+                                         "Check if the filesystem is read-only"],
+                        context={"action": "write", "resolved_path": resolved,
+                                 "error": str(_touch_err)},
+                    )
+
+            # STEP 4: Create backup if requested
+            if backup and resolved_path.exists():
                 import shutil
-                shutil.copy2(resolved, resolved + ".bak")
+                import uuid
+                backup_path = resolved + ".bak." + str(uuid.uuid4())[:8]
+                try:
+                    shutil.copy2(resolved, backup_path)
+                except Exception as _backup_err:
+                    return self._fs_error(
+                        f"Failed to create backup of {resolved}: {_backup_err}",
+                        "API_500", status_code=500,
+                        recommendations=["Check disk space for backup",
+                                         "Try with backup=false to skip backup creation"],
+                        context={"action": "write", "resolved_path": resolved,
+                                 "backup_path": backup_path, "error": str(_backup_err)},
+                    )
+
+            # STEP 5: Write content
             if atomic:
-                tmp = resolved + ".tmp"
-                with open(tmp, "w", encoding=encoding) as f:
-                    f.write(content)
-                os.replace(tmp, resolved)
+                tmp = resolved + ".tmp." + str(os.getpid())
+                try:
+                    with open(tmp, "w", encoding=encoding) as f:
+                        f.write(content)
+                    os.replace(tmp, resolved)
+                except OSError as _ore:
+                    # Clean up temp file on failure
+                    try:
+                        os.remove(tmp)
+                    except Exception:
+                        pass
+                    return self._fs_error(
+                        f"Write failed: cannot replace target file {resolved}. "
+                        f"This may indicate file corruption, insufficient permissions, "
+                        f"or disk issues.",
+                        "API_500", status_code=500,
+                        recommendations=["Check disk space and file permissions",
+                                         "Try with atomic=false for direct write",
+                                         "Ensure no other process is locking the file"],
+                        context={"action": "write", "resolved_path": resolved,
+                                 "atomic_write": True, "error": str(_ore)},
+                    )
             else:
                 with open(resolved, "w", encoding=encoding) as f:
                     f.write(content)
+
             return self._ok("File written", {"path": resolved, "size": len(content)},
                             request_id=request_id)
+
+        except PermissionError:
+            return self._fs_error(
+                f"Permission denied: cannot write to {resolved}",
+                "API_403", status_code=403,
+                recommendations=["Check file and directory permissions",
+                                 "Run with elevated privileges",
+                                 "Choose a writable directory"],
+                context={"action": "write", "resolved_path": resolved},
+            )
+        except OSError as e:
+            return self._fs_error(
+                f"Write failed — OS error: {e}. "
+                f"This may indicate disk corruption, file system issues, "
+                f"or permission problems on: {resolved}",
+                "API_500", status_code=500,
+                recommendations=["Check disk health (chkdsk on Windows, fsck on Unix)",
+                                 "Verify sufficient disk space",
+                                 "Check if the filesystem is in read-only mode"],
+                context={"action": "write", "resolved_path": resolved, "error": str(e)},
+            )
         except Exception as e:
-            return self._err(f"Write failed: {e}", "API_500", status_code=500)
+            return self._fs_error(
+                f"Write failed: {e}",
+                "API_500", status_code=500,
+                recommendations=["Review the error details and retry the operation",
+                                 "Check file system integrity",
+                                 "Ensure the target path is valid"],
+                context={"action": "write", "resolved_path": resolved, "error": str(e)},
+            )
 
     async def _fs_delete(self, path: Optional[str], args: Dict) -> Dict:
         import os, shutil
         from pathlib import Path
 
         if not path:
-            return self._err("path required for delete", "API_400")
+            return self._fs_error(
+                "path parameter is required for delete operation",
+                "API_400", status_code=400,
+                recommendations=["Provide a valid file or directory path in the 'path' parameter",
+                                 "Use list action to find available paths"],
+                context={"action": "delete", "provided_path": path},
+            )
+
         resolved = str(Path(path).resolve())
         recursive = args.get("recursive", False)
         dry_run = args.get("dry_run", False)
         request_id = new_request_id()
+
+        # Check existence first
+        if not os.path.exists(resolved) and not dry_run:
+            return self._fs_error(
+                f"Path not found: {resolved}",
+                "API_404", status_code=404,
+                recommendations=["Verify the path is correct — it may have been moved or deleted",
+                                 "Use list action on the parent directory to see available files"],
+                context={"action": "delete", "resolved_path": resolved},
+            )
+
+        if os.path.isdir(resolved) and not recursive:
+            return self._fs_error(
+                f"Path is a directory: {resolved}. Use recursive=true to delete directories.",
+                "API_400", status_code=400,
+                recommendations=["Set recursive=true to delete the directory and its contents",
+                                 "Set recursive=false (default) to target individual files"],
+                context={"action": "delete", "resolved_path": resolved, "is_directory": True,
+                         "recursive": recursive},
+            )
 
         try:
             if dry_run:
@@ -674,17 +1041,58 @@ class ActionRouter:
                 os.remove(resolved)
             return self._ok("Deleted", {"path": resolved}, request_id=request_id)
         except FileNotFoundError:
-            return self._err(f"Not found: {resolved}", "API_404", status_code=404)
+            return self._fs_error(
+                f"Path not found during delete: {resolved}. "
+                f"It may have been removed by another process.",
+                "API_404", status_code=404,
+                recommendations=["Verify the path and retry",
+                                 "Check if the file was already deleted"],
+                context={"action": "delete", "resolved_path": resolved},
+            )
+        except PermissionError:
+            return self._fs_error(
+                f"Permission denied: cannot delete {resolved}",
+                "API_403", status_code=403,
+                recommendations=["Check file/directory permissions",
+                                 "Run with elevated privileges",
+                                 "Ensure no other process is using the file"],
+                context={"action": "delete", "resolved_path": resolved},
+            )
+        except OSError as e:
+            return self._fs_error(
+                f"Delete failed — OS error: {e}. "
+                f"The file may be corrupted, locked by another process, "
+                f"or there is a disk/permission issue on: {resolved}",
+                "API_500", status_code=500,
+                recommendations=["Close any applications that may be using the file",
+                                 "Check disk for errors",
+                                 "Try running with elevated privileges"],
+                context={"action": "delete", "resolved_path": resolved, "error": str(e)},
+            )
 
     async def _fs_copy(self, path: Optional[str], args: Dict) -> Dict:
         import os, shutil
         from pathlib import Path
 
         if not path:
-            return self._err("path required for copy", "API_400")
+            return self._fs_error(
+                "path parameter is required for copy (source)",
+                "API_400", status_code=400,
+                recommendations=["Provide the source file path in the 'path' parameter",
+                                 "Provide the destination path in args.dest"],
+                context={"action": "copy", "provided_source": path},
+            )
+
         dest = args.get("dest")
         if not dest:
-            return self._err("dest required for copy", "API_400")
+            return self._fs_error(
+                "dest parameter is required for copy (destination)",
+                "API_400", status_code=400,
+                recommendations=["Provide the destination path in args.dest",
+                                 "Example: args={'dest': '/path/to/destination'}"],
+                context={"action": "copy", "provided_source": path, "provided_dest": dest},
+            )
+
         src = str(Path(path).resolve())
         dst = str(Path(dest).resolve())
         overwrite = args.get("overwrite", False)
@@ -692,31 +1100,118 @@ class ActionRouter:
         dry_run = args.get("dry_run", False)
         request_id = new_request_id()
 
+        if not os.path.exists(src):
+            return self._fs_error(
+                f"Source not found: {src}",
+                "API_404", status_code=404,
+                recommendations=["Verify the source path is correct",
+                                 "Use list action to find available files"],
+                context={"action": "copy", "source_path": src, "destination_path": dst},
+            )
+
         try:
             if dry_run:
                 return self._ok("Dry run — would copy", {"from": src, "to": dst},
                                 request_id=request_id)
+
             if os.path.exists(dst) and not overwrite:
-                return self._err(f"Destination exists: {dst}", "API_409", status_code=409)
+                return self._fs_error(
+                    f"Destination exists: {dst}. Use overwrite=true to replace.",
+                    "API_409", status_code=409,
+                    recommendations=["Set overwrite=true to replace",
+                                     "Choose a different destination path"],
+                    context={"action": "copy", "source_path": src, "destination_path": dst},
+                )
+
+            # Verify destination parent directory
             if create_parents:
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                dst_dir = Path(dst).parent
+                if not dst_dir.exists():
+                    parent_check = self._check_parent_write_chain(dst)
+                    if not parent_check["ok"]:
+                        err_info = parent_check["error"]
+                        return self._fs_error(
+                            f"Cannot create destination parent directories: {err_info['reason']}",
+                            "API_403", status_code=403,
+                            recommendations=["Choose a writable destination",
+                                             "Run with elevated privileges"],
+                            context={"action": "copy", "destination_path": dst,
+                                     "failed_path": err_info["path"], "reason": err_info["reason"]},
+                        )
+                if not os.access(dst_dir, os.W_OK):
+                    return self._fs_error(
+                        f"No write permission on destination directory: {dst_dir}",
+                        "API_403", status_code=403,
+                        recommendations=["Change destination directory permissions",
+                                         "Choose a different destination"],
+                        context={"action": "copy", "destination_path": dst,
+                                 "parent_path": str(dst_dir)},
+                    )
+                os.makedirs(str(dst_dir), exist_ok=True)
+
             if os.path.isdir(src):
+                if not overwrite and os.path.exists(dst):
+                    return self._fs_error(
+                        f"Destination directory exists: {dst}. Use overwrite=true to replace.",
+                        "API_409", status_code=409,
+                        recommendations=["Set overwrite=true to merge/replace",
+                                         "Choose a different destination"],
+                        context={"action": "copy", "source_path": src, "destination_path": dst},
+                    )
                 shutil.copytree(src, dst, dirs_exist_ok=overwrite)
             else:
                 shutil.copy2(src, dst)
             return self._ok("Copied", {"from": src, "to": dst}, request_id=request_id)
+
+        except PermissionError:
+            return self._fs_error(
+                f"Permission denied: cannot copy {src} to {dst}",
+                "API_403", status_code=403,
+                recommendations=["Check permissions on source and destination",
+                                 "Run with elevated privileges"],
+                context={"action": "copy", "source_path": src, "destination_path": dst},
+            )
         except FileNotFoundError:
-            return self._err(f"Source not found: {src}", "API_404", status_code=404)
+            return self._fs_error(
+                f"Source not found during copy: {src}",
+                "API_404", status_code=404,
+                recommendations=["Verify the source path and retry"],
+                context={"action": "copy", "source_path": src, "destination_path": dst},
+            )
+        except OSError as e:
+            return self._fs_error(
+                f"Copy failed — OS error: {e}",
+                "API_500", status_code=500,
+                recommendations=["Check disk space on destination",
+                                 "Verify the filesystem is not read-only",
+                                 "For large files, ensure sufficient memory"],
+                context={"action": "copy", "source_path": src, "destination_path": dst,
+                         "error": str(e)},
+            )
 
     async def _fs_move(self, path: Optional[str], args: Dict) -> Dict:
         import os, shutil
         from pathlib import Path
 
         if not path:
-            return self._err("path required for move", "API_400")
+            return self._fs_error(
+                "path parameter is required for move (source)",
+                "API_400", status_code=400,
+                recommendations=["Provide the source file path in the 'path' parameter",
+                                 "Provide the destination path in args.dest"],
+                context={"action": "move", "provided_source": path},
+            )
+
         dest = args.get("dest")
         if not dest:
-            return self._err("dest required for move", "API_400")
+            return self._fs_error(
+                "dest parameter is required for move (destination)",
+                "API_400", status_code=400,
+                recommendations=["Provide the destination path in args.dest",
+                                 "Example: args={'dest': '/path/to/destination'}"],
+                context={"action": "move", "provided_source": path, "provided_dest": dest},
+            )
+
         src = str(Path(path).resolve())
         dst = str(Path(dest).resolve())
         overwrite = args.get("overwrite", False)
@@ -724,18 +1219,112 @@ class ActionRouter:
         dry_run = args.get("dry_run", False)
         request_id = new_request_id()
 
+        # Check source exists
+        if not os.path.exists(src):
+            return self._fs_error(
+                f"Source not found: {src}",
+                "API_404", status_code=404,
+                recommendations=["Verify the source path is correct",
+                                 "The file may have been moved or deleted",
+                                 "Use list action to find available files"],
+                context={"action": "move", "source_path": src, "destination_path": dst},
+            )
+
+        if os.path.isdir(src):
+            return self._fs_error(
+                f"Source is a directory: {src}. Move operation requires a file path.",
+                "API_400", status_code=400,
+                recommendations=["Use a file path as the source",
+                                 "Use copy with recursive=true for directories"],
+                context={"action": "move", "source_path": src, "is_directory": True},
+            )
+
         try:
             if dry_run:
                 return self._ok("Dry run — would move", {"from": src, "to": dst},
                                 request_id=request_id)
+
+            # Check destination
             if os.path.exists(dst) and not overwrite:
-                return self._err(f"Destination exists: {dst}", "API_409", status_code=409)
-            if create_parents:
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                return self._fs_error(
+                    f"Destination exists: {dst}. Use overwrite=true to replace.",
+                    "API_409", status_code=409,
+                    recommendations=["Set overwrite=true to replace the destination",
+                                     "Choose a different destination path"],
+                    context={"action": "move", "source_path": src, "destination_path": dst},
+                )
+
+            # Verify destination parent directory
+            dst_parent = Path(dst).parent
+            if not dst_parent.exists():
+                if not create_parents:
+                    return self._fs_error(
+                        f"Destination parent directory does not exist: {dst_parent} "
+                        f"and create_dest_parents=false",
+                        "API_404", status_code=404,
+                        recommendations=["Set create_dest_parents=true to auto-create parent directories",
+                                         "Use mkdir to create the parent directory first"],
+                        context={"action": "move", "destination_path": dst,
+                                 "parent_path": str(dst_parent)},
+                    )
+                # Recursive parent write access check
+                parent_check = self._check_parent_write_chain(dst)
+                if not parent_check["ok"]:
+                    err = parent_check["error"]
+                    return self._fs_error(
+                        f"Cannot create destination parent directories: {err['reason']}",
+                        "API_403", status_code=403,
+                        recommendations=["Choose a writable destination directory",
+                                         "Run with elevated privileges"],
+                        context={"action": "move", "destination_path": dst,
+                                 "failed_path": err["path"], "reason": err["reason"]},
+                    )
+                dst_parent.mkdir(parents=True, exist_ok=True)
+
+            # Verify write access on destination parent
+            if not os.access(dst_parent, os.W_OK):
+                return self._fs_error(
+                    f"No write permission on destination parent directory: {dst_parent}",
+                    "API_403", status_code=403,
+                    recommendations=["Change destination directory permissions",
+                                     "Choose a different destination"],
+                    context={"action": "move", "source_path": src, "destination_path": dst,
+                             "parent_path": str(dst_parent)},
+                )
+
             shutil.move(src, dst)
             return self._ok("Moved", {"from": src, "to": dst}, request_id=request_id)
+
+        except PermissionError:
+            return self._fs_error(
+                f"Permission denied: cannot move {src} to {dst}",
+                "API_403", status_code=403,
+                recommendations=["Check permissions on both source and destination",
+                                 "Run with elevated privileges",
+                                 "Ensure no other process is using the file"],
+                context={"action": "move", "source_path": src, "destination_path": dst},
+            )
         except FileNotFoundError:
-            return self._err(f"Source not found: {src}", "API_404", status_code=404)
+            return self._fs_error(
+                f"Source not found during move: {src}. "
+                f"It may have been removed by another process.",
+                "API_404", status_code=404,
+                recommendations=["Verify the source path and retry",
+                                 "Check if the file was already moved or deleted"],
+                context={"action": "move", "source_path": src, "destination_path": dst},
+            )
+        except OSError as e:
+            return self._fs_error(
+                f"Move failed — OS error: {e}. "
+                f"This may indicate cross-filesystem move issues, disk problems, "
+                f"or permission restrictions.",
+                "API_500", status_code=500,
+                recommendations=["For cross-filesystem moves, use copy+delete instead",
+                                 "Check disk space on destination filesystem",
+                                 "Verify source and destination are accessible"],
+                context={"action": "move", "source_path": src, "destination_path": dst,
+                         "error": str(e)},
+            )
 
     async def _fs_mkdir(self, path: Optional[str], args: Dict) -> Dict:
         import os
@@ -756,6 +1345,8 @@ class ActionRouter:
             return self._ok("Directory created", {"path": resolved}, request_id=request_id)
         except FileExistsError:
             return self._err(f"Directory exists: {resolved}", "API_409", status_code=409)
+        except OSError as e:
+            return self._err(f"Mkdir failed — OS error: {e}", "API_500", status_code=500)
 
     async def _fs_list(self, path: Optional[str], repo_id: Optional[str], args: Dict) -> Dict:
         import os

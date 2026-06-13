@@ -114,7 +114,9 @@ class DiskDeleter:
                 deleted_entry["file_type"] = mime or "application/octet-stream"
             return deleted_entry
         except Exception as e:
-            return {"path": _norm(str(resolved)), "status": "error", "error": str(e)}
+            return {"path": _norm(str(resolved)), "status": "error", "error": str(e),
+                    "recommendations": ["The file may be corrupted or locked",
+                                        "Check permissions or run with elevated privileges"]}
 
 class DiskMover:
     """Pure filesystem mover — no VCS."""
@@ -174,18 +176,20 @@ class DiskMover:
             return {"source": _norm(str(src_path)), "destination": _norm(str(dst_path)), "status": "error", "error": "Destination exists — use overwrite=True"}
 
         import mimetypes
-        dry_entry: Dict[str, Any] = {
-            "source": _norm(str(src_path)), "destination": _norm(str(dst_path)), "status": "dry_run", "message": "Would move",
-            "is_directory": src_path.is_dir(),
-        }
-        try:
-            dry_entry["source_size_bytes"] = src_path.stat().st_size if not src_path.is_dir() else None
-            if not src_path.is_dir():
-                mime, _ = mimetypes.guess_type(str(src_path))
-                dry_entry["source_file_type"] = mime or "application/octet-stream"
-        except OSError:
-            pass
-        return dry_entry
+
+        if dry_run:
+            dry_entry: Dict[str, Any] = {
+                "source": _norm(str(src_path)), "destination": _norm(str(dst_path)), "status": "dry_run", "message": "Would move",
+                "is_directory": src_path.is_dir(),
+            }
+            try:
+                dry_entry["source_size_bytes"] = src_path.stat().st_size if not src_path.is_dir() else None
+                if not src_path.is_dir():
+                    mime, _ = mimetypes.guess_type(str(src_path))
+                    dry_entry["source_file_type"] = mime or "application/octet-stream"
+            except OSError:
+                pass
+            return dry_entry
 
         try:
             if create_parents:
@@ -203,5 +207,16 @@ class DiskMover:
             except OSError:
                 pass
             return moved_entry
+        except PermissionError:
+            return {"source": _norm(str(src_path)), "destination": _norm(str(dst_path)),
+                    "status": "error", "error": "Permission denied",
+                    "recommendations": ["Check source and destination permissions",
+                                        "Run with elevated privileges"]}
+        except OSError as e:
+            return {"source": _norm(str(src_path)), "destination": _norm(str(dst_path)),
+                    "status": "error", "error": str(e),
+                    "recommendations": ["May be cross-filesystem move — try copy+delete instead",
+                                        "Check disk space on destination"]}
         except Exception as e:
-            return {"source": _norm(str(src_path)), "destination": _norm(str(dst_path)), "status": "error", "error": str(e)}
+            return {"source": _norm(str(src_path)), "destination": _norm(str(dst_path)),
+                    "status": "error", "error": str(e)}

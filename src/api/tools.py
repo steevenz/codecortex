@@ -55,6 +55,40 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
                 pass
         return response
 
+    def _coerce_args(args: Any) -> Dict:
+        """Coerce args from JSON string to dict, or return original if already dict.
+
+        Returns a dict — never None. Passes through if already a dict or None (→ {}).
+        If args is a JSON string, attempts to parse it.
+
+        Raises TypeError with clear message if args is an unsupported type.
+        """
+        import json
+        if args is None:
+            return {}
+        if isinstance(args, dict):
+            return args
+        if isinstance(args, str):
+            try:
+                parsed = json.loads(args)
+                if not isinstance(parsed, dict):
+                    raise TypeError(
+                        f"args is a JSON string but parsed to {type(parsed).__name__}, "
+                        f"expected JSON object (dict). "
+                        f"Hint: pass args as {{'key': 'value'}}, not '...' wrapping the object."
+                    )
+                return parsed
+            except json.JSONDecodeError as e:
+                raise TypeError(
+                    f"args is a JSON string but failed to parse: {e}. "
+                    f"Hint: args should be a JSON object like {{\"content\": \"...\"}}, "
+                    f"not a JSON string or array."
+                )
+        raise TypeError(
+            f"args must be a dict or JSON string, got {type(args).__name__}. "
+            f"If using an MCP client, ensure args is sent as a JSON object, not a string."
+        )
+
     @mcp.tool(
         annotations=ToolAnnotations(
             title="CodeCortex Repository",
@@ -110,8 +144,14 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
             await ctx.info(f"repository.{action} started")
         if action in ("analyze", "sync", "audit") and hasattr(ctx, "report_progress"):
             await ctx.report_progress(0, 6, "Starting...")
+        try:
+            coerced_args = _coerce_args(args)
+        except TypeError as e:
+            from src.core import api_response as _api_resp, new_request_id as _new_rid
+            return _api_resp(success=False, status_code=400, message=str(e),
+                             data=None, request_id=_new_rid(), error_code="API_400")
         result = await _router().dispatch_repository(
-            action, repo_path, repo_id, args or {},
+            action, repo_path, repo_id, coerced_args,
         )
         if action in ("analyze", "sync", "audit") and hasattr(ctx, "report_progress"):
             await ctx.report_progress(6, 6, "Complete")
@@ -164,8 +204,14 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         @return: Dict with success, data, meta.
         """
         t0 = time.monotonic()
+        try:
+            coerced_args = _coerce_args(args)
+        except TypeError as e:
+            from src.core import api_response as _api_resp, new_request_id as _new_rid
+            return _api_resp(success=False, status_code=400, message=str(e),
+                             data=None, request_id=_new_rid(), error_code="API_400")
         result = await _router().dispatch_filesystem(
-            action, path, repo_id, args or {},
+            action, path, repo_id, coerced_args,
         )
         result.setdefault("meta", {})["duration_ms"] = int((time.monotonic() - t0) * 1000)
         return _inject_insight(result, "codecortex_filesystem", action)
@@ -226,12 +272,18 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         t0 = time.monotonic()
         if hasattr(ctx, "info"):
             await ctx.info(f"codebase.{action} started")
+        try:
+            coerced_args = _coerce_args(args)
+        except TypeError as e:
+            from src.core import api_response as _api_resp, new_request_id as _new_rid
+            return _api_resp(success=False, status_code=400, message=str(e),
+                             data=None, request_id=_new_rid(), error_code="API_400")
         _long_actions = {"analyze", "audit", "test", "graph_build"}
-        _is_long = action in _long_actions or (action == "graph" and (args or {}).get("sub_action") == "build")
+        _is_long = action in _long_actions or (action == "graph" and coerced_args.get("sub_action") == "build")
         if _is_long and hasattr(ctx, "report_progress"):
             await ctx.report_progress(0, 5, f"Starting {action}...")
         result = await _router().dispatch_codebase(
-            action, repo_id, repo_path, args or {},
+            action, repo_id, repo_path, coerced_args,
         )
         if _is_long and hasattr(ctx, "report_progress"):
             await ctx.report_progress(5, 5, f"{action} complete")
