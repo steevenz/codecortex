@@ -103,7 +103,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         action: str,
         repo_path: Optional[str] = None,
         repo_id: Optional[str] = None,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Repository lifecycle management — init, inspect, analyze, sync, audit, and more.
@@ -176,7 +176,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         action: str,
         path: Optional[str] = None,
         repo_id: Optional[str] = None,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Filesystem operations — read, write, delete, search, watch, disk usage, and audit.
@@ -233,7 +233,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
         action: str,
         repo_id: Optional[str] = None,
         repo_path: Optional[str] = None,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Code intelligence — search, graph analysis, audit, indexing, testing, refactoring.
@@ -306,7 +306,7 @@ def register_tools(mcp: FastMCP, orchestrator_factory: Callable[..., Any]) -> No
     )
     async def scaffolder(
         action: str,
-        args: Optional[Dict[str, Any]] = None,
+        args: Optional[Any] = None,
     ) -> Dict[str, Any]:
         """
         Project scaffolding — inspect stacks, validate names, generate files, and scaffold projects.

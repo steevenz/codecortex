@@ -624,8 +624,22 @@ class ActionRouter:
             self.orchestrator.fs_service.resolve_repo_path(repo_id, path) if repo_id else str(Path(path).resolve())
         )
 
+        # Check for corrupted file and force-remove if needed
+        health_check = self._ensure_healthy_path(resolved)
+        if not health_check['ok']:
+            return self._fs_error(
+                health_check['error'],
+                health_check['code'], status_code=health_check['status'],
+                recommendations=health_check['recommendations'],
+                context={'action': 'read', **health_check.get('context', {})},
+            )
+
         # Check file existence first
-        if not os.path.exists(resolved):
+        try:
+            exists = os.path.exists(resolved)
+        except OSError:
+            exists = False
+        if not exists:
             return self._fs_error(
                 f"File not found: {resolved}",
                 "API_404", status_code=404,
@@ -756,6 +770,61 @@ class ActionRouter:
             "missing_parents": missing_parents,
         }
 
+    def _ensure_healthy_path(self, resolved_path: str) -> Dict[str, Any]:
+        """Verify path health and handle corrupted files on Windows.
+
+        On Windows, corrupted files (WinError 1392) can cause os.path.exists
+        and other stat operations to raise OSError. This method force-removes
+        corrupted files via shell so the operation can proceed.
+
+        Returns {'ok': True} or dict with error details.
+        """
+        from pathlib import Path
+
+        resolved = Path(resolved_path)
+
+        # Skip if file doesn't exist at all
+        try:
+            resolved.stat()
+        except FileNotFoundError:
+            return {'ok': True}
+        except PermissionError:
+            return {'ok': False,
+                    'error': f"Cannot access: {resolved_path} — permission denied",
+                    'code': 'API_403', 'status': 403,
+                    'recommendations': ['Check file permissions', 'Run with elevated privileges'],
+                    'context': {'resolved_path': resolved_path, 'error_type': 'permission'}}
+        except OSError as e:
+            # File exists but is corrupted/unreadable (WinError 1392)
+            return self._force_remove_corrupted(resolved_path)
+        else:
+            return {'ok': True}
+
+    def _force_remove_corrupted(self, resolved_path: str) -> Dict[str, Any]:
+        """Force-remove a corrupted file via shell command."""
+        import subprocess
+        try:
+            shell_cmd = f'cmd /c "del /f /q \"{resolved_path}\""'
+            result = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                return {'ok': True, 'corrupted_file_removed': True}
+            else:
+                return {'ok': False,
+                        'error': f"Corrupted file could not be removed: {resolved_path}. "
+                                 f"Shell error: {result.stderr.strip()}",
+                        'code': 'API_500', 'status': 500,
+                        'recommendations': ['Delete the file manually',
+                                            'Run chkdsk on the drive to repair filesystem errors'],
+                        'context': {'resolved_path': resolved_path,
+                                    'shell_error': result.stderr.strip()}}
+        except Exception as shell_err:
+            return {'ok': False,
+                    'error': f"Corrupted file could not be removed via shell: {shell_err}",
+                    'code': 'API_500', 'status': 500,
+                    'recommendations': ['Delete the file manually',
+                                        'Run the IDE/terminal as Administrator to get file access'],
+                    'context': {'resolved_path': resolved_path, 'shell_error': str(shell_err)}}
+
     async def _fs_write(self, path: Optional[str], repo_id: Optional[str], args: Dict) -> Dict:
         import os
         from pathlib import Path
@@ -780,9 +849,32 @@ class ActionRouter:
         overwrite = args.get("overwrite", False)
         request_id = new_request_id()
 
-        resolved = str(Path(path).resolve()) if os.path.isabs(path) else (
-            self.orchestrator.fs_service.resolve_repo_path(repo_id, path) if repo_id else str(Path(path).resolve())
-        )
+        # Resolve path safely — handles corrupted files
+        try:
+            if os.path.isabs(path):
+                resolved = str(Path(path).resolve())
+            elif repo_id:
+                resolved = self.orchestrator.fs_service.resolve_repo_path(repo_id, path)
+            else:
+                resolved = str(Path(path).resolve())
+        except OSError as _res_err:
+            return self._fs_error(
+                f"Path resolution failed: {path}. The path may be on a corrupted filesystem.",
+                "API_500", status_code=500,
+                recommendations=["Check the drive for filesystem errors",
+                                 "Ensure the path is valid and accessible"],
+                context={"action": "write", "provided_path": path, "error": str(_res_err)},
+            )
+
+        # Check for corrupted file and force-remove if needed
+        write_check = self._ensure_healthy_path(resolved)
+        if not write_check['ok']:
+            return self._fs_error(
+                write_check['error'],
+                write_check['code'], status_code=write_check['status'],
+                recommendations=write_check['recommendations'],
+                context={'action': 'write', **write_check.get('context', {})},
+            )
 
         resolved_path = Path(resolved)
 
@@ -1008,8 +1100,23 @@ class ActionRouter:
         dry_run = args.get("dry_run", False)
         request_id = new_request_id()
 
+        # Check for corrupted file and force-remove if needed
+        health_check = self._ensure_healthy_path(resolved)
+        if not health_check['ok']:
+            return self._fs_error(
+                health_check['error'],
+                health_check['code'], status_code=health_check['status'],
+                recommendations=health_check['recommendations'],
+                context={'action': 'delete', **health_check.get('context', {})},
+            )
+        # Note: if corrupted_file_removed is True, the file is already deleted
+
         # Check existence first
-        if not os.path.exists(resolved) and not dry_run:
+        try:
+            exists = os.path.exists(resolved)
+        except OSError:
+            exists = False
+        if not exists and not dry_run:
             return self._fs_error(
                 f"Path not found: {resolved}",
                 "API_404", status_code=404,
