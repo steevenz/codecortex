@@ -10,9 +10,9 @@ This directory contains all project documentation following CODDY Codeworks stan
 - [Security](architecture/security.md) — SSRF guards, path validation, label sanitization
 - [Changelog](versions/changelog.md) — Version history
 
-## 6 Unified MCP Tools
+## 8 Unified MCP Tools
 
-CodeCortex exposes **6 consolidated MCP tools** that dispatch to 35+ internal domain actions. Each tool uses an `action + args` pattern.
+CodeCortex exposes **8 consolidated MCP tools** that dispatch to 40+ internal domain actions. Each tool uses an `action + args` pattern.
 
 | Tool | Purpose | Key Actions |
 |------|---------|-------------|
@@ -22,6 +22,8 @@ CodeCortex exposes **6 consolidated MCP tools** that dispatch to 35+ internal do
 | **codecortex:scaffolder** | Project scaffolding | list_stacks, get_stack, validate_name, list_licenses, generate_content, generate_class, create_project |
 | **codecortex:knowledge** | Knowledge extraction | extract, query, status, relationships, validate |
 | **codecortex:idegraph** | IDE memory | ingest, search, compact, export, timeline, state, artifacts |
+| **codecortex:indexing** | Unified indexing | run, schedule, stop, status, providers |
+| **codecortex:loggraph** | Log visualization | summary, error-frequency, time-trend, scan, discover, anomalies, files, health, info |
 
 ## Feature Documentation
 
@@ -33,6 +35,8 @@ Feature documentation is organized in `docs/features/` by domain:
 | **CodeGraph** | Relationship graph, architecture analysis | [View](codegraph/concept.md) |
 | **CodeRepository** | Git integration, multi-repo management | [View](coderepository/concept.md) |
 | **Filesystem** | File I/O, directory operations | [View](filesystem/concept.md) |
+| **UnifiedSearch** | Multi-provider search orchestrator, 17 providers | [View](unified-search/concept.md) |
+| **UnifiedIndexing** | Multi-provider indexing orchestrator, 7 providers + scheduler | [View](unified-indexing/concept.md) |
 | **CodeRefactor** | Symbol rename, search & replace | [View](coderefactor/concept.md) |
 | **CodeTester** | QA automation, test runners, linters | [View](codetester/concept.md) |
 | **Core** | Database, token economy, CLI | [View](core/concept.md) |

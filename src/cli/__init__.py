@@ -88,6 +88,19 @@ from src.cli.remote import (
     COMMANDS as REMOTE_COMMANDS, build_parser as build_remote_parser,
 )
 
+from src.cli.search import (
+    SEARCH_COMMANDS, build_parser as build_search_parser,
+)
+
+from src.cli.indexing import (
+    INDEX_COMMANDS, build_parser as build_indexing_parser,
+)
+
+from src.modules.codelogs.api.cli import (
+    DOMAIN as LOG_DOMAIN, ALIASES as LOG_ALIASES,
+    LOG_COMMANDS, build_parser as build_log_parser,
+)
+
 sys.path.insert(0, str(PROJECT_ROOT))
 
 
@@ -120,6 +133,9 @@ def _init_registry():
     _register("cloud", [], CLOUD_COMMANDS, build_cloud_parser)
     _register("neocortex", [], neocortex_COMMANDS, build_neocortex_parser)
     _register("remote", [], REMOTE_COMMANDS, build_remote_parser)
+    _register("search", ["s", "find", "unified-search"], SEARCH_COMMANDS, build_search_parser)
+    _register("indexing", ["idx", "index", "unified-index"], INDEX_COMMANDS, build_indexing_parser)
+    _register("log", ["logs", "logging"], LOG_COMMANDS, build_log_parser)
 
 
 def main() -> None:
@@ -153,6 +169,10 @@ Examples:
   codecortex ref rename --repo-id <uuid> src/utils.py::calc --new-name calculate_total --apply
   codecortex ref rename-file --repo-id <uuid> src/old.py --new-path src/new.py
   codecortex ref modularize --repo-id <uuid> src/monolith.py --target-domain src/domain/ --apply
+  codecortex search "authentication module" --model codecortex-combo
+  codecortex s "database connection" --type code --max-results 10
+  codecortex search models
+  codecortex find "class User" --model codecortex-codebase
   codecortex cg build /path/to/repo
   codecortex cg query callers MyService --repo-id <uuid>
   codecortex cg query visualize MyModule --repo-id <uuid> --viz-format mermaid

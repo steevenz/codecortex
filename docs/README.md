@@ -68,6 +68,8 @@ All documentation must:
 - **features/index.md** - Feature map with documentation by domain (6 domains + Core)
 - **features/support-matrix.md** - Languages, frameworks, MCP, LLMs, OS, databases, backends, QA tools
 - **features/core/mcp-compliance.md** - MCP spec compliance (annotations, progress, resources, logging, duration)
+- **features/unified-search/concept.md** - UnifiedSearch multi-provider search orchestrator
+- **features/unified-search/sub-features/security-filter/concept.md** - SecurityFilter (sensitive content masking, vulgar detection)
 - **features/codeindex/concept.md** - Code indexing docs (TreeSitter, semantic search, etc.)
 - **features/codegraph/concept.md** - Code graph & architecture analysis docs
 - **features/coderepository/concept.md** - Repository management docs
@@ -76,7 +78,7 @@ All documentation must:
 - **features/codetester/concept.md** - QA automation docs
 - **features/core/concept.md** - Core infrastructure docs (database, token economy, CLI)
 - **architecture/architecture.md** - Domain map, DI wiring, pipeline flow, backend abstraction
-- **architecture/security.md** - SSRF guards, path validation, label sanitization reference
+- **architecture/security.md** - SSRF guards, path validation, SecurityFilter, label sanitization
 - **guides/how-to-setup-mcp.md** - MCP server setup and configuration
 - **guides/how-to-use-cli.md** - CLI usage guide
 - **workflows/workflow-index.md** - Master index of all agentic workflows

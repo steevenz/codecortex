@@ -1,0 +1,61 @@
+{
+  "name": "codelogs",
+  "version": "2.0.0",
+  "description": "Log management — scan, search, visualize, discover, cleanup, rotate, validate log files. Systematic path discovery across languages, OS, servers, and databases per logging-standard.md and project-structure-standard.md",
+  "type": "module",
+  "dependencies": {
+    "modules": [],
+    "core": [
+      "config",
+      "errors",
+      "logging"
+    ]
+  },
+  "providers": {
+    "services": [
+      "log_service",
+      "log_path_collector",
+      "loggraph_service"
+    ],
+    "api": [
+      "cli",
+      "tools"
+    ]
+  },
+  "tools": {
+    "prefix": "log_",
+    "entries": [
+      "loggraph",
+      "search",
+      "discover",
+      "cleanup",
+      "rotate",
+      "validate"
+    ]
+  },
+  "security": {
+    "path_traversal_prevention": true,
+    "allowed_log_roots": [
+      "logs",
+      "outputs/logs",
+      "storage/logs",
+      "log",
+      "outputs/debugs"
+    ],
+    "max_file_size_mb": 10,
+    "blocked_paths": [
+      "/etc",
+      "/proc",
+      "/sys",
+      "/dev",
+      "C:\\Windows",
+      "C:\\System32"
+    ]
+  },
+  "author": {
+    "name": "Steeven Andrian",
+    "email": "steevenz@steevenz.com"
+  },
+  "copyright": "Copyright (c) 2026 CODDY Codework",
+  "standard": "CODDY-CrossStack-v2.0"
+}

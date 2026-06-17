@@ -24,6 +24,8 @@ from src.core import api_response, new_request_id, load_version
 from src.core.logging import get_logger
 from src.main import CortexOrchestrator, mcp # Import mcp for tool lookup
 from src.core.security.auth import AuthService
+from scripts.server.search_api import search_endpoint, models_endpoint, models_info_endpoint
+from scripts.server.codelogs_api import router as codelogs_router
 
 logger = get_logger(__name__)
 
@@ -374,6 +376,9 @@ def create_app() -> FastAPI:
         </html>
         """
 
+    # Register codelogs API router
+    app.include_router(codelogs_router)
+
     @app.get("/status")
     async def status() -> Dict[str, Any]:
         request_id = new_request_id()
@@ -390,10 +395,98 @@ def create_app() -> FastAPI:
                 "transport": "http-jsonrpc/sse",
                 "uptime_seconds": int(time.time() - START_TIME),
                 "status": "healthy",
-                "features": ["code_analysis", "semantic_indexing", "architectural_mapping", "sse_streaming"],
+                "features": ["code_analysis", "semantic_indexing", "architectural_mapping", "sse_streaming", "unified_search", "unified_indexing"],
             },
             request_id=request_id,
         )
+
+    # ── Unified Search API (9Router-compatible) ─────────
+    @app.post("/v1/search")
+    async def unified_search(body: Dict[str, Any]):
+        from scripts.server.search_api import SearchAPIRequest
+        req = SearchAPIRequest(**body)
+        return await search_endpoint(req)
+
+    @app.get("/v1/models/search")
+    @app.get("/v1/tools/search")
+    async def search_models():
+        return await models_endpoint()
+
+    @app.get("/v1/models/info")
+    @app.get("/v1/tools/info")
+    async def search_model_info(id: str):
+        return await models_info_endpoint(id)
+
+    # ── Unified Indexing API ──────────────────────────────
+    @app.post("/v1/index")
+    async def unified_index(body: Dict[str, Any]):
+        from src.services.unified_indexing import IndexingRequest, get_indexing_engine
+
+        repo_path = body.get("repo_path")
+        if not repo_path:
+            return api_response(success=False, status_code=400,
+                                message="repo_path is required",
+                                data=None, error_code="IDX_001")
+        provider = body.get("provider", "codecortex-full")
+        mode = body.get("mode", "full")
+
+        req = IndexingRequest(
+            provider=provider,
+            repo_path=repo_path,
+            repo_id=body.get("repo_id"),
+            mode=mode,
+            sequential=True,
+        )
+        engine = get_indexing_engine()
+        try:
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(engine.index(req))
+            loop.close()
+            return api_response(
+                success=result.success,
+                status_code=200 if result.success else 500,
+                message=f"Indexing {'succeeded' if result.success else 'failed'}",
+                data=result.to_dict(),
+            )
+        except Exception as e:
+            return api_response(success=False, status_code=500,
+                                message=str(e), data=None, error_code="IDX_500")
+
+    @app.post("/v1/index/schedule")
+    async def index_schedule(body: Dict[str, Any]):
+        from src.services.unified_indexing import get_indexing_engine
+
+        repo_path = body.get("repo_path")
+        if not repo_path:
+            return api_response(success=False, status_code=400,
+                                message="repo_path is required",
+                                data=None, error_code="IDX_002")
+        interval = body.get("interval", 3600)
+        engine = get_indexing_engine()
+        result = engine.start_scheduler(repo_path, interval_seconds=interval)
+        return result
+
+    @app.post("/v1/index/stop")
+    async def index_stop():
+        from src.services.unified_indexing import get_indexing_engine
+        engine = get_indexing_engine()
+        return engine.stop_scheduler()
+
+    @app.get("/v1/index/status")
+    async def index_status():
+        from src.services.unified_indexing import get_indexing_engine
+        engine = get_indexing_engine()
+        sched = engine.scheduler_status()
+        last = engine.get_last_result()
+        return api_response(success=True, data={"scheduler": sched, "last_run": last})
+
+    @app.get("/v1/index/providers")
+    async def index_providers():
+        from src.services.unified_indexing import get_indexing_engine
+        engine = get_indexing_engine()
+        return api_response(success=True, data=engine.get_providers())
 
     mcp_path = "/sync"
     mcp_secret = os.getenv("CODECORTEX_MCP_SECRET", "").strip()

@@ -72,6 +72,14 @@ To provide a comprehensive, language-agnostic code intelligence engine that unde
 - Directory traversal prevention
 - File classification (code, docs, config, binary)
 
+### 7. **Unified Search & Security**
+- 9 unified search providers with parallel execution
+- ReDoS-safe regex search with timeout guards
+- Sensitive content masking (41 patterns, 4 severity levels)
+- Vulgar content detection and blocking
+- Strict mode toggle (mask vs block)
+- `.gitignore` / `.aiignore` integration
+
 ## Architecture
 
 CodeCortex follows **Domain-Driven Design (DDD)** with clear bounded contexts:

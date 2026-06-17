@@ -423,7 +423,7 @@ def _safe_kill_and_wait(killed_any: bool) -> bool:
     return True
 
 
-def _safeguard_instance() -> None:
+def     _safeguard_instance() -> None:
     """Self-kill safeguard that prevents multi-IDE process conflicts.
 
     Runs synchronously at module load time.
@@ -611,8 +611,8 @@ def _safeguard_instance() -> None:
     atexit.register(_cleanup)
 
 
-# Run safeguard BEFORE anything else
-_safeguard_instance()
+if os.environ.get("CODECORTEX_SKIP_SAFEGUARD") != "1":
+    _safeguard_instance()
 
 from src.core import api_response, new_request_id
 from src.core.logging import Logger, get_logger
@@ -676,6 +676,19 @@ class CortexOrchestrator:
     def _ensure_schema(self) -> None:
         """Create database tables if they do not exist (idempotent)."""
         from src.core.database.orm import BaseModel, SessionManager
+
+        # CRITICAL: Import ALL SQLAlchemy model classes BEFORE create_all()
+        # so they register themselves with BaseModel.metadata.
+        # Without these imports, create_all() creates nothing.
+        from src.modules.coderepository.core.models.repository import Repository  # noqa: F401
+        from src.modules.coderepository.core.models.file import File  # noqa: F401
+        from src.modules.coderepository.core.models.symbol import Symbol  # noqa: F401
+        from src.modules.coderepository.core.models.directory import Directory  # noqa: F401
+        from src.modules.coderepository.core.models.edge import Edge  # noqa: F401
+        from src.modules.coderepository.core.models.commit import Commit  # noqa: F401
+        from src.modules.coderepository.core.models.file_commit import FileCommit  # noqa: F401
+        from src.modules.coderepository.core.models.manifest_entry import ManifestEntry  # noqa: F401
+
         SessionManager(str(self.db._db_path)).create_tables(BaseModel)
         # Ensure vcs_url uniqueness index for cross-device identity
         self.db.conn.execute("""
@@ -734,6 +747,9 @@ class CortexOrchestrator:
         # SideCortex cross-IDE tables (sc_ prefix)
         from src.core.database.sidecortex_schema import ensure_sidecortex_tables
         ensure_sidecortex_tables(self.db.conn)
+        # Fallback: ensure all core tables exist regardless of ORM import order
+        from src.core.database.migration import full_migration
+        full_migration(self.db.conn)
 
     def get_repo_id(self, path: str) -> Optional[str]:
         """Resolve a physical path to its repo ID. Falls back to remote_url matching for cross-device."""
@@ -911,7 +927,7 @@ register_idegraph_tools(mcp, create_orchestrator)
 # Register MCP Resources (codecortex:// URIs)
 register_api_resources(mcp, create_orchestrator)
 
-# Total: 6 unified MCP tools + 4 resources
+# Total: 8 unified MCP tools (4 base + knowledge + idegraph + indexing + loggraph) + 4 resources
 
 if __name__ == "__main__":
     import sys

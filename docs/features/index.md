@@ -6,7 +6,7 @@
 
 ## Feature Map
 
-CodeCortex exposes **6 unified MCP tools** (`codecortex:repository`, `:filesystem`, `:codebase`, `:scaffolder`, `:knowledge`, `:idegraph`) that dispatch to 35+ internal domain actions across **6 bounded contexts (domains)** plus **KnowledgeGraph**, **Scaffolder**, and a **Core** shared layer.
+CodeCortex exposes **8 unified MCP tools** (`codecortex:repository`, `:filesystem`, `:codebase`, `:scaffolder`, `:knowledge`, `:idegraph`, `:loggraph`, `:search`) that dispatch to 50+ internal domain actions across **6 bounded contexts (domains)** plus **KnowledgeGraph**, **Scaffolder**, **Codelogs**, **UnifiedSearch**, and a **Core** shared layer.
 
 ---
 
@@ -15,6 +15,8 @@ CodeCortex exposes **6 unified MCP tools** (`codecortex:repository`, `:filesyste
 - [Support Matrix](support-matrix.md) — Languages, frameworks, MCP, LLMs, OS, databases, backends, QA tools, CI/CD
 - [CodeIndex](codeindex/concept.md) — AST parsing, symbol extraction, semantic search
 - [CodeGraph](codegraph/concept.md) — Relationship graph, architecture analysis
+- [Codelogs](codelogs/concept.md) — Log management, discovery, visualization, health assessment
+- [UnifiedSearch](unified-search/concept.md) — 16-provider search orchestrator (code, files, git, svn, todo, security, empty, blame)
 - [CodeAnalysis](codeanalysis/concept.md) — Source code security audit
 - [CodeRepository](coderepository/concept.md) — Git integration, multi-repo management
 - [Filesystem](filesystem/concept.md) — File operations, security guards
@@ -40,6 +42,8 @@ CodeCortex exposes **6 unified MCP tools** (`codecortex:repository`, `:filesyste
 | **CodeTester** | QA automation, test running, linting | `qa_run`, `qa_status` | Background Tasks |
 | **KnowledgeGraph** | Engineering knowledge extraction from docs — 8 types, pattern-based | `codecortex:knowledge` | Knowledge Extraction, Importance Scoring, Relationship Mapping, GoldenKnowledge Store |
 | **Scaffolder** | Project scaffolding, stack detection, boilerplate generation | `scaffold_list_stacks`, `scaffold_get_stack`, `scaffold_validate_name`, `scaffold_generate`, `scaffold_make`, `scaffold_create` | Stack Detection, Naming Conventions, License Templates, Project Generation |
+| **Codelogs** | Log management, discovery, visualization, health | `codecortex:loggraph` | Scan, Search, Graph, Discover, Cleanup, Rotate, Validate, Info |
+| **UnifiedSearch** | 16-provider search orchestrator | `codecortex:search` | Codebase, Filesystem, RepoWT, Graph, IDEGraph, Knowledge, CrossProject, CodeIndex, AgentArt, Codelogs, Todo, Stub, Security, Empty, SVN, Blame |
 | **Core** | Database, token economy, CLI, backup | CLI: `--compact`, `--cleanup`, `--takeout`, `--import-dump`, `--repositories` | Token Economy, Database Maintenance, CLI |
 
 ---

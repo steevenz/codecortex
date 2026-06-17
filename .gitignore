@@ -58,3 +58,6 @@ database/
 
 # Vendored upstream mirrors (managed by harvest_upstreams.py)
 vendor/
+
+# Node.js
+node_modules/

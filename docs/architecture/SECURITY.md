@@ -2,7 +2,12 @@
 
 ## Scope
 
-Security utilities are centralized in `src/domain/codegraph/core/security.py`. They provide SSRF prevention, path traversal guards, and label sanitization. These utilities are exposed as MCP tools and are safe to invoke from any agent context.
+CodeCortex has two security layers:
+
+1. **Domain Security** (`src/domain/codegraph/core/security.py`) — SSRF prevention, path traversal guards, label sanitization. Exposed as MCP tools.
+2. **Service Security** (`src/services/security_filter.py`) — Sensitive file/content detection, content masking, vulgar detection, .gitignore/.aiignore parsing. Integrated into all file-accessing search providers.
+
+Both layers are safe to invoke from any agent context.
 
 ## Modules
 
@@ -74,9 +79,74 @@ Security utilities are registered as MCP tools in `src/domain/codegraph/api/tool
 | `validate_graph_path_safe` | `validate_graph_path()` | `path: str`, `base_path: str` (optional) |
 | `sanitize_graph_label` | `sanitize_label()` | `text: str` |
 
+## Service Security: SecurityFilter
+
+**Package:** `src/services/security_filter.py`
+
+`SecurityFilter` provides content-level security for all file-accessing search operations. It is not exposed as a standalone MCP tool — instead, it is embedded within `UnifiedSearchEngine` providers that read file content.
+
+### Key Capabilities
+
+| Capability | Description |
+|-----------|-------------|
+| **Sensitive file detection** | 18 sensitive extensions + 50+ exact filenames — always blocked |
+| **Sensitive content masking** | 41 regex patterns across 4 severity levels — masked in default mode |
+| **Vulgar content blocking** | Always blocked, never shown to agent |
+| **Strict mode toggle** | `CODECORTEX_SECURITY_STRICT=true` blocks all sensitive content |
+| **Ignore file parsing** | `.gitignore` / `.aiignore` rule loading and glob matching |
+
+### Integration Points
+
+| Provider | Integration | Method |
+|----------|------------|--------|
+| `UnifiedSearch._search_filesystem()` | Per-file check | `check_file(path, content)` |
+| `UnifiedSearch._search_repowt()` | Git status filter | `check_file(path)` |
+| `UnifiedSearch._search_knowledge()` | Chunk content filter | `process_content(text)` |
+| `UnifiedSearch._search_agentart()` | Per-file check | `check_file()` + `process_content()` |
+
+### 3-Layer Pipeline
+
+```
+check_file(path, content)
+  │
+  ├── Layer 1: Path Validation
+  │     ├── traversal prevention (.. / outside project root)
+  │     ├── sensitive extension match (.env, .key, .pem, ...)
+  │     ├── sensitive exact name match (id_rsa, .npmrc, ...)
+  │     ├── sensitive path substring (/secret/, /credentials/)
+  │     └── .gitignore / .aiignore rule matching
+  │
+  ├── Layer 2: Vulgar Detection (always first)
+  │     └── if vulgar content → block entirely, never shown
+  │
+  └── Layer 3: Sensitive Content Analysis
+        ├── 41 regex patterns matched against file text
+        ├── non-strict → mask matches with ***MASKED***
+        └── strict     → block entire file
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CODECORTEX_SECURITY_STRICT` | `false` | `false` = mask sensitive content; `true` = block entirely |
+
+### Behavior Matrix
+
+| Content Type | Default Mode | Strict Mode |
+|-------------|-------------|-------------|
+| Safe code | Allowed | Allowed |
+| Password / API key | Masked (`***MASKED***`) | Blocked |
+| .env file | Blocked (file-level) | Blocked |
+| NSFW / vulgar | Blocked | Blocked |
+
+Full reference: [Security Filter](../features/unified-search/sub-features/security-filter/concept.md)
+
 ## Usage in Production
 
 - Always wrap external URL inputs with `validate_url()` before any HTTP call.
 - Always pass user-provided file paths through `validate_graph_path()` before reading/writing.
 - Never pass raw graph labels to HTML templates — use `escape_html_label()`.
 - Security guards are enforced at the domain level in `CodeGraphService` for all graph operations.
+- `SecurityFilter` is automatically active in every UnifiedSearch provider — no manual invocation needed.
+- Set `CODECORTEX_SECURITY_STRICT=true` in environments where no sensitive data should reach the AI agent.

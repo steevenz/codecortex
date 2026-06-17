@@ -296,4 +296,4 @@ MCP: codecortex:codebase
 
 ---
 
-*Cross-reference: [workflow-index.md](workflow-index.md) | [deep-analysis-workflow.md](deep-analysis-workflow.md)*
+*Cross-reference: [workflow-index.md](workflow-index.md) | [deep-analysis-workflow.md](deep-analysis-workflow.md) | [UnifiedSearch](../features/unified-search/concept.md)*

@@ -1,5 +1,35 @@
 # CodeCortex Changelog
 
+## [2026-06-17] UnifiedSearch Engine + Security Filter
+
+### New: UnifiedSearch Engine (`src/services/unified_search.py`)
+- **9 Unified Search Providers**: codebase (FTS5 + semantic), filesystem (glob + regex), repowt (git status), graph (BFS), idegraph (IDE memory), knowledge (FTS + JSON), crossproject (multi-repo), codeindex (symbol lookup), agentart (.agents artifacts)
+- **Combo Mode**: Query all non-empty providers in parallel via `asyncio.gather()`
+- **ReDoS Protection**: Input size, backtrack limit, pattern complexity, 5s timeout on all regex
+- **9Router Compatibility**: JSON-RPC + SSE streaming support
+- **Auto-Indexing**: One-call search with automatic repo inspection + indexing
+
+### New: Security Filter (`src/services/security_filter.py`)
+- **41 sensitive patterns** across 4 severity levels (9 critical, 15 high, 14 medium, 3 low)
+- **Content masking** (default mode): replace sensitive text with `***MASKED***`
+- **Strict mode** (`CODECORTEX_SECURITY_STRICT=true`): block all sensitive content entirely
+- **Vulgar content detection**: always blocked, never shown to AI agent
+- **Sensitive file detection**: 18 extensions + 50+ exact names + 7 path substrings
+- **`.gitignore`/`.aiignore` parsing**: rule loading and matching per project
+- **Path traversal prevention**: absolute path resolution + boundary checks
+
+### Integration: SecurityFilter in UnifiedSearch
+- `_search_filesystem()` — each file passes through `check_file()` before inclusion
+- `_search_repowt()` — git status results filtered by `check_file()`
+- `_search_knowledge()` — knowledge chunks filtered by `process_content()`
+- `_search_agentart()` — artifact files filtered by `check_file()` + `process_content()`
+
+### Documentation
+- `docs/features/unified-search/concept.md` — full UnifiedSearch architecture
+- `docs/features/unified-search/sub-features/security-filter/concept.md` — SecurityFilter reference
+- `docs/architecture/security.md` — updated with SecurityFilter section
+- `docs/features/README.md` — added UnifiedSearch entry
+
 ## [2026-05-05] Documentation Restructuring & Architecture Update
 
 ### Documentation

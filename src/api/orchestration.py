@@ -39,6 +39,9 @@ SCAFFOLDER_ACTIONS = {
 UPDATE_ACTIONS = {
     "check", "status", "download", "apply", "signal", "dismiss",
 }
+INDEXING_ACTIONS = {
+    "run", "schedule", "stop", "status", "providers",
+}
 
 class ActionRouter:
     """Routes action→domain→tool function with lazy import and uniform response."""
@@ -1778,6 +1781,7 @@ class ActionRouter:
         elif action_lower == "test": return await self._cb_test(repo_id, repo_path, args)
         elif action_lower == "refactor": return await self._cb_refactor(repo_id, args)
         elif action_lower == "graph": return await self._cb_graph(repo_id, repo_path, args)
+        elif action_lower == "check_quality": return await self._cb_check_quality(repo_path, repo_id, args)
         else: return self._err(f"Unknown codebase action: {action}", "API_400")
 
     # ══════════════════════════════════════════════════════════
@@ -1884,6 +1888,74 @@ class ActionRouter:
             return api_response(
                 success=False, status_code=500, message=str(e),
                 data=None, error_code="UPDATE_ERR",
+            )
+
+    def dispatch_indexing(self, action: str, repo_path: Optional[str] = None,
+                          repo_id: Optional[str] = None,
+                          provider: Optional[str] = None,
+                          mode: Optional[str] = None,
+                          interval: Optional[int] = None,
+                          args: Optional[Dict] = None) -> Dict:
+        """
+        Dispatch to UnifiedIndexingEngine.
+
+        Actions: run, schedule, stop, status, providers.
+        """
+        from ..services.unified_indexing import IndexingRequest, get_indexing_engine
+
+        engine = get_indexing_engine(orchestrator=self.orchestrator)
+        action_lower = action.lower()
+
+        try:
+            if action_lower == "providers":
+                return api_response(success=True, data=engine.get_providers())
+
+            if action_lower == "status":
+                sched = engine.scheduler_status()
+                last = engine.get_last_result()
+                return api_response(success=True, data={"scheduler": sched, "last_run": last})
+
+            if action_lower == "schedule":
+                effective_path = repo_path or (args or {}).get("repo_path")
+                if not effective_path:
+                    return self._err("repo_path required for schedule", "API_400")
+                effective_interval = interval or (args or {}).get("interval", 3600)
+                return engine.start_scheduler(effective_path, interval_seconds=effective_interval)
+
+            if action_lower == "stop":
+                return engine.stop_scheduler()
+
+            if action_lower == "run":
+                effective_path = repo_path or (args or {}).get("repo_path")
+                if not effective_path:
+                    return self._err("repo_path required for run", "API_400")
+                req = IndexingRequest(
+                    provider=provider or (args or {}).get("provider", "codecortex-full"),
+                    repo_path=effective_path,
+                    repo_id=repo_id or (args or {}).get("repo_id"),
+                    mode=mode or (args or {}).get("mode", "full"),
+                    detect_modular=(args or {}).get("detect_modular", True),
+                    build_dependency_graph=(args or {}).get("build_dependency_graph", True),
+                    sequential=True,
+                )
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(engine.index(req))
+                loop.close()
+                return api_response(
+                    success=result.success,
+                    status_code=200 if result.success else 500,
+                    message=f"Indexing {'succeeded' if result.success else 'failed'}",
+                    data=result.to_dict(),
+                )
+
+            return self._err(f"Unknown indexing action: {action}", "API_400")
+        except Exception as e:
+            logger.exception("Indexing action '%s' failed", action)
+            return api_response(
+                success=False, status_code=500, message=str(e),
+                data=None, error_code="INDEXING_ERR",
             )
 
     # ── scaffolder handlers ────────────────────────────────
@@ -2350,6 +2422,106 @@ class ActionRouter:
                             request_id=request_id)
         except Exception as e:
             return self._err(f"Audit failed: {e}", "API_500", status_code=500)
+
+    # ═══════════════════════════════════════════════════════
+    # P1-G6: codebase(check_quality) — Zero Placeholder Policy scanner
+    # ═══════════════════════════════════════════════════════
+    async def _cb_check_quality(self, repo_path: Optional[str], repo_id: Optional[str],
+                                 args: Dict) -> Dict:
+        """Scan codebase for quality anti-patterns: TODO/FIXME, console.log, empty catch, mock data."""
+        import os
+        import re
+        import fnmatch
+        target = args.get("target") or repo_path or "."
+        checks = args.get("checks", ["zero_placeholder", "dead_code", "console_log"])
+        files_filter = args.get("files", "*.{py,js,ts,tsx,rs,go,java,kt,cpp,c,h,cs,rb,php}")
+        request_id = new_request_id()
+
+        # Zero placeholder patterns (regex)
+        ZERO_PLACEHOLDER_PATTERNS = {
+            "todo": re.compile(r"(?i)#\s*(TODO|FIXME|HACK|XXX|BUG|NOTE|OPTIMIZE|REVIEW)\b"),
+            "console_log": re.compile(r"\b(console\.log|console\.debug|console\.error|print\(|printf\(|puts\s|var_dump\()"),
+            "empty_catch": re.compile(r"catch\s*[^{]*\{\s*\}"),
+            "stub_function": re.compile(r"(?i)(TODO|FIXME|stub|placeholder|not.implemented|pass\s*#.*todo)"),
+            "mock_data": re.compile(r"\b(mock_data|fake_data|dummy_data|sample_data)\b"),
+            "debug_breakpoint": re.compile(r"\b(debugger|breakpoint|ipdb\.set_trace|pdb\.set_trace)\b"),
+        }
+
+        findings = []
+        scanned_files = 0
+        violations_by_type = {}
+
+        for root, dirs, files in os.walk(target):
+            # Skip common non-source dirs
+            dirs[:] = [d for d in dirs if d not in (".git", "__pycache__", "node_modules",
+                        ".venv", "venv", "dist", "build", ".next", ".vscode", ".idea")]
+            for file in files:
+                if not any(fnmatch.fnmatch(file, p.strip()) for p in files_filter.split(",")):
+                    continue
+                filepath = os.path.join(root, file)
+                if not os.path.isfile(filepath):
+                    continue
+                rel_path = os.path.relpath(filepath, target)
+                try:
+                    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+                        lines = f.readlines()
+                except Exception:
+                    continue
+                scanned_files += 1
+                for i, line_text in enumerate(lines, 1):
+                    stripped = line_text.rstrip("\n\r")
+                    for check, active_checks in [
+                        ("zero_placeholder", checks),
+                        ("console_log", checks),
+                        ("dead_code", checks),
+                    ]:
+                        if check not in active_checks:
+                            continue
+                        pattern_name = check
+                        # Map check types to patterns
+                        if check == "zero_placeholder":
+                            for pname, p_re in ZERO_PLACEHOLDER_PATTERNS.items():
+                                if pname in ("console_log", "debug_breakpoint"):
+                                    continue
+                                if p_re.search(stripped):
+                                    findings.append({
+                                        "file": rel_path, "line": i,
+                                        "severity": "info" if pname == "todo" else "warning",
+                                        "rule": f"zero_placeholder:{pname}",
+                                        "message": f"Found {pname} in source: {stripped.strip()[:100]}",
+                                    })
+                                    violations_by_type[pname] = violations_by_type.get(pname, 0) + 1
+                        elif check == "console_log":
+                            if ZERO_PLACEHOLDER_PATTERNS["console_log"].search(stripped):
+                                findings.append({
+                                    "file": rel_path, "line": i,
+                                    "severity": "warning",
+                                    "rule": "console_log",
+                                    "message": f"Debug logging statement: {stripped.strip()[:100]}",
+                                })
+                                violations_by_type["console_log"] = violations_by_type.get("console_log", 0) + 1
+                        elif check == "dead_code":
+                            if ZERO_PLACEHOLDER_PATTERNS["empty_catch"].search(stripped):
+                                findings.append({
+                                    "file": rel_path, "line": i,
+                                    "severity": "error",
+                                    "rule": "dead_code:empty_catch",
+                                    "message": "Empty catch block suppresses errors",
+                                })
+                                violations_by_type["empty_catch"] = violations_by_type.get("empty_catch", 0) + 1
+
+        total_violations = len(findings)
+        score = max(0, 100 - (total_violations * 2))
+        return self._ok(f"Quality check complete: {total_violations} violations in {scanned_files} files",
+                        {
+                            "target": target,
+                            "scanned_files": scanned_files,
+                            "total_violations": total_violations,
+                            "quality_score": min(100, score),
+                            "violations_by_type": violations_by_type,
+                            "findings": findings[:200],  # cap at 200 to avoid huge responses
+                        },
+                        request_id=request_id)
 
     async def _cb_graph(self, repo_id: Optional[str], repo_path: Optional[str],
                         args: Dict) -> Dict:
